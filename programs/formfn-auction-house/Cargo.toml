@@ -1,14 +1,11 @@
 [package]
-name = "formfn-auction-house"
+name = "auction-house"
 version = "0.1.0"
-description = "Formfunction auction house program"
-authors = ["Formfunction Developers"]
-repository = "https://github.com/formfunction-hq/formfn-auction-house"
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "formfn_auction_house"
+name = "auction_house"
 
 [features]
 cpi = ["no-entrypoint"]
@@ -18,10 +15,9 @@ no-idl = []
 no-log-ix-name = []
 
 [dependencies]
-anchor-lang = {version = "0.26.0", features = ["init-if-needed"]}
-anchor-spl = "0.26.0"
+anchor-lang = {version = "0.29.0", features = ["init-if-needed"]}
+anchor-spl = "0.29.0"
 arrayref = "0.3.6"
-campaign-treasury-manager = { version = "0.0.7", registry = "formfunction-hq", features = ["cpi"] }
 mpl-token-metadata = { version = "1.7.0", features = ["no-entrypoint"] }
 num-traits = "0.2"
 num-derive = "0.2"

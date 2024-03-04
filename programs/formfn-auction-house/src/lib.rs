@@ -12,9 +12,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-// Run `yarn test` to run tests and the script will automatically change
-// this to localnet for you.
-anchor_lang::declare_id!("formn3hJtt8gvVKxpCfzCJGuoz6CNUFcULFZW18iTpC");
+anchor_lang::declare_id!("FsCyjMWU12ZLGjZ7pxwwfFNjDt4RSvwTUntZvbujyLvW");
 
 #[program]
 pub mod auction_house {
@@ -99,12 +97,12 @@ pub mod auction_house {
         handle_deposit(ctx, escrow_payment_bump, amount)
     }
 
-    // To support freezing of NFTs upon listing, we also need to
-    // thaw NFTs upon delisting (cancel). Since freeze/thaw is done
-    // by our Auction House program as the token account delegate,
-    // the cancel instruction needs the Auction House 'program_as_signer'
-    // PDA which needs a new argument (bump). New arguments cannot be shipped
-    // in a backwards compatible way and thus we are introducing a new IX.
+    // // To support freezing of NFTs upon listing, we also need to
+    // // thaw NFTs upon delisting (cancel). Since freeze/thaw is done
+    // // by our Auction House program as the token account delegate,
+    // // the cancel instruction needs the Auction House 'program_as_signer'
+    // // PDA which needs a new argument (bump). New arguments cannot be shipped
+    // // in a backwards compatible way and thus we are introducing a new IX.
     pub fn cancel_v2<'info>(
         ctx: Context<'_, '_, '_, 'info, CancelV2<'info>>,
         buyer_price: u64,
@@ -152,7 +150,7 @@ pub mod auction_house {
         )
     }
 
-    // Need a separate ix because this takes in an additional arg
+    // // Need a separate ix because this takes in an additional arg
     pub fn buy_v2<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyV2<'info>>,
         trade_state_bump: u8,

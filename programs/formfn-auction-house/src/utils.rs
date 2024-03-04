@@ -1244,37 +1244,37 @@ pub fn write_anchor_account_discriminator<'a>(
     Ok(())
 }
 
-pub fn create_campaign_treasury_manager_deposit<'a>(
-    campaign_treasury_manager_program: AccountInfo<'a>,
-    campaign_escrow: AccountInfo<'a>,
-    deposit_record: AccountInfo<'a>,
-    deposit_escrow: AccountInfo<'a>,
-    deposit_escrow_mint: AccountInfo<'a>,
-    depositor: AccountInfo<'a>,
-    depositor_payment_account: AccountInfo<'a>,
-    mint: AccountInfo<'a>,
-    system_program: AccountInfo<'a>,
-    token_program: AccountInfo<'a>,
-    instruction_sysvar_account: AccountInfo<'a>,
-    deposit_amount: u64,
-) -> Result<()> {
-    let accounts = campaign_treasury_manager::cpi::accounts::CreateDeposit {
-        campaign_escrow,
-        deposit_record,
-        deposit_escrow,
-        depositor,
-        depositor_payment_account,
-        mint,
-        deposit_escrow_mint,
-        token_program,
-        system_program,
-        instruction_sysvar_account,
-    };
+// pub fn create_campaign_treasury_manager_deposit<'a>(
+//     campaign_treasury_manager_program: AccountInfo<'a>,
+//     campaign_escrow: AccountInfo<'a>,
+//     deposit_record: AccountInfo<'a>,
+//     deposit_escrow: AccountInfo<'a>,
+//     deposit_escrow_mint: AccountInfo<'a>,
+//     depositor: AccountInfo<'a>,
+//     depositor_payment_account: AccountInfo<'a>,
+//     mint: AccountInfo<'a>,
+//     system_program: AccountInfo<'a>,
+//     token_program: AccountInfo<'a>,
+//     instruction_sysvar_account: AccountInfo<'a>,
+//     deposit_amount: u64,
+// ) -> Result<()> {
+//     let accounts = campaign_treasury_manager::cpi::accounts::CreateDeposit {
+//         campaign_escrow,
+//         deposit_record,
+//         deposit_escrow,
+//         depositor,
+//         depositor_payment_account,
+//         mint,
+//         deposit_escrow_mint,
+//         token_program,
+//         system_program,
+//         instruction_sysvar_account,
+//     };
 
-    let context = CpiContext::new(campaign_treasury_manager_program, accounts);
+//     let context = CpiContext::new(campaign_treasury_manager_program, accounts);
 
-    campaign_treasury_manager::cpi::create_deposit(context, deposit_amount)
-}
+//     campaign_treasury_manager::cpi::create_deposit(context, deposit_amount)
+// }
 
 /// Lifted from gumdrop, candy-machine, etc.
 /// Returns true if a `leaf` can be proved to be a part of a Merkle tree

@@ -1,17 +1,10 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
-    "esModuleInterop": true,
+    "types": ["mocha", "chai"],
+    "typeRoots": ["./node_modules/@types"],
     "lib": ["es2015"],
     "module": "commonjs",
-    "noEmit": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "strict": true,
     "target": "es6",
-    "types": ["jest", "node"],
-    "typeRoots": ["node_modules/@types"]
-  },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+    "esModuleInterop": true,
+  }
 }

@@ -94,7 +94,7 @@ pub fn handle_create_edition_distributor<'info>(
         return Err(AuctionHouseError::InvalidMasterEditionSupply.into());
     }
 
-    let distributor_bump = *ctx.bumps.get("edition_distributor").unwrap();
+    let distributor_bump = ctx.bumps.edition_distributor;
     edition_distributor.bump = distributor_bump;
     edition_distributor.master_edition_mint = mint.key();
     edition_distributor.owner = owner.key();
