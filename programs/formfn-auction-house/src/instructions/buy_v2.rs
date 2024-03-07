@@ -307,7 +307,7 @@ pub fn handle_buy_v2<'info>(
                             return Err(AuctionHouseError::PreviousBidderIncorrect.into());
                         }
                         withdraw_helper(
-                            &UncheckedAccount::try_from(previous_bidder_wallet.to_account_info()),
+                            previous_bidder_wallet,
                             previous_bidder_refund_account,
                             previous_bidder_escrow_payment_account,
                             authority,
@@ -364,7 +364,7 @@ pub fn handle_buy_v2<'info>(
                     return Err(AuctionHouseError::PreviousBidderIncorrect.into());
                 }
                 withdraw_helper(
-                    &UncheckedAccount::try_from(previous_bidder_wallet.to_account_info()),
+                    previous_bidder_wallet,
                     previous_bidder_refund_account,
                     previous_bidder_escrow_payment_account,
                     authority,

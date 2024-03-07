@@ -256,7 +256,7 @@ pub fn handle_buy_edition_v2<'info>(
 
             create_or_allocate_account_raw(
                 *ctx.program_id,
-                &edition_buyer_info_account,
+                edition_buyer_info_account,
                 &rent.to_account_info(),
                 &system_program,
                 &buyer,
@@ -266,7 +266,7 @@ pub fn handle_buy_edition_v2<'info>(
             )?;
 
             write_anchor_account_discriminator(
-                &edition_buyer_info_account,
+                edition_buyer_info_account,
                 &<EditionBuyerInfoAccount as anchor_lang::Discriminator>::discriminator(),
             )?;
         }
@@ -283,83 +283,86 @@ pub fn handle_buy_edition_v2<'info>(
         let proof = proof_data.proof;
         let root_index_for_proof = proof_data.root_index_for_proof as usize;
 
-        let edition_allowlist_settings_account: Account<EditionAllowlistSettings> =
-            Account::try_from(&edition_allowlist_settings)?;
+        // let edition_allowlist_settings_account: Account<EditionAllowlistSettings> =
+            // Account::try_from(edition_allowlist_settings)?;
 
-        let roots_list = &edition_allowlist_settings_account.merkle_roots;
-        if roots_list.is_empty() {
-            msg!("Invalid allowlist proof provided, the current roots list is empty.");
-            return Err(AuctionHouseError::InvalidAllowlistProof.into());
-        } else if root_index_for_proof >= roots_list.len() {
-            msg!(
-                "Invalid root_index_for_proof provided, received: {}, roots_list length = {}.",
-                root_index_for_proof,
-                roots_list.len()
-            );
-            return Err(AuctionHouseError::InvalidAllowlistProof.into());
-        }
 
-        let leaf = anchor_lang::solana_program::keccak::hashv(&[
-            &[0x00],
-            &buyer.key().to_bytes(),
-            &mint.key().to_bytes(),
-            &amount.to_le_bytes(),
-        ]);
+        
 
-        let root: [u8; 32] = roots_list[root_index_for_proof];
+        // let roots_list = &edition_allowlist_settings_account.merkle_roots;
+        // if roots_list.is_empty() {
+        //     msg!("Invalid allowlist proof provided, the current roots list is empty.");
+        //     return Err(AuctionHouseError::InvalidAllowlistProof.into());
+        // } else if root_index_for_proof >= roots_list.len() {
+        //     msg!(
+        //         "Invalid root_index_for_proof provided, received: {}, roots_list length = {}.",
+        //         root_index_for_proof,
+        //         roots_list.len()
+        //     );
+        //     return Err(AuctionHouseError::InvalidAllowlistProof.into());
+        // }
 
-        let is_proof_valid = verify_merkle_proof(&proof, root, leaf.0);
-        if !is_proof_valid {
-            msg!(
-                "Invalid proof provided for root_index_for_proof: {}.",
-                root_index_for_proof
-            );
-            return Err(AuctionHouseError::InvalidAllowlistProof.into());
-        }
+        // let leaf = anchor_lang::solana_program::keccak::hashv(&[
+        //     &[0x00],
+        //     &buyer.key().to_bytes(),
+        //     &mint.key().to_bytes(),
+        //     &amount.to_le_bytes(),
+        // ]);
 
-        let mut edition_buyer_info_account: Account<EditionBuyerInfoAccount> =
-            Account::try_from(edition_buyer_info_account)?;
+        // let root: [u8; 32] = roots_list[root_index_for_proof];
 
-        require!(
-            edition_buyer_info_account.number_bought_allowlist < amount,
-            AuctionHouseError::AllowlistAmountAlreadyMinted
-        );
+        // let is_proof_valid = verify_merkle_proof(&proof, root, leaf.0);
+        // if !is_proof_valid {
+        //     msg!(
+        //         "Invalid proof provided for root_index_for_proof: {}.",
+        //         root_index_for_proof
+        //     );
+        //     return Err(AuctionHouseError::InvalidAllowlistProof.into());
+        // }
 
-        let number_bought_allowlist = edition_buyer_info_account
-            .number_bought_allowlist
-            .checked_add(1)
-            .unwrap();
+        // let mut edition_buyer_info_account: Account<EditionBuyerInfoAccount> =
+        //     Account::try_from(edition_buyer_info_account)?;
 
-        edition_buyer_info_account.number_bought_allowlist = number_bought_allowlist;
+        // require!(
+        //     edition_buyer_info_account.number_bought_allowlist < amount,
+        //     AuctionHouseError::AllowlistAmountAlreadyMinted
+        // );
 
-        // This re-serializes the account to persist the changes.
-        edition_buyer_info_account.exit(&crate::ID)?;
+        // let number_bought_allowlist = edition_buyer_info_account
+        //     .number_bought_allowlist
+        //     .checked_add(1)
+        //     .unwrap();
 
-        msg!(
-            "Valid merkle allowlist proof submitted by {} with root index {}.",
-            buyer.key(),
-            root_index_for_proof
-        );
+        // edition_buyer_info_account.number_bought_allowlist = number_bought_allowlist;
+
+        // // This re-serializes the account to persist the changes.
+        // edition_buyer_info_account.exit(&crate::ID)?;
+
+        // msg!(
+        //     "Valid merkle allowlist proof submitted by {} with root index {}.",
+        //     buyer.key(),
+        //     root_index_for_proof
+        // );
     }
 
     if !is_allowlist_sale && limit_per_address > 0 {
-        let mut edition_buyer_info_account: Account<EditionBuyerInfoAccount> =
-            Account::try_from(&edition_buyer_info_account)?;
+        // let mut edition_buyer_info_account: Account<EditionBuyerInfoAccount> =
+        //     Account::try_from(edition_buyer_info_account)?;
 
-        require!(
-            edition_buyer_info_account.number_bought < limit_per_address,
-            AuctionHouseError::EditionLimitPerAddressExceeded
-        );
+        // require!(
+        //     edition_buyer_info_account.number_bought < limit_per_address,
+        //     AuctionHouseError::EditionLimitPerAddressExceeded
+        // );
 
-        let number_bought = edition_buyer_info_account
-            .number_bought
-            .checked_add(1)
-            .unwrap();
+        // let number_bought = edition_buyer_info_account
+        //     .number_bought
+        //     .checked_add(1)
+        //     .unwrap();
 
-        edition_buyer_info_account.number_bought = number_bought;
+        // edition_buyer_info_account.number_bought = number_bought;
 
-        // This re-serializes the account to persist the changes.
-        edition_buyer_info_account.exit(&crate::ID)?;
+        // // This re-serializes the account to persist the changes.
+        // edition_buyer_info_account.exit(&crate::ID)?;
     }
 
     let is_native = treasury_mint.key() == spl_token::native_mint::id();

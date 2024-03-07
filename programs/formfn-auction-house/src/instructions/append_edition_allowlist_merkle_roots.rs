@@ -70,7 +70,7 @@ pub fn handle_append_edition_allowlist_merkle_roots<'info>(
         root_list.len()
     );
 
-    let bump = *ctx.bumps.get("edition_allowlist_settings").unwrap();
+    let bump = ctx.bumps.edition_allowlist_settings;    
     edition_allowlist_settings.bump = bump;
 
     Ok(())
