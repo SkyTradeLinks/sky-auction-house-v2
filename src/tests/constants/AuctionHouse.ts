@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { WALLET_CREATOR } from "tests/constants/Wallets";
+import { WALLET_CREATOR } from "../../tests/constants/Wallets";
 
 ///
 /// LABELS

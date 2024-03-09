@@ -3,7 +3,7 @@ import {
   findEditionPda,
   findTokenMetadataPda,
   TOKEN_METADATA_PROGRAM_ID,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../formfunction-program-shared/src";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -16,14 +16,14 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { BN } from "bn.js";
-import getSellerFreeTradeState from "solana/auction-house/getSellerFreeTradeState";
-import getTradeState from "solana/auction-house/getTradeState";
-import findAuctionHouseBuyerEscrow from "solana/pdas/findAuctionHouseBuyerEscrow";
-import findAuctionHouseFeeAccount from "solana/pdas/findAuctionHouseFeeAccount";
-import findAuctionHouseProgramAsSigner from "solana/pdas/findAuctionHouseProgramAsSigner";
-import findAuctionHouseTreasuryAccount from "solana/pdas/findAuctionHouseTreasuryAccount";
-import getWalletIfNativeElseAta from "solana/utils/getWalletIfNativeElseAta";
-import AuctionHouseProgram from "types/AuctionHouseProgram";
+import getSellerFreeTradeState from "../../solana/auction-house/getSellerFreeTradeState";
+import getTradeState from "../../solana/auction-house/getTradeState";
+import findAuctionHouseBuyerEscrow from "../../solana/pdas/findAuctionHouseBuyerEscrow";
+import findAuctionHouseFeeAccount from "../../solana/pdas/findAuctionHouseFeeAccount";
+import findAuctionHouseProgramAsSigner from "../../solana/pdas/findAuctionHouseProgramAsSigner";
+import findAuctionHouseTreasuryAccount from "../../solana/pdas/findAuctionHouseTreasuryAccount";
+import getWalletIfNativeElseAta from "../../solana/utils/getWalletIfNativeElseAta";
+import AuctionHouseProgram from "../../types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;

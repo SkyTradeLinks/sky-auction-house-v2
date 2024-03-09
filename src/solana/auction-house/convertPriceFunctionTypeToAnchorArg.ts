@@ -1,5 +1,5 @@
-import { lowercaseFirstLetter } from "@formfunction-hq/formfunction-program-shared";
-import PriceFunctionType from "types/enum/PriceFunctionType";
+import { lowercaseFirstLetter } from "../../../formfunction-program-shared/src";
+import PriceFunctionType from "../../types/enum/PriceFunctionType";
 
 export default function convertPriceFunctionTypeToAnchorArg(
   priceFunctionType: PriceFunctionType

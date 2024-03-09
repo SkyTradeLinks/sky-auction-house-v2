@@ -1,14 +1,15 @@
-import { logIfDebug } from "@formfunction-hq/formfunction-program-shared";
+import { logIfDebug } from "../../../formfunction-program-shared/src";
 import {
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
 } from "@solana/web3.js";
-import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
-import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
-import verifyDelegateAndFrozen from "tests/utils/verifyDelegateAndFrozen";
-import SaleType from "types/enum/SaleType";
+import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
+import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
+import verifyDelegateAndFrozen from "../../tests/utils/verifyDelegateAndFrozen";
+import SaleType from "../../types/enum/SaleType";
+import { expect } from "chai";
 
 export default async function sell(
   connection: Connection,

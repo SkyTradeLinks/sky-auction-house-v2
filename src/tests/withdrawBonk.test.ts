@@ -2,13 +2,13 @@ import {
   createAtaIfNotExists,
   mintTo,
   requestAirdrops,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../formfunction-program-shared/src";
 import { createMint } from "@solana/spl-token";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import getConnectionForTest from "tests/utils/getConnectionForTest";
-import getEditionDistributorSetup from "tests/utils/getEditionDistributorSetup";
-import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
-import PriceFunctionType from "types/enum/PriceFunctionType";
+import getConnectionForTest from "../tests/utils/getConnectionForTest";
+import getEditionDistributorSetup from "../tests/utils/getEditionDistributorSetup";
+import sendTransactionWithWallet from "../tests/utils/txs/sendTransactionWithWallet";
+import PriceFunctionType from "../types/enum/PriceFunctionType";
 
 const payer = Keypair.generate();
 const connection = getConnectionForTest();

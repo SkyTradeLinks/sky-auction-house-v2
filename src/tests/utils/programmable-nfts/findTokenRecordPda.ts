@@ -1,7 +1,7 @@
 import {
   PdaResult,
   TOKEN_METADATA_PROGRAM_ID,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../../formfunction-program-shared/src";
 import { PublicKey } from "@solana/web3.js";
 
 export default function findTokenRecordPda(

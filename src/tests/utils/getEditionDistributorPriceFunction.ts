@@ -1,7 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
-import deserializePriceFunctionType from "solana/utils/deserializePriceFunctionType";
-import AuctionHouseProgram from "types/AuctionHouseProgram";
-import PriceFunctionType from "types/enum/PriceFunctionType";
+import deserializePriceFunctionType from "../../solana/utils/deserializePriceFunctionType";
+import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import PriceFunctionType from "../../types/enum/PriceFunctionType";
 
 export default async function getEditionDistributorPriceFunction(
   program: AuctionHouseProgram,

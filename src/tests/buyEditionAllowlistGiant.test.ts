@@ -3,18 +3,18 @@ import {
   generateKeypairArray,
   range,
   requestAirdrops,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../formfunction-program-shared/src";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import MERKLE_TREE_LEAF_COUNT_LIMIT from "constants/MerkleTreeLeafCountLimit";
+import MERKLE_TREE_LEAF_COUNT_LIMIT from "../constants/MerkleTreeLeafCountLimit";
 import dayjs from "dayjs";
-import buyEditionForTest from "tests/utils/buyEditionForTest";
-import cloneKeypair from "tests/utils/cloneKeypair";
-import createEditionAllowlist from "tests/utils/createEditionAllowlist";
-import createKeypairAddressMap from "tests/utils/createKeypairAddressMap";
-import fundSplTokenAtas from "tests/utils/fundSplTokenAccount";
-import getConnectionForTest from "tests/utils/getConnectionForTest";
-import getEditionDistributorSetup from "tests/utils/getEditionDistributorSetup";
-import PriceFunctionType from "types/enum/PriceFunctionType";
+import buyEditionForTest from "../tests/utils/buyEditionForTest";
+import cloneKeypair from "../tests/utils/cloneKeypair";
+import createEditionAllowlist from "../tests/utils/createEditionAllowlist";
+import createKeypairAddressMap from "../tests/utils/createKeypairAddressMap";
+import fundSplTokenAtas from "../tests/utils/fundSplTokenAccount";
+import getConnectionForTest from "../tests/utils/getConnectionForTest";
+import getEditionDistributorSetup from "../tests/utils/getEditionDistributorSetup";
+import PriceFunctionType from "../types/enum/PriceFunctionType";
 
 const connection = getConnectionForTest();
 
@@ -49,7 +49,7 @@ const buyers = generateGiantBuyersList();
 const buyersKeypairMap = createKeypairAddressMap(uniqueBuyers);
 
 describe("buy edition v2 giant allowlist", () => {
-  beforeAll(async () => {
+  before(async () => {
     await requestAirdrops({
       connection,
       wallets: uniqueBuyers,

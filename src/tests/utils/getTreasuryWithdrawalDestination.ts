@@ -1,8 +1,8 @@
-import { findAtaPda } from "@formfunction-hq/formfunction-program-shared";
+import { findAtaPda } from "../../../formfunction-program-shared/src";
 import { PublicKey } from "@solana/web3.js";
-import { TREASURY_WITHDRAWAL_DESTINATION_OWNER } from "tests/constants/AuctionHouse";
-import { IS_NATIVE } from "tests/setup";
-import getTreasuryMint from "tests/utils/getTreasuryMint";
+import { TREASURY_WITHDRAWAL_DESTINATION_OWNER } from "../../tests/constants/AuctionHouse";
+import { IS_NATIVE } from "../../tests/setup";
+import getTreasuryMint from "../../tests/utils/getTreasuryMint";
 
 const treasuryWithdrawalDestinationMap: { [key: string]: PublicKey } = {};
 

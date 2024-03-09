@@ -1,19 +1,19 @@
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
-import findLastBidPrice from "solana/pdas/findLastBidPrice";
+import AuctionHouseSdk from "../solana/auction-house/AuctionHouseSdk";
+import findLastBidPrice from "../solana/pdas/findLastBidPrice";
 import {
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
   BUY_PRICE,
-} from "tests/constants/AuctionHouse";
-import { WALLET_CREATOR } from "tests/constants/Wallets";
-import buy from "tests/utils/buy";
-import expectTransactionToFailWithErrorCode from "tests/utils/errors/expectTransactionToFailWithErrorCode";
-import getConnectionForTest from "tests/utils/getConnectionForTest";
-import getProgram from "tests/utils/getProgram";
-import getTestSetup from "tests/utils/getTestSetup";
-import getTreasuryMint from "tests/utils/getTreasuryMint";
-import sell from "tests/utils/sell";
+} from "../tests/constants/AuctionHouse";
+import { WALLET_CREATOR } from "../tests/constants/Wallets";
+import buy from "../tests/utils/buy";
+import expectTransactionToFailWithErrorCode from "../tests/utils/errors/expectTransactionToFailWithErrorCode";
+import getConnectionForTest from "../tests/utils/getConnectionForTest";
+import getProgram from "../tests/utils/getProgram";
+import getTestSetup from "../tests/utils/getTestSetup";
+import getTreasuryMint from "../tests/utils/getTreasuryMint";
+import sell from "../tests/utils/sell";
 
 let tokenMint: PublicKey;
 let tokenAccount: PublicKey;

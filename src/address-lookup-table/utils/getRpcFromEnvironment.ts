@@ -1,7 +1,7 @@
 import {
   assertUnreachable,
   Environment,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../formfunction-program-shared/src";
 
 export default function getRpcFromEnvironment(
   environment: Environment

@@ -1,4 +1,4 @@
-import { logIfDebug } from "@formfunction-hq/formfunction-program-shared";
+import { logIfDebug } from "../../../formfunction-program-shared/src";
 import {
   Connection,
   Keypair,
@@ -6,11 +6,11 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import { Dayjs } from "dayjs";
-import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
-import { WALLET_CREATOR } from "tests/constants/Wallets";
-import getBuyerEscrowLamports from "tests/utils/getBuyerEscrowLamports";
-import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
-import SaleType from "types/enum/SaleType";
+import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
+import { WALLET_CREATOR } from "../../tests/constants/Wallets";
+import getBuyerEscrowLamports from "../../tests/utils/getBuyerEscrowLamports";
+import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
+import SaleType from "../../types/enum/SaleType";
 
 function getBuyTx(
   sdk: AuctionHouseSdk,

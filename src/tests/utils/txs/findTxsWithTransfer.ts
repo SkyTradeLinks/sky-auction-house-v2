@@ -1,9 +1,9 @@
 import {
   filterNulls,
   Maybe,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../../formfunction-program-shared/src";
 import { ParsedTransactionWithMeta, PublicKey } from "@solana/web3.js";
-import parseTxWithTransfer from "tests/utils/txs/parse/parseTxWithTransfer";
+import parseTxWithTransfer from "../../../tests/utils/txs/parse/parseTxWithTransfer";
 
 export default function findTxsWithTransfer(
   txs: Array<Maybe<ParsedTransactionWithMeta>>,

@@ -2,7 +2,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import {
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
-} from "tests/constants/AuctionHouse";
+} from "../../tests/constants/AuctionHouse";
 
 export default function getCreatorShareInLamports(
   buyPriceInSol: number,

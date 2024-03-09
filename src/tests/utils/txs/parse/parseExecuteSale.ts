@@ -1,4 +1,4 @@
-import { Maybe } from "@formfunction-hq/formfunction-program-shared";
+import { Maybe } from "../../../../../formfunction-program-shared/src";
 import { BorshInstructionCoder } from "@project-serum/anchor";
 import {
   ParsedInstruction,
@@ -6,10 +6,10 @@ import {
   PartiallyDecodedInstruction,
   PublicKey,
 } from "@solana/web3.js";
-import { AUCTION_HOUSE_PROGRAM_ID } from "tests/constants/AuctionHouse";
-import NftTransactionType from "tests/types/enums/NftTransactionType";
-import NftTransaction from "tests/types/NftTransaction";
-import getIdl from "tests/utils/getIdl";
+import { AUCTION_HOUSE_PROGRAM_ID } from "../../../../tests/constants/AuctionHouse";
+import NftTransactionType from "../../../../tests/types/enums/NftTransactionType";
+import NftTransaction from "../../../../tests/types/NftTransaction";
+import getIdl from "../../../../tests/utils/getIdl";
 
 const TOKEN_MINT_POSITION = 3;
 

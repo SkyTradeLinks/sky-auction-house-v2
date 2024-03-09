@@ -9,9 +9,9 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { BN } from "bn.js";
-import findAuctionHouseBuyerEscrow from "solana/pdas/findAuctionHouseBuyerEscrow";
-import findAuctionHouseFeeAccount from "solana/pdas/findAuctionHouseFeeAccount";
-import AuctionHouseProgram from "types/AuctionHouseProgram";
+import findAuctionHouseBuyerEscrow from "../../solana/pdas/findAuctionHouseBuyerEscrow";
+import findAuctionHouseFeeAccount from "../../solana/pdas/findAuctionHouseFeeAccount";
+import AuctionHouseProgram from "../../types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;
