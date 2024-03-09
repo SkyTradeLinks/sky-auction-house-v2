@@ -1,6 +1,6 @@
 import { DataV2 } from "@metaplex-foundation/mpl-token-metadata";
 import { PublicKey } from "@solana/web3.js";
-import { BASIS_POINTS } from "tests/constants/AuctionHouse";
+import { BASIS_POINTS } from "../../tests/constants/AuctionHouse";
 
 export default function getTestMetadata(
   ...creators: Array<{ address: PublicKey; share: number; verified: boolean }>

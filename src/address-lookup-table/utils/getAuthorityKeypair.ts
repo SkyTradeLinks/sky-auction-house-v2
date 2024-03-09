@@ -1,7 +1,7 @@
 import {
   assertUnreachable,
   Environment,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../formfunction-program-shared/src";
 import { Keypair } from "@solana/web3.js";
 import { readFileSync } from "fs";
 

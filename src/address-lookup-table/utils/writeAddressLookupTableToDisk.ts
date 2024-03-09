@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import AddressLookupTableFileData from "address-lookup-table/types/AddressLookupTableFileData";
+import AddressLookupTableFileData from "../../address-lookup-table/types/AddressLookupTableFileData";
 import { writeFileSync } from "fs";
 
 export default function writeTableAddressToDisk(

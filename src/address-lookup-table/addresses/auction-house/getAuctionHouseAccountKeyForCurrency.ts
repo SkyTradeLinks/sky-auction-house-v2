@@ -1,9 +1,9 @@
 import {
   assertUnreachable,
   Environment,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../../formfunction-program-shared/src";
 import { PublicKey } from "@solana/web3.js";
-import Currency from "address-lookup-table/types/Currency";
+import Currency from "../../../address-lookup-table/types/Currency";
 
 // Lifted from formfn-monorepo.
 export default function getAuctionHouseAccountKeyForCurrency(

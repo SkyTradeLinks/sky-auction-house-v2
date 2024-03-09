@@ -1,3 +1,16 @@
+// import {
+//   createAtaIx,
+//   createTransferAtaIx,
+//   filterNulls,
+//   findAtaPda,
+//   findTokenMetadataPda,
+//   getMasterEditionSupply,
+//   ixsToTx,
+//   ixToTx,
+//   Maybe,
+//   MaybeUndef,
+//   MerkleRoot,
+// } from "../formfunction-program-shared/src";
 import * as anchor from "@coral-xyz/anchor";
 
 import {
@@ -7,14 +20,12 @@ import {
   auctionHouseAuthority,
   LAST_BID_PRICE,
 } from "./utils/constants";
-
-import {
-  getUSDC,
-  setupAirDrop,
-  findAuctionHouseBidderEscrowAccount,
-  findAuctionHouseTradeState,
-  findLastBidPrice,
-} from "./utils/helper";
+import { LAMPORTS_PER_SOL, PublicKey ,  sendAndConfirmTransaction,
+  SendOptions,
+  Transaction,
+  TransactionMessage,
+  VersionedTransaction,} from "@solana/web3.js";
+import { getUSDC, setupAirDrop } from "./utils/helper";
 import { AuctionHouse } from "../target/types/auction_house";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { mplBubblegum } from "@metaplex-foundation/mpl-bubblegum";
@@ -40,8 +51,21 @@ import {
   getAssociatedTokenAddressSync,
   getOrCreateAssociatedTokenAccount,
 } from "@solana/spl-token";
+import  SaleType from "./types/SaleType";
+import findLastBidPrice from "./pdas/findLastBidPrice";
+import auctionHouseCreateTradeStateIx from "./instructions/auctionHouseCreateTradeStateIx";
+import auctionHouseCreateLastBidPriceIx from "./instructions/auctionHouseCreateLastBidPriceIx";
+import auctionHouseSellIx from "./instructions/auctionHouseSellIx";
+import { ixToTx } from "./program_shared/instructions";
+import PdaResult from './types/PdaResult';
+import { BN } from "@coral-xyz/anchor";
 
-export class AuctionHouseSdk {
+
+const SIGNATURE_SIZE = 64;
+const MAX_SUPPORTED_TRANSACTION_VERSION = 0;
+
+
+export default class AuctionHouseSdk {
   private static instance: AuctionHouseSdk;
 
   // fields
@@ -58,7 +82,7 @@ export class AuctionHouseSdk {
   public treasuryBump: number;
 
   constructor(
-    private readonly program: anchor.Program<AuctionHouse>,
+    public readonly program: anchor.Program<AuctionHouse>,
     private readonly provider: anchor.AnchorProvider
   ) {}
 
@@ -70,6 +94,7 @@ export class AuctionHouseSdk {
       AuctionHouseSdk.instance = new AuctionHouseSdk(program, provider);
       await AuctionHouseSdk.instance.setup();
     }
+    // console.log("Anchor House Program", program)
 
     return AuctionHouseSdk.instance;
   }
@@ -454,5 +479,141 @@ export class AuctionHouseSdk {
    );
 
    await this.sendTx(buyTx, [buyer]); */
+  }
+
+
+  private createTradeState(
+    {
+      tokenAccount,
+      tokenMint,
+      wallet,
+    }: {
+      tokenAccount: PublicKey;
+      tokenMint: PublicKey;
+      wallet: PublicKey;
+    },
+    {
+      allocationSize,
+      priceInLamports,
+      saleType,
+      tokenSize,
+    }: {
+      allocationSize?: number;
+      priceInLamports: number;
+      saleType: SaleType;
+      tokenSize?: number;
+    }
+  ) {
+
+    return auctionHouseCreateTradeStateIx(
+      {
+        auctionHouse: this.auctionHouse,
+        auctionHouseFeeAccount: this.feeAccount,
+        auctionHouseProgramId: this.program.programId,
+        authority: auctionHouseAuthority.publicKey,
+        program: this.program,
+        tokenAccount,
+        tokenMint,
+        treasuryMint: this.mintAccount,
+        wallet,
+      },
+      {
+        allocationSize,
+        priceInLamports,
+        saleType,
+        tokenSize,
+      }
+    );
+
+  }
+
+  async createLastBidPriceTx({
+    tokenMint,
+    wallet,
+  }: {
+    tokenMint: PublicKey;
+    wallet: PublicKey;
+  }) {
+    const auctionHouseAddressKey = this.auctionHouse;
+
+    const ix = await auctionHouseCreateLastBidPriceIx({
+      auctionHouse: auctionHouseAddressKey,
+      auctionHouseProgramId: this.program.programId,
+      program: this.program,
+      tokenMint,
+      wallet,
+    });
+    return ixToTx(ix);
+  }
+
+  async findLastBidPrice(tokenMint: PublicKey) {
+    return findLastBidPrice(tokenMint, this.program.programId, this.auctionHouse);
+  }
+
+  private async createLastBidPriceIfNotExistsTx({
+    tokenMint,
+    wallet,
+  }: {
+    tokenMint: PublicKey;
+    wallet: PublicKey;
+  }) {
+    const [lastBidPrice] = await this.findLastBidPrice(tokenMint);
+    const lastBidPriceAccount = await this.program.provider.connection.getAccountInfo(lastBidPrice);
+    if (lastBidPriceAccount != null) {
+      return null;
+    }
+
+    return this.createLastBidPriceTx({ tokenMint, wallet });
+  }
+
+
+
+  async sell(
+    saleType: SaleType,
+    shouldCreateLastBidPriceIfNotExists: boolean,
+    {
+      priceInLamports,
+      tokenAccount,
+      tokenMint,
+      wallet,
+    }: {
+      priceInLamports: number;
+      tokenAccount: PublicKey;
+      tokenMint: PublicKey;
+      wallet: PublicKey;
+    },
+    { tokenSize = 1 }: { tokenSize?: number }
+  ) {
+    const tradeStateIx = await this.createTradeState(
+      {
+        tokenAccount,
+        tokenMint,
+        wallet,
+      },
+      {
+        priceInLamports,
+        saleType,
+        tokenSize,
+      }
+    )
+
+    const [createLastBidPriceTx, sellIx] = await Promise.all([shouldCreateLastBidPriceIfNotExists
+      ? this.createLastBidPriceIfNotExistsTx({ tokenMint, wallet }) : null,
+      auctionHouseSellIx(
+        {
+          auctionHouse: this.auctionHouse,
+          auctionHouseProgramId: this.program.programId,
+          authority: auctionHouseAuthority.publicKey,
+          feeAccount: this.feeAccount,
+          priceInLamports,
+          program: this.program,
+          tokenAccount,
+          tokenMint,
+          treasuryMint: this.mintAccount,
+          walletSeller: wallet,
+        },
+        { tokenSize }
+      ),
+    ]);
   }
 }

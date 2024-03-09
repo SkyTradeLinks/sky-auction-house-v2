@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import AuctionHouseProgramId from "types/enum/AuctionHouseProgramId";
+import AuctionHouseProgramId from "../../types/enum/AuctionHouseProgramId";
 
 /**
  * In some cases, we (mistakenly) use the auction house account key as one of the

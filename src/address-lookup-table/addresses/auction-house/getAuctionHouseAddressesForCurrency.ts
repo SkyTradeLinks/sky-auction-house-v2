@@ -1,14 +1,14 @@
-import { Environment } from "@formfunction-hq/formfunction-program-shared";
-import getAntiBotAuthorityForEnvironment from "address-lookup-table/addresses/auction-house/getAntiBotAuthorityForEnvironment";
-import getAuctionHouseAccountKeyForCurrency from "address-lookup-table/addresses/auction-house/getAuctionHouseAccountKeyForCurrency";
-import getAuctionHouseAuthorityForEnvironment from "address-lookup-table/addresses/auction-house/getAuctionHouseAuthorityForEnvironment";
-import getAuctionHouseProgramIdForEnvironment from "address-lookup-table/addresses/auction-house/getAuctionHouseProgramIdForEnvironment";
-import getTreasuryMintForCurrency from "address-lookup-table/addresses/auction-house/getTreasuryMintForCurrency";
-import AuctionHouseAddresses from "address-lookup-table/types/AuctionHouseAddresses";
-import AuctionHouseOverrideForTest from "address-lookup-table/types/AuctionHouseOverrideForTest";
-import Currency from "address-lookup-table/types/Currency";
-import findAuctionHouseFeeAccount from "solana/pdas/findAuctionHouseFeeAccount";
-import findAuctionHouseTreasuryAccount from "solana/pdas/findAuctionHouseTreasuryAccount";
+import { Environment } from "../../../../formfunction-program-shared/src";
+import getAntiBotAuthorityForEnvironment from "../../../address-lookup-table/addresses/auction-house/getAntiBotAuthorityForEnvironment";
+import getAuctionHouseAccountKeyForCurrency from "../../../address-lookup-table/addresses/auction-house/getAuctionHouseAccountKeyForCurrency";
+import getAuctionHouseAuthorityForEnvironment from "../../../address-lookup-table/addresses/auction-house/getAuctionHouseAuthorityForEnvironment";
+import getAuctionHouseProgramIdForEnvironment from "../../../address-lookup-table/addresses/auction-house/getAuctionHouseProgramIdForEnvironment";
+import getTreasuryMintForCurrency from "../../../address-lookup-table/addresses/auction-house/getTreasuryMintForCurrency";
+import AuctionHouseAddresses from "../../../address-lookup-table/types/AuctionHouseAddresses";
+import AuctionHouseOverrideForTest from "../../../address-lookup-table/types/AuctionHouseOverrideForTest";
+import Currency from "../../../address-lookup-table/types/Currency";
+import findAuctionHouseFeeAccount from "../../../solana/pdas/findAuctionHouseFeeAccount";
+import findAuctionHouseTreasuryAccount from "../../../solana/pdas/findAuctionHouseTreasuryAccount";
 
 export default async function getAuctionHouseAddressesForCurrency(
   environment: Environment,

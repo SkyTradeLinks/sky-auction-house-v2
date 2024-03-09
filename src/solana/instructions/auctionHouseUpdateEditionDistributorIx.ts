@@ -3,12 +3,12 @@ import {
   findEditionPda,
   Maybe,
   MaybeUndef,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../formfunction-program-shared/src";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import convertPriceFunctionTypeToAnchorArg from "solana/auction-house/convertPriceFunctionTypeToAnchorArg";
-import findEditionDistributor from "solana/pdas/findEditionDistributor";
-import AuctionHouseProgram from "types/AuctionHouseProgram";
-import PriceFunctionType from "types/enum/PriceFunctionType";
+import convertPriceFunctionTypeToAnchorArg from "../../solana/auction-house/convertPriceFunctionTypeToAnchorArg";
+import findEditionDistributor from "../../solana/pdas/findEditionDistributor";
+import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import PriceFunctionType from "../../types/enum/PriceFunctionType";
 
 type Accounts = {
   mint: PublicKey;

@@ -11,7 +11,7 @@ const config: Config.InitialOptions = {
     "dist/",
   ],
   preset: "ts-jest",
-  setupFilesAfterEnv: ["<rootDir>/src/tests/setup.ts"],
+  // setupFilesAfterEnv: ["<rootDir>/src/tests/setup.ts"],
   testEnvironment: "node",
   testTimeout: 180_000,
   verbose: true,

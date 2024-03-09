@@ -12,7 +12,7 @@ import {
   Maybe,
   mintTo,
   requestAirdrops,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../formfunction-program-shared/src";
 import { DataV2, Metadata } from "@metaplex-foundation/mpl-token-metadata";
 import {
   Connection,
@@ -20,14 +20,14 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
 } from "@solana/web3.js";
-import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
-import createAuctionHouse from "tests/utils/createAuctionHouse";
-import fundSplTokenAtas from "tests/utils/fundSplTokenAccount";
-import getTestMetadata from "tests/utils/getTestMetadata";
-import getTestWallets from "tests/utils/getTestWallets";
-import getTreasuryWithdrawalDestination from "tests/utils/getTreasuryWithdrawalDestination";
-import createProgrammableNft from "tests/utils/programmable-nfts/createProgrammableNft";
-import AuctionHouseProgram from "types/AuctionHouseProgram";
+import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
+import createAuctionHouse from "../../tests/utils/createAuctionHouse";
+import fundSplTokenAtas from "../../tests/utils/fundSplTokenAccount";
+import getTestMetadata from "../../tests/utils/getTestMetadata";
+import getTestWallets from "../../tests/utils/getTestWallets";
+import getTreasuryWithdrawalDestination from "../../tests/utils/getTreasuryWithdrawalDestination";
+import createProgrammableNft from "../../tests/utils/programmable-nfts/createProgrammableNft";
+import AuctionHouseProgram from "../../types/AuctionHouseProgram";
 
 export default async function getTestSetupV2({
   auctionHouseConfig,

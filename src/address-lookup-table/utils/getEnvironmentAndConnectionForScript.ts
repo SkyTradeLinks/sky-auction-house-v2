@@ -1,7 +1,7 @@
-import { Environment } from "@formfunction-hq/formfunction-program-shared";
+import { Environment } from "../../../formfunction-program-shared/src";
 import { Connection } from "@solana/web3.js";
-import getRpcFromEnvironment from "address-lookup-table/utils/getRpcFromEnvironment";
-import parseScriptArgs from "address-lookup-table/utils/parseScriptArgs";
+import getRpcFromEnvironment from "../../address-lookup-table/utils/getRpcFromEnvironment";
+import parseScriptArgs from "../../address-lookup-table/utils/parseScriptArgs";
 
 export default function getEnvironmentAndConnectionForScript(): {
   connection: Connection;

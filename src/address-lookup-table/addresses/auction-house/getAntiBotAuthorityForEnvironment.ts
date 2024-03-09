@@ -3,7 +3,7 @@ import {
   ANTI_BOT_MAINNET_AUTHORITY,
   assertUnreachable,
   Environment,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../../formfunction-program-shared/src";
 import { PublicKey } from "@solana/web3.js";
 
 export default function getAntiBotAuthorityForEnvironment(

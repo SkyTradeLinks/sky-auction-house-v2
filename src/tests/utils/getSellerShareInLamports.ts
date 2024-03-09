@@ -1,5 +1,5 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { BASIS_POINTS_SECONDARY } from "tests/constants/AuctionHouse";
+import { BASIS_POINTS_SECONDARY } from "../../tests/constants/AuctionHouse";
 
 // Get remaining amount after paying auction house fees + creator royalties for secondary sales
 export default function getSellerShareInLamports(

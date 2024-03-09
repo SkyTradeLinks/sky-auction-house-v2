@@ -1,8 +1,8 @@
-import { Environment } from "@formfunction-hq/formfunction-program-shared";
+import { Environment } from "../../../formfunction-program-shared/src";
 import { PublicKey } from "@solana/web3.js";
-import getAuctionHouseAddressesForCurrency from "address-lookup-table/addresses/auction-house/getAuctionHouseAddressesForCurrency";
-import AuctionHouseOverrideForTest from "address-lookup-table/types/AuctionHouseOverrideForTest";
-import Currency from "address-lookup-table/types/Currency";
+import getAuctionHouseAddressesForCurrency from "../../address-lookup-table/addresses/auction-house/getAuctionHouseAddressesForCurrency";
+import AuctionHouseOverrideForTest from "../../address-lookup-table/types/AuctionHouseOverrideForTest";
+import Currency from "../../address-lookup-table/types/Currency";
 
 export default async function getAuctionHouseAddressesForEnvironment(
   environment: Environment,

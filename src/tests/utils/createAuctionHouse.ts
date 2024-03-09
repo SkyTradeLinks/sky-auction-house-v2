@@ -1,14 +1,14 @@
-import { logIfDebug } from "@formfunction-hq/formfunction-program-shared";
+import { logIfDebug } from "../../../formfunction-program-shared/src";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import AuctionHouseOverrideForTest from "address-lookup-table/types/AuctionHouseOverrideForTest";
-import extendAddressLookupTableForTest from "address-lookup-table/utils/extendAddressLookupTableForTest";
-import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import AuctionHouseOverrideForTest from "../../address-lookup-table/types/AuctionHouseOverrideForTest";
+import extendAddressLookupTableForTest from "../../address-lookup-table/utils/extendAddressLookupTableForTest";
+import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
 import {
   FEE_WITHDRAWAL_DESTINATION,
   TREASURY_WITHDRAWAL_DESTINATION_OWNER,
-} from "tests/constants/AuctionHouse";
-import { ADDRESS_LOOKUP_TABLE_ADDRESS } from "tests/setup";
-import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+} from "../../tests/constants/AuctionHouse";
+import { ADDRESS_LOOKUP_TABLE_ADDRESS } from "../../tests/setup";
+import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
 import invariant from "tiny-invariant";
 
 export default async function createAuctionHouse(

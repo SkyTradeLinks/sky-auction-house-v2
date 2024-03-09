@@ -3,13 +3,13 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from "@solana/web3.js";
-import findLastBidPrice from "solana/pdas/findLastBidPrice";
-import AuctionHouseProgram from "types/AuctionHouseProgram";
+import findLastBidPrice from "../../solana/pdas/findLastBidPrice";
+import AuctionHouseProgram from "../../types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
-  program: AuctionHouseProgram;
+  program: any;
   tokenMint: PublicKey;
   wallet: PublicKey;
 };

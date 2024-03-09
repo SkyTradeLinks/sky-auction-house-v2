@@ -1,7 +1,7 @@
-import { logIfDebug } from "@formfunction-hq/formfunction-program-shared";
+import { logIfDebug } from "../../../../formfunction-program-shared/src";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { writeFileSync } from "fs";
-import findNftTxs from "tests/utils/txs/findNftTxs";
+import findNftTxs from "../../../tests/utils/txs/findNftTxs";
 
 export default async function getNftTxs(
   connection: Connection,

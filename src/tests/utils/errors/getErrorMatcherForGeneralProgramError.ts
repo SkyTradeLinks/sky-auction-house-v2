@@ -1,4 +1,4 @@
-import { assertUnreachable } from "@formfunction-hq/formfunction-program-shared";
+import { assertUnreachable } from "../../../../formfunction-program-shared/src";
 import GeneralProgramError, {
   ACCOUNT_IS_FROZEN,
   CONSTRAINT_HAS_ONE,
@@ -6,9 +6,9 @@ import GeneralProgramError, {
   EDITION_NUMBER_GREATER_THAN_MAX_SUPPLY,
   MISSING_ACCOUNT,
   SIGNATURE_VERIFICATION_FAILED,
-} from "tests/constants/GeneralProgramError";
-import errorCodeToHexString from "tests/utils/errors/errorCodeToHexString";
-import errorNumberToHexString from "tests/utils/errors/errorNumberToHexString";
+} from "../../../tests/constants/GeneralProgramError";
+import errorCodeToHexString from "../../../tests/utils/errors/errorCodeToHexString";
+import errorNumberToHexString from "../../../tests/utils/errors/errorNumberToHexString";
 
 /**
  * Maps a general program error to the specific RegExp pattern to match the error

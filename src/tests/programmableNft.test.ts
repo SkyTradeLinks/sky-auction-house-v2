@@ -1,7 +1,7 @@
-import { requestAirdrops } from "@formfunction-hq/formfunction-program-shared";
+import { requestAirdrops } from "../../formfunction-program-shared/src";
 import { Keypair } from "@solana/web3.js";
-import getConnectionForTest from "tests/utils/getConnectionForTest";
-import createProgrammableNft from "tests/utils/programmable-nfts/createProgrammableNft";
+import getConnectionForTest from "../tests/utils/getConnectionForTest";
+import createProgrammableNft from "../tests/utils/programmable-nfts/createProgrammableNft";
 
 describe("Programmable NFTs test", () => {
   test("Create a Programmable NFT", async () => {

@@ -1,4 +1,4 @@
-import { Maybe } from "@formfunction-hq/formfunction-program-shared";
+import { Maybe } from "../../../../formfunction-program-shared/src";
 import {
   ACCOUNT_IS_FROZEN,
   CONSTRAINT_HAS_ONE,
@@ -6,11 +6,11 @@ import {
   EDITION_NUMBER_GREATER_THAN_MAX_SUPPLY,
   MISSING_ACCOUNT,
   SIGNATURE_VERIFICATION_FAILED,
-} from "tests/constants/GeneralProgramError";
-import ProgramTransactionError from "tests/constants/ProgramTransactionError";
-import errorCodeToHexString from "tests/utils/errors/errorCodeToHexString";
-import getErrorCodeFromErrorName from "tests/utils/errors/getErrorCodeFromErrorName";
-import getErrorMatcherForGeneralProgramError from "tests/utils/errors/getErrorMatcherForGeneralProgramError";
+} from "../../../tests/constants/GeneralProgramError";
+import ProgramTransactionError from "../../../tests/constants/ProgramTransactionError";
+import errorCodeToHexString from "../../../tests/utils/errors/errorCodeToHexString";
+import getErrorCodeFromErrorName from "../../../tests/utils/errors/getErrorCodeFromErrorName";
+import getErrorMatcherForGeneralProgramError from "../../../tests/utils/errors/getErrorMatcherForGeneralProgramError";
 
 export default async function expectFunctionToFailWithErrorCode({
   errorName,

@@ -1,7 +1,7 @@
 import {
   findAtaPda,
   isMintNative,
-} from "@formfunction-hq/formfunction-program-shared";
+} from "../../../formfunction-program-shared/src";
 import { PublicKey } from "@solana/web3.js";
 
 export default async function getWalletIfNativeElseAta(

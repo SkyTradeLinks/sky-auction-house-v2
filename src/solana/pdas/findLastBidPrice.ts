@@ -1,7 +1,7 @@
-import { PdaResult } from "@formfunction-hq/formfunction-program-shared";
+import { PdaResult } from "../../../formfunction-program-shared/src";
 import { PublicKey } from "@solana/web3.js";
-import { LAST_BID_PRICE } from "constants/SolanaConstants";
-import getSolAuctionHouseAccountByProgramId from "solana/auction-house/getSolAuctionHouseAccountByProgramId";
+import { LAST_BID_PRICE } from "../../constants/SolanaConstants";
+import getSolAuctionHouseAccountByProgramId from "../../solana/auction-house/getSolAuctionHouseAccountByProgramId";
 
 export default function findLastBidPrice(
   mint: PublicKey,

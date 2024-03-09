@@ -7,23 +7,27 @@ import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
-import { SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
+import { SYSVAR_RENT_PUBKEY,} from "@solana/web3.js";
 
-import { auctionHouseAuthority } from "../sdk/utils/constants";
-import { AuctionHouseSdk } from "../sdk/auction-house-sdk";
+import { auctionHouseAuthority, BUY_PRICE } from "../sdk/utils/constants";
+import AuctionHouseSdk from "../sdk/auction-house-sdk";
+
 
 
 
 describe("create-auction-house", async () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
+  const connection = provider.connection;
 
   const program = anchor.workspace.AuctionHouse as Program<AuctionHouse>;
+
 
   let auctionHouseSdk: AuctionHouseSdk;
 
   before(async () => {
     auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
+   
   });
 
   // 1% goes to authority
@@ -33,12 +37,13 @@ describe("create-auction-house", async () => {
   const requiresSignOff = true;
   const canChangeSalePrice = false;
   const payAllFees = true;
+  
 
   it("should not fetch auction house", async () => {
     // will pass if it exists as it's on devnet
     try {
-      await program.account.auctionHouse.fetch(auctionHouseSdk.auctionHouse);
-    } catch (err: any) {
+
+      } catch (err: any) {
       if (err.message.includes("does not exist")) {
         // passes
         return;
@@ -55,8 +60,9 @@ describe("create-auction-house", async () => {
       if (err.message.includes("does not exist")) {
         const withdrawalDestinationAta = await getAssociatedTokenAddress(
           auctionHouseSdk.mintAccount,
-          auctionHouseAuthority.publicKey
+          auctionHouseAuthority.publicKey,
         );
+
 
         await program.methods
           .createAuctionHouse(

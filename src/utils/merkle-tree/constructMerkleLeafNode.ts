@@ -1,7 +1,7 @@
-import { MerkleLeaf } from "@formfunction-hq/formfunction-program-shared";
+import { MerkleLeaf } from "../../../formfunction-program-shared/src";
 import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
-import MerkleAllowlistBuyerInfo from "types/merkle-tree/MerkleAllowlistBuyerInfo";
+import MerkleAllowlistBuyerInfo from "../../types/merkle-tree/MerkleAllowlistBuyerInfo";
 
 // Must be consistent with the program proof verification amount size in bytes.
 const amountNumBytes = 2;
