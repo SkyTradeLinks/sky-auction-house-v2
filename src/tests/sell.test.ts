@@ -1,20 +1,20 @@
-import { transfer } from "../../formfunction-program-shared/src";
+import { transfer } from "@formfunction-hq/formfunction-program-shared";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import AuctionHouseSdk from "../solana/auction-house/AuctionHouseSdk";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
 import {
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
   BUY_PRICE,
-} from "../tests/constants/AuctionHouse";
-import { WALLET_CREATOR } from "../tests/constants/Wallets";
-import NftTransactionType from "../tests/types/enums/NftTransactionType";
-import expectFunctionToFailWithErrorCode from "../tests/utils/errors/expectFunctionToFailWithErrorCode";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getProgram from "../tests/utils/getProgram";
-import getTestSetup from "../tests/utils/getTestSetup";
-import getTreasuryMint from "../tests/utils/getTreasuryMint";
-import sell from "../tests/utils/sell";
-import getNftTxs from "../tests/utils/txs/getNftTxs";
+} from "tests/constants/AuctionHouse";
+import { WALLET_CREATOR } from "tests/constants/Wallets";
+import NftTransactionType from "tests/types/enums/NftTransactionType";
+import expectFunctionToFailWithErrorCode from "tests/utils/errors/expectFunctionToFailWithErrorCode";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getProgram from "tests/utils/getProgram";
+import getTestSetup from "tests/utils/getTestSetup";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import sell from "tests/utils/sell";
+import getNftTxs from "tests/utils/txs/getNftTxs";
 
 let tokenMint: PublicKey;
 let tokenAccount: PublicKey;

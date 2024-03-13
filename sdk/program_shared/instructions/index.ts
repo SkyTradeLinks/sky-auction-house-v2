@@ -1,5 +1,7 @@
 import ixToTx from "./ixToTx";
+import ixsToTx from './ixsToTx';
 
 export {
-    ixToTx
+    ixToTx,
+    ixsToTx
 }

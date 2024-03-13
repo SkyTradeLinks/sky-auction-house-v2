@@ -4,27 +4,26 @@ import {
   PublicKey,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import AuctionHouseSdk from "../solana/auction-house/AuctionHouseSdk";
-import findLastBidPrice from "../solana/pdas/findLastBidPrice";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import findLastBidPrice from "solana/pdas/findLastBidPrice";
 import {
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
   BUY_PRICE,
   FEE_WITHDRAWAL_DESTINATION,
   ZERO_PUBKEY,
-} from "../tests/constants/AuctionHouse";
-import { WALLET_CREATOR } from "../tests/constants/Wallets";
-import expectTransactionToFailWithErrorCode from "../tests/utils/errors/expectTransactionToFailWithErrorCode";
-import expectEqPubkeys from "../tests/utils/expectEqPubkeys";
-import getBalance from "../tests/utils/getBalance";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getProgram from "../tests/utils/getProgram";
-import getTestSetup from "../tests/utils/getTestSetup";
-import getTreasuryMint from "../tests/utils/getTreasuryMint";
-import getTreasuryWithdrawalDestination from "../tests/utils/getTreasuryWithdrawalDestination";
-import sendTransactionWithWallet from "../tests/utils/txs/sendTransactionWithWallet";
-import SaleType from "../types/enum/SaleType";
-import { expect } from "chai";
+} from "tests/constants/AuctionHouse";
+import { WALLET_CREATOR } from "tests/constants/Wallets";
+import expectTransactionToFailWithErrorCode from "tests/utils/errors/expectTransactionToFailWithErrorCode";
+import expectEqPubkeys from "tests/utils/expectEqPubkeys";
+import getBalance from "tests/utils/getBalance";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getProgram from "tests/utils/getProgram";
+import getTestSetup from "tests/utils/getTestSetup";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import getTreasuryWithdrawalDestination from "tests/utils/getTreasuryWithdrawalDestination";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import SaleType from "types/enum/SaleType";
 
 // NOTE: use existing tokenMint to make test faster.
 // Use new tokenMint to test everything from scratch.

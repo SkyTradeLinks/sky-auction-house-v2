@@ -1,10 +1,10 @@
-import { AnchorWallet } from "../../../formfunction-program-shared/src";
+import { AnchorWallet } from "@formfunction-hq/formfunction-program-shared";
 import * as anchor from "@project-serum/anchor";
 import { web3 } from "@project-serum/anchor";
 import { Cluster, PublicKey } from "@solana/web3.js";
-import { AuctionHouse } from "../../idl/AuctionHouse";
-import { AUCTION_HOUSE_IDL } from "../../index";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import { AuctionHouse } from "idl/AuctionHouse";
+import { AUCTION_HOUSE_IDL } from "index";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 export default function loadAuctionHouseProgramWithWallet(
   auctionHouseProgramId: PublicKey | string,

@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
-import getTradeState from "../../solana/auction-house/getTradeState";
+import getTradeState from "solana/auction-house/getTradeState";
 
 export default async function getFreeTradeState({
   wallet,

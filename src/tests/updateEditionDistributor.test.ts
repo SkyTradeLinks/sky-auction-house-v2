@@ -1,15 +1,15 @@
 import {
   expectPublicKeysEqual,
   requestAirdrops,
-} from "../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import dayjs from "dayjs";
-import expectTransactionToFailWithErrorCode from "../tests/utils/errors/expectTransactionToFailWithErrorCode";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getEditionDistributorPriceFunction from "../tests/utils/getEditionDistributorPriceFunction";
-import getEditionDistributorSetup from "../tests/utils/getEditionDistributorSetup";
-import sendTransactionWithWallet from "../tests/utils/txs/sendTransactionWithWallet";
-import PriceFunctionType from "../types/enum/PriceFunctionType";
+import expectTransactionToFailWithErrorCode from "tests/utils/errors/expectTransactionToFailWithErrorCode";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getEditionDistributorPriceFunction from "tests/utils/getEditionDistributorPriceFunction";
+import getEditionDistributorSetup from "tests/utils/getEditionDistributorSetup";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import PriceFunctionType from "types/enum/PriceFunctionType";
 
 const connection = getConnectionForTest();
 

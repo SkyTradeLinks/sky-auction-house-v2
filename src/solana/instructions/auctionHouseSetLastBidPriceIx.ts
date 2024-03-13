@@ -1,7 +1,7 @@
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { BN } from "bn.js";
-import findLastBidPrice from "../../solana/pdas/findLastBidPrice";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import findLastBidPrice from "solana/pdas/findLastBidPrice";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;

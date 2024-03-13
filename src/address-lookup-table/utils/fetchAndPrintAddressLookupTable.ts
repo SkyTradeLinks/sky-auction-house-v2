@@ -1,4 +1,4 @@
-import { jsonStringify } from "../../../formfunction-program-shared/src";
+import { jsonStringify } from "@formfunction-hq/formfunction-program-shared";
 import { Connection, PublicKey } from "@solana/web3.js";
 
 export default async function fetchAndPrintAddressLookupTable(

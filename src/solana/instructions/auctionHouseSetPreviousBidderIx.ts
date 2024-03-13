@@ -1,7 +1,7 @@
-import { Maybe } from "../../../formfunction-program-shared/src";
+import { Maybe } from "@formfunction-hq/formfunction-program-shared";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import findLastBidPrice from "../../solana/pdas/findLastBidPrice";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import findLastBidPrice from "solana/pdas/findLastBidPrice";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;

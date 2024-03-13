@@ -7,15 +7,15 @@ import {
   logIfDebug,
   mintTo,
   requestAirdrops,
-} from "../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import {
   createTransferCheckedInstruction,
   createTransferInstruction,
 } from "@solana/spl-token";
 import { sendAndConfirmTransaction, Transaction } from "@solana/web3.js";
-import { WALLET_BUYER, WALLET_SELLER } from "../tests/constants/Wallets";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getNftTxs from "../tests/utils/txs/getNftTxs";
+import { WALLET_BUYER, WALLET_SELLER } from "tests/constants/Wallets";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getNftTxs from "tests/utils/txs/getNftTxs";
 
 async function setup() {
   //

@@ -1,4 +1,4 @@
-import { Maybe } from "../../../formfunction-program-shared/src";
+import { Maybe } from "@formfunction-hq/formfunction-program-shared";
 import { BN } from "@project-serum/anchor";
 import {
   PublicKey,
@@ -6,16 +6,16 @@ import {
   SYSVAR_RENT_PUBKEY,
   TransactionInstruction,
 } from "@solana/web3.js";
-import getTradeState from "../../solana/auction-house/getTradeState";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
-import SaleType from "../../types/enum/SaleType";
+import getTradeState from "solana/auction-house/getTradeState";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
+import SaleType from "types/enum/SaleType";
 
 type Accounts = {
   auctionHouse: PublicKey;
   auctionHouseFeeAccount: PublicKey;
   auctionHouseProgramId: PublicKey;
   authority: PublicKey;
-  program: AuctionHouseProgram; //
+  program: AuctionHouseProgram;
   tokenAccount: PublicKey;
   tokenMint: PublicKey;
   treasuryMint: PublicKey;

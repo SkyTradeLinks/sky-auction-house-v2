@@ -1,5 +1,17 @@
 use anchor_lang::prelude::*;
 
+use anchor_spl::{
+    associated_token::{create, get_associated_token_address, AssociatedToken, Create},
+    token::{transfer_checked, Mint, Token, TokenAccount, TransferChecked},
+};
+
+use mpl_bubblegum::{
+    hash::{hash_creators, hash_metadata},
+    instructions::MintV1CpiBuilder,
+    types::{LeafSchema, MetadataArgs},
+    utils::get_asset_id,
+};
+
 pub mod constants;
 pub mod errors;
 pub mod instructions;
@@ -139,7 +151,24 @@ pub mod auction_house {
         program_as_signer_bump: u8,
         buyer_price: u64,
         token_size: u64,
-    ) -> Result<()> {
+        leaves_data: Vec<LeafData>,
+    ) -> Result<()> { 
+        let accounts = &mut ctx.remaining_accounts.iter();
+        let length: usize = accounts.len() / 2;
+
+        for index in 0..length {
+            let land_owner = next_account_info(accounts)?;
+            let land_owner_ata = next_account_info(accounts)?;
+
+            let expected_ata = get_associated_token_address(land_owner.key, &ctx.accounts.token_mint.key());
+
+            let leaf_data = &leaves_data[index];
+
+            if land_owner_ata.key() != expected_ata || leaf_data.owner != land_owner.key() {
+                return err!(AuctionHouseError::IncorrectOwner);
+            }
+        }
+
         handle_sell(
             ctx,
             trade_state_bump,

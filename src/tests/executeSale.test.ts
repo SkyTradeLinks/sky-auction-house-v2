@@ -4,37 +4,37 @@ import {
   ixToTx,
   requestAirdrops,
   transfer,
-} from "../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { DataV2 } from "@metaplex-foundation/mpl-token-metadata";
 import { createRevokeInstruction } from "@solana/spl-token";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import AuctionHouseSdk from "../solana/auction-house/AuctionHouseSdk";
-import auctionHouseThawDelegatedAccountIx from "../solana/instructions/auctionHouseThawDelegatedAccountIx";
-import findLastBidPrice from "../solana/pdas/findLastBidPrice";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import auctionHouseThawDelegatedAccountIx from "solana/instructions/auctionHouseThawDelegatedAccountIx";
+import findLastBidPrice from "solana/pdas/findLastBidPrice";
 import {
   AUCTION_HOUSE_PROGRAM_ID,
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
   BUY_PRICE,
   ZERO_PUBKEY,
-} from "../tests/constants/AuctionHouse";
-import { WALLET_CREATOR } from "../tests/constants/Wallets";
-import { IS_NATIVE } from "../tests/setup";
-import buy from "../tests/utils/buy";
-import expectFunctionToFailWithErrorCode from "../tests/utils/errors/expectFunctionToFailWithErrorCode";
-import executeSale from "../tests/utils/executeSale";
-import fundSplTokenAtas from "../tests/utils/fundSplTokenAccount";
-import getBalance from "../tests/utils/getBalance";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getProgram from "../tests/utils/getProgram";
-import getTestSetup from "../tests/utils/getTestSetup";
-import getTreasuryMint from "../tests/utils/getTreasuryMint";
-import getTreasuryWithdrawalDestination from "../tests/utils/getTreasuryWithdrawalDestination";
-import resetTradeState from "../tests/utils/resetTradeState";
-import sell from "../tests/utils/sell";
-import sendTransactionWithWallet from "../tests/utils/txs/sendTransactionWithWallet";
-import verifyDelegateAndFrozen from "../tests/utils/verifyDelegateAndFrozen";
-import SaleType from "../types/enum/SaleType";
+} from "tests/constants/AuctionHouse";
+import { WALLET_CREATOR } from "tests/constants/Wallets";
+import { IS_NATIVE } from "tests/setup";
+import buy from "tests/utils/buy";
+import expectFunctionToFailWithErrorCode from "tests/utils/errors/expectFunctionToFailWithErrorCode";
+import executeSale from "tests/utils/executeSale";
+import fundSplTokenAtas from "tests/utils/fundSplTokenAccount";
+import getBalance from "tests/utils/getBalance";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getProgram from "tests/utils/getProgram";
+import getTestSetup from "tests/utils/getTestSetup";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import getTreasuryWithdrawalDestination from "tests/utils/getTreasuryWithdrawalDestination";
+import resetTradeState from "tests/utils/resetTradeState";
+import sell from "tests/utils/sell";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import verifyDelegateAndFrozen from "tests/utils/verifyDelegateAndFrozen";
+import SaleType from "types/enum/SaleType";
 
 // NOTE: use existing tokenMint to make test faster.
 // Use new tokenMint to test everything from scratch.

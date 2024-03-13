@@ -5,8 +5,8 @@ import {
   Signer,
   Transaction,
 } from "@solana/web3.js";
-import ProgramTransactionError from "../../../tests/constants/ProgramTransactionError";
-import expectFunctionToFailWithErrorCode from "../../../tests/utils/errors/expectFunctionToFailWithErrorCode";
+import ProgramTransactionError from "tests/constants/ProgramTransactionError";
+import expectFunctionToFailWithErrorCode from "tests/utils/errors/expectFunctionToFailWithErrorCode";
 
 /**
  * A wrapper around expectFunctionToFailWithErrorCode which expects a transaction,

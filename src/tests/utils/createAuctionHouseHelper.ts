@@ -1,20 +1,20 @@
-import { ANTI_BOT_DEV_AUTHORITY_KEYPAIR } from "../../../formfunction-program-shared/src";
+import { ANTI_BOT_DEV_AUTHORITY_KEYPAIR } from "@formfunction-hq/formfunction-program-shared";
 import {
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
 } from "@solana/web3.js";
-import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
 import {
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
   TREASURY_WITHDRAWAL_DESTINATION_OWNER,
-} from "../../tests/constants/AuctionHouse";
-import createAuctionHouse from "../../tests/utils/createAuctionHouse";
-import getTreasuryMint from "../../tests/utils/getTreasuryMint";
-import getTreasuryWithdrawalDestination from "../../tests/utils/getTreasuryWithdrawalDestination";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+} from "tests/constants/AuctionHouse";
+import createAuctionHouse from "tests/utils/createAuctionHouse";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import getTreasuryWithdrawalDestination from "tests/utils/getTreasuryWithdrawalDestination";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 export default async function createAuctionHouseHelper(
   connection: Connection,

@@ -3,7 +3,7 @@ import {
   flat,
   isMintNative,
   Undef,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { AccountMeta, PublicKey } from "@solana/web3.js";
 
 export default async function getRemainingAccounts(

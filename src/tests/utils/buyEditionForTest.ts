@@ -3,7 +3,7 @@ import {
   getBalanceForMint,
   logIfDebug,
   Maybe,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { DataV2 } from "@metaplex-foundation/mpl-token-metadata";
 import {
   AccountMeta,
@@ -12,16 +12,16 @@ import {
   PublicKey,
   SendOptions,
 } from "@solana/web3.js";
-import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
-import findEditionDistributor from "../../solana/pdas/findEditionDistributor";
-import { BASIS_POINTS_100_PERCENT } from "../../tests/constants/AuctionHouse";
-import { IS_NATIVE } from "../../tests/setup";
-import expectSlightlyLessThan from "../../tests/utils/expectSlightlyLessThan";
-import getBalance from "../../tests/utils/getBalance";
-import getTreasuryMint from "../../tests/utils/getTreasuryMint";
-import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
-import MerkleAllowlistBuyerWithProof from "../../types/merkle-tree/MerkleAllowlistBuyerWithProof";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import findEditionDistributor from "solana/pdas/findEditionDistributor";
+import { BASIS_POINTS_100_PERCENT } from "tests/constants/AuctionHouse";
+import { IS_NATIVE } from "tests/setup";
+import expectSlightlyLessThan from "tests/utils/expectSlightlyLessThan";
+import getBalance from "tests/utils/getBalance";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
+import MerkleAllowlistBuyerWithProof from "types/merkle-tree/MerkleAllowlistBuyerWithProof";
 
 export default async function buyEditionForTest({
   auctionHouseAccount,

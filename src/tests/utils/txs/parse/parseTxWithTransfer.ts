@@ -1,4 +1,4 @@
-import { Maybe } from "../../../../../formfunction-program-shared/src";
+import { Maybe } from "@formfunction-hq/formfunction-program-shared";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import {
   ParsedInstruction,
@@ -6,8 +6,8 @@ import {
   PartiallyDecodedInstruction,
   PublicKey,
 } from "@solana/web3.js";
-import NftTransactionType from "../../../../tests/types/enums/NftTransactionType";
-import NftTransaction from "../../../../tests/types/NftTransaction";
+import NftTransactionType from "tests/types/enums/NftTransactionType";
+import NftTransaction from "tests/types/NftTransaction";
 
 function isTransferIx(
   ix: ParsedInstruction | PartiallyDecodedInstruction

@@ -1,4 +1,4 @@
-import { estimateTransactionSizeInBytes } from "../../../../formfunction-program-shared/src";
+import { estimateTransactionSizeInBytes } from "@formfunction-hq/formfunction-program-shared";
 import {
   Connection,
   Keypair,
@@ -9,7 +9,7 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { ADDRESS_LOOKUP_TABLE_ADDRESS, DEBUG, LOG_TX_SIZE } from "../../../tests/setup";
+import { ADDRESS_LOOKUP_TABLE_ADDRESS, DEBUG, LOG_TX_SIZE } from "tests/setup";
 import invariant from "tiny-invariant";
 
 async function sendVersionedTransaction({

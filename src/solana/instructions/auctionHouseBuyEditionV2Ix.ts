@@ -8,7 +8,7 @@ import {
   getMasterEditionSupply,
   Maybe,
   TOKEN_METADATA_PROGRAM_ID,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -21,14 +21,14 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { BN } from "bn.js";
-import findAuctionHouseFeeAccount from "../../solana/pdas/findAuctionHouseFeeAccount";
-import findAuctionHouseTreasuryAccount from "../../solana/pdas/findAuctionHouseTreasuryAccount";
-import findEditionAllowlistSettingsAccount from "../../solana/pdas/findEditionAllowlistSettingsAccount";
-import findEditionBuyerInfoAccountPda from "../../solana/pdas/findEditionBuyerInfoAccountPda";
-import findEditionDistributor from "../../solana/pdas/findEditionDistributor";
-import getWalletIfNativeElseAta from "../../solana/utils/getWalletIfNativeElseAta";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
-import MerkleAllowlistBuyerWithProof from "../../types/merkle-tree/MerkleAllowlistBuyerWithProof";
+import findAuctionHouseFeeAccount from "solana/pdas/findAuctionHouseFeeAccount";
+import findAuctionHouseTreasuryAccount from "solana/pdas/findAuctionHouseTreasuryAccount";
+import findEditionAllowlistSettingsAccount from "solana/pdas/findEditionAllowlistSettingsAccount";
+import findEditionBuyerInfoAccountPda from "solana/pdas/findEditionBuyerInfoAccountPda";
+import findEditionDistributor from "solana/pdas/findEditionDistributor";
+import getWalletIfNativeElseAta from "solana/utils/getWalletIfNativeElseAta";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
+import MerkleAllowlistBuyerWithProof from "types/merkle-tree/MerkleAllowlistBuyerWithProof";
 
 function getIxMerkleAllowlistProofData(
   buyerWithAllowlistProofData: Maybe<MerkleAllowlistBuyerWithProof>

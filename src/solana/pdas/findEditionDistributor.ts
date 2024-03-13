@@ -1,6 +1,6 @@
-import { PdaResult } from "../../../formfunction-program-shared/src";
+import { PdaResult } from "@formfunction-hq/formfunction-program-shared";
 import { PublicKey } from "@solana/web3.js";
-import { EDITION_DISTRIBUTOR } from "../../constants/SolanaConstants";
+import { EDITION_DISTRIBUTOR } from "constants/SolanaConstants";
 
 export default function findEditionDistributor(
   mint: PublicKey,

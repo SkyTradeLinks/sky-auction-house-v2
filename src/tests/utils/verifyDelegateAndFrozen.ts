@@ -1,9 +1,8 @@
-import { getTokenAccountInfo } from "../../../formfunction-program-shared/src";
+import { getTokenAccountInfo } from "@formfunction-hq/formfunction-program-shared";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import findAuctionHouseProgramAsSigner from "../../solana/pdas/findAuctionHouseProgramAsSigner";
-import expectEqPubkeys from "../../tests/utils/expectEqPubkeys";
-import expectNeqPubkeys from "../../tests/utils/expectNeqPubkeys";
-import { expect } from "chai";
+import findAuctionHouseProgramAsSigner from "solana/pdas/findAuctionHouseProgramAsSigner";
+import expectEqPubkeys from "tests/utils/expectEqPubkeys";
+import expectNeqPubkeys from "tests/utils/expectNeqPubkeys";
 
 export default async function verifyDelegateAndFrozen(
   connection: Connection,

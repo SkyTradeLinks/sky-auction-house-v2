@@ -1,8 +1,8 @@
-import { findAtaPda } from "../../../formfunction-program-shared/src";
+import { findAtaPda } from "@formfunction-hq/formfunction-program-shared";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import findEditionDistributor from "../../solana/pdas/findEditionDistributor";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import findEditionDistributor from "solana/pdas/findEditionDistributor";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;

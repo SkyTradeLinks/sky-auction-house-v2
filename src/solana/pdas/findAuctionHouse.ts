@@ -1,6 +1,6 @@
-import { PdaResult } from "../../../formfunction-program-shared/src";
+import { PdaResult } from "@formfunction-hq/formfunction-program-shared";
 import { PublicKey } from "@solana/web3.js";
-import { AUCTION_HOUSE } from "../../constants/SolanaConstants";
+import { AUCTION_HOUSE } from "constants/SolanaConstants";
 
 export default function findAuctionHouse(
   creator: PublicKey,

@@ -1,4 +1,4 @@
-import { findTokenMetadataPda } from "../../../formfunction-program-shared/src";
+import { findTokenMetadataPda } from "@formfunction-hq/formfunction-program-shared";
 import { web3 } from "@project-serum/anchor";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -7,11 +7,11 @@ import {
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { BN } from "bn.js";
 import { Dayjs } from "dayjs";
-import getTradeState from "../../solana/auction-house/getTradeState";
-import findAuctionHouseBuyerEscrow from "../../solana/pdas/findAuctionHouseBuyerEscrow";
-import findLastBidPrice from "../../solana/pdas/findLastBidPrice";
-import getWalletIfNativeElseAta from "../../solana/utils/getWalletIfNativeElseAta";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import getTradeState from "solana/auction-house/getTradeState";
+import findAuctionHouseBuyerEscrow from "solana/pdas/findAuctionHouseBuyerEscrow";
+import findLastBidPrice from "solana/pdas/findLastBidPrice";
+import getWalletIfNativeElseAta from "solana/utils/getWalletIfNativeElseAta";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;

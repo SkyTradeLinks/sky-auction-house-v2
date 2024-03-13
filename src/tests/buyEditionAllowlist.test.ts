@@ -8,19 +8,19 @@ import {
   range,
   requestAirdrops,
   sleep,
-} from "../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import dayjs from "dayjs";
-import buyEditionForTest from "../tests/utils/buyEditionForTest";
-import createEditionAllowlist from "../tests/utils/createEditionAllowlist";
-import createKeypairAddressMap from "../tests/utils/createKeypairAddressMap";
-import expectFunctionToFailWithErrorCode from "../tests/utils/errors/expectFunctionToFailWithErrorCode";
-import fundSplTokenAtas from "../tests/utils/fundSplTokenAccount";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getEditionDistributorSetup from "../tests/utils/getEditionDistributorSetup";
-import PriceFunctionType from "../types/enum/PriceFunctionType";
-import MerkleAllowlistBuyersList from "../types/merkle-tree/MerkleAllowlistBuyersList";
-import MerkleAllowlistBuyerWithProof from "../types/merkle-tree/MerkleAllowlistBuyerWithProof";
+import buyEditionForTest from "tests/utils/buyEditionForTest";
+import createEditionAllowlist from "tests/utils/createEditionAllowlist";
+import createKeypairAddressMap from "tests/utils/createKeypairAddressMap";
+import expectFunctionToFailWithErrorCode from "tests/utils/errors/expectFunctionToFailWithErrorCode";
+import fundSplTokenAtas from "tests/utils/fundSplTokenAccount";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getEditionDistributorSetup from "tests/utils/getEditionDistributorSetup";
+import PriceFunctionType from "types/enum/PriceFunctionType";
+import MerkleAllowlistBuyersList from "types/merkle-tree/MerkleAllowlistBuyersList";
+import MerkleAllowlistBuyerWithProof from "types/merkle-tree/MerkleAllowlistBuyerWithProof";
 
 const connection = getConnectionForTest();
 
@@ -64,7 +64,7 @@ async function waitForPublicSale(publicSaleStartTime: number): Promise<void> {
 }
 
 describe("buy edition v2 allowlist", () => {
-  before(async () => {
+  beforeAll(async () => {
     await requestAirdrops({
       connection,
       wallets: buyers,
