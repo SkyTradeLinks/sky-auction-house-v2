@@ -1,8 +1,12 @@
 import fs from "fs";
 import * as anchor from "@coral-xyz/anchor";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import {
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
 import { createMint } from "@solana/spl-token";
-import { auctionHouseAuthority } from "./constants";
+import { AUCTION_HOUSE, auctionHouseAuthority } from "./constants";
 
 export const loadKeyPair = (filename) => {
   const decodedKey = new Uint8Array(
@@ -48,23 +52,62 @@ export const setupAirDrop = async (
   });
 };
 
-export const getUSDC = async (connection: anchor.web3.Connection) => {
-  if (connection.rpcEndpoint.includes("localhost")) {
-    return await createMint(
-      connection,
-      auctionHouseAuthority,
-      auctionHouseAuthority.publicKey,
-      auctionHouseAuthority.publicKey,
-      6
-    );
-  } else if (connection.rpcEndpoint.includes("mainnet")) {
-    return new anchor.web3.PublicKey(
-      "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-    );
+export const getUSDC = async (
+  connection: anchor.web3.Connection,
+  test_flag = false
+) => {
+  if (test_flag) {
+    return new PublicKey("BnXBBCnX8nZFxxeK9teZGJSHeCbnQ5PfzdS2RanrVnv7");
   } else {
-    // devnet | testnet
-    return new anchor.web3.PublicKey(
-      "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
-    );
+    if (connection.rpcEndpoint.includes("mainnet")) {
+      return new anchor.web3.PublicKey(
+        "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+      );
+    } else {
+      // devnet | testnet
+      return new anchor.web3.PublicKey(
+        "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+      );
+    }
   }
+};
+
+export const findAuctionHouseBidderEscrowAccount = (
+  auctionHouse: PublicKey,
+  wallet: PublicKey,
+  merkleTree: PublicKey,
+  auctionHouseProgramId: PublicKey
+) => {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from(AUCTION_HOUSE),
+      auctionHouse.toBuffer(),
+      wallet.toBuffer(),
+      merkleTree.toBuffer(),
+    ],
+    auctionHouseProgramId
+  );
+};
+
+export const findAuctionHouseTradeState = (
+  auctionHouse: PublicKey,
+  wallet: PublicKey,
+  assetId: PublicKey,
+  treasuryMint: PublicKey,
+  merkleTree: PublicKey,
+  buyPrice: anchor.BN,
+  auctionHouseProgramId: PublicKey
+) => {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from(AUCTION_HOUSE),
+      wallet.toBuffer(),
+      auctionHouse.toBuffer(),
+      assetId.toBuffer(),
+      treasuryMint.toBuffer(),
+      merkleTree.toBuffer(),
+      buyPrice.toArrayLike(Buffer, "le", 8),
+    ],
+    auctionHouseProgramId
+  );
 };

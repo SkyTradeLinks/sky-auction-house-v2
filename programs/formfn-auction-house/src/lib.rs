@@ -156,7 +156,6 @@ pub mod auction_house {
         trade_state_bump: u8,
         escrow_payment_bump: u8,
         buyer_price: u64,
-        token_size: u64,
         // Unix time (seconds since epoch)
         auction_end_time: Option<i64>,
         previous_bidder_escrow_payment_bump: u8,
@@ -166,7 +165,6 @@ pub mod auction_house {
             trade_state_bump,
             escrow_payment_bump,
             buyer_price,
-            token_size,
             auction_end_time,
             previous_bidder_escrow_payment_bump,
         )
@@ -227,7 +225,6 @@ pub mod auction_house {
         ctx: Context<'_, '_, '_, 'info, CreateTradeState<'info>>,
         trade_state_bump: u8,
         price: u64,
-        token_size: u64,
         sale_type: u8,
         trade_state_size: Option<u16>,
     ) -> Result<()> {
@@ -235,7 +232,6 @@ pub mod auction_house {
             ctx,
             trade_state_bump,
             price,
-            token_size,
             sale_type,
             trade_state_size,
         )

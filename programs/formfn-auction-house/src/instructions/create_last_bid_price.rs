@@ -7,7 +7,10 @@ use crate::{constants::*, utils::*, AuctionHouse, LastBidPrice, LAST_BID_PRICE_S
 pub struct CreateLastBidPrice<'info> {
     #[account(mut)]
     wallet: Signer<'info>,
-    token_mint: Account<'info, Mint>,
+
+    /// CHECK: No need to deserialize.
+    asset_id: UncheckedAccount<'info>,
+
     #[account(
         seeds = [
             PREFIX.as_bytes(),
@@ -22,7 +25,7 @@ pub struct CreateLastBidPrice<'info> {
         seeds = [
             LAST_BID_PRICE.as_bytes(),
             auction_house.key().as_ref(),
-            token_mint.key().as_ref()
+            asset_id.key().as_ref()
         ],
         payer = wallet,
         space = LAST_BID_PRICE_SIZE,
@@ -36,15 +39,17 @@ pub fn handle_create_last_bid_price<'info>(
     ctx: Context<'_, '_, '_, 'info, CreateLastBidPrice<'info>>,
 ) -> Result<()> {
     let auction_house = &ctx.accounts.auction_house;
-    let token_mint = &ctx.accounts.token_mint;
+    let asset_id = &ctx.accounts.asset_id;
     let last_bid_price = &mut ctx.accounts.last_bid_price;
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
-    assert_valid_last_bid_price(
-        &last_bid_price.to_account_info(),
-        ctx.program_id,
-        &token_mint.key(),
-    )?;
+
+    // fix
+    // assert_valid_last_bid_price(
+    //     &last_bid_price.to_account_info(),
+    //     ctx.program_id,
+    //     &token_mint.key(),
+    // )?;
 
     last_bid_price.price = 0;
     last_bid_price.bidder = Some(ZERO_PUBKEY);

@@ -9,3 +9,4 @@ export const auctionHouseAuthority = loadKeyPairV2(
 export const AUCTION_HOUSE = "auction_house";
 export const FEE_PAYER = "fee_payer";
 export const TREASURY = "treasury";
+export const LAST_BID_PRICE = "last_bid_price"

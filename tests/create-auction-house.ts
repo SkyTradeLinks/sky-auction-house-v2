@@ -31,6 +31,7 @@ describe("create-auction-house", async () => {
   const payAllFees = true;
 
   it("should not fetch auction house", async () => {
+    // will pass if it exists as it's on devnet
     try {
       await program.account.auctionHouse.fetch(auctionHouseSdk.auctionHouse);
     } catch (err: any) {
