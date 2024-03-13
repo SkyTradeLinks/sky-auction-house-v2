@@ -6,7 +6,8 @@ skip-lint = false
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+# cluster = "localnet" 
+cluster = "https://devnet.helius-rpc.com/?api-key=887524e6-92b0-4f96-973c-b37a53a9cfe4"
 wallet = "/home/chuksud77/.config/solana/id.json"
 
 [scripts]

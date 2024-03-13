@@ -1,4 +1,4 @@
-import { IDL as AUCTION_HOUSE_IDL } from "../../idl/AuctionHouse";
+import { IDL as AUCTION_HOUSE_IDL } from "idl/AuctionHouse";
 
 const ErrorCodes = AUCTION_HOUSE_IDL["errors"].map((val) => val.name);
 

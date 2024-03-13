@@ -8,7 +8,7 @@ import {
   SYSVAR_RENT_PUBKEY,
   TransactionInstruction,
 } from "@solana/web3.js";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;

@@ -2,18 +2,18 @@ import {
   ixsToTx,
   Maybe,
   WRAPPED_SOL_MINT,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import {
   createInitializeMintInstruction,
   MintLayout,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
-import { SPL_TOKEN_DECIMALS } from "../../tests/constants/AuctionHouse";
-import { WALLET_SPL_TOKEN_MINT_AUTHORITY } from "../../tests/constants/Wallets";
-import { IS_NATIVE } from "../../tests/setup";
-import getConnectionForTest from "../../tests/utils/getConnectionForTest";
-import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
+import { SPL_TOKEN_DECIMALS } from "tests/constants/AuctionHouse";
+import { WALLET_SPL_TOKEN_MINT_AUTHORITY } from "tests/constants/Wallets";
+import { IS_NATIVE } from "tests/setup";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
 
 const TREASURY_MINT = WRAPPED_SOL_MINT;
 

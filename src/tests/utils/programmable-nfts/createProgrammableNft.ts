@@ -4,7 +4,7 @@ import {
   findEditionPda,
   findTokenMetadataPda,
   ixToTx,
-} from "../../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { PROGRAM_ID as TOKEN_AUTH_RULES_ID } from "@metaplex-foundation/mpl-token-auth-rules";
 import {
   AssetData,
@@ -25,10 +25,10 @@ import {
   SystemProgram,
   SYSVAR_INSTRUCTIONS_PUBKEY,
 } from "@solana/web3.js";
-import findTokenRecordPda from "../../../tests/utils/programmable-nfts/findTokenRecordPda";
-import getProgrammableNftAssetData from "../../../tests/utils/programmable-nfts/getProgrammableNftAssetData";
-import getProgrammableNftCreateArgs from "../../../tests/utils/programmable-nfts/getProgrammableNftCreateArgs";
-import sendTransactionWithWallet from "../../../tests/utils/txs/sendTransactionWithWallet";
+import findTokenRecordPda from "tests/utils/programmable-nfts/findTokenRecordPda";
+import getProgrammableNftAssetData from "tests/utils/programmable-nfts/getProgrammableNftAssetData";
+import getProgrammableNftCreateArgs from "tests/utils/programmable-nfts/getProgrammableNftCreateArgs";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
 
 function removeNullBytesFromString(str: string): string {
   return str.replace(/\0+/, "");

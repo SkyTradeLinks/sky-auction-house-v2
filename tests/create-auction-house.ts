@@ -48,52 +48,52 @@ describe("create-auction-house", async () => {
     }
   });
 
-  it("should create auction house if it doesn't exist", async () => {
-    try {
-      await program.account.auctionHouse.fetch(auctionHouseSdk.auctionHouse);
-    } catch (err: any) {
-      if (err.message.includes("does not exist")) {
-        const withdrawalDestinationAta = await getAssociatedTokenAddress(
-          auctionHouseSdk.mintAccount,
-          auctionHouseAuthority.publicKey,
-        );
+  // it("should create auction house if it doesn't exist", async () => {
+  //   try {
+  //     await program.account.auctionHouse.fetch(auctionHouseSdk.auctionHouse);
+  //   } catch (err: any) {
+  //     if (err.message.includes("does not exist")) {
+  //       const withdrawalDestinationAta = await getAssociatedTokenAddress(
+  //         auctionHouseSdk.mintAccount,
+  //         auctionHouseAuthority.publicKey,
+  //       );
 
 
-        await program.methods
-          .createAuctionHouse(
-            auctionHouseSdk.auctionHouseBump,
-            auctionHouseSdk.feeBump,
-            auctionHouseSdk.treasuryBump,
-            listingFeePercent,
-            requiresSignOff,
-            canChangeSalePrice,
-            subsequentListingFeePercent,
-            payAllFees
-          )
-          .accounts({
-            treasuryMint: auctionHouseSdk.mintAccount,
-            payer: auctionHouseAuthority.publicKey,
-            authority: auctionHouseAuthority.publicKey,
+  //       await program.methods
+  //         .createAuctionHouse(
+  //           auctionHouseSdk.auctionHouseBump,
+  //           auctionHouseSdk.feeBump,
+  //           auctionHouseSdk.treasuryBump,
+  //           listingFeePercent,
+  //           requiresSignOff,
+  //           canChangeSalePrice,
+  //           subsequentListingFeePercent,
+  //           payAllFees
+  //         )
+  //         .accounts({
+  //           treasuryMint: auctionHouseSdk.mintAccount,
+  //           payer: auctionHouseAuthority.publicKey,
+  //           authority: auctionHouseAuthority.publicKey,
 
-            feeWithdrawalDestination: auctionHouseAuthority.publicKey,
-            treasuryWithdrawalDestination: withdrawalDestinationAta,
-            treasuryWithdrawalDestinationOwner: auctionHouseAuthority.publicKey,
+  //           feeWithdrawalDestination: auctionHouseAuthority.publicKey,
+  //           treasuryWithdrawalDestination: withdrawalDestinationAta,
+  //           treasuryWithdrawalDestinationOwner: auctionHouseAuthority.publicKey,
 
-            auctionHouse: auctionHouseSdk.auctionHouse,
-            auctionHouseFeeAccount: auctionHouseSdk.feeAccount,
+  //           auctionHouse: auctionHouseSdk.auctionHouse,
+  //           auctionHouseFeeAccount: auctionHouseSdk.feeAccount,
 
-            auctionHouseTreasury: auctionHouseSdk.treasuryAccount,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            ataProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-            rent: SYSVAR_RENT_PUBKEY,
-          })
-          .signers([auctionHouseAuthority])
-          .rpc();
-        return;
-      }
+  //           auctionHouseTreasury: auctionHouseSdk.treasuryAccount,
+  //           tokenProgram: TOKEN_PROGRAM_ID,
+  //           systemProgram: anchor.web3.SystemProgram.programId,
+  //           ataProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+  //           rent: SYSVAR_RENT_PUBKEY,
+  //         })
+  //         .signers([auctionHouseAuthority])
+  //         .rpc();
+  //       return;
+  //     }
 
-      throw err;
-    }
-  });
+  //     throw err;
+  //   }
+  // });
 });

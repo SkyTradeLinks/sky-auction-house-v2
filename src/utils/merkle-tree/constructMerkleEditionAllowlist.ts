@@ -2,13 +2,13 @@ import {
   chunkArray,
   getCompareByPropertyFunction,
   serializeMerkleProof,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { PublicKey } from "@solana/web3.js";
-import MERKLE_TREE_LEAF_COUNT_LIMIT from "../../constants/MerkleTreeLeafCountLimit";
-import MerkleAllowlistBuyerInfo from "../../types/merkle-tree/MerkleAllowlistBuyerInfo";
-import MerkleAllowlistBuyersList from "../../types/merkle-tree/MerkleAllowlistBuyersList";
-import MerkleAllowlistBuyerWithProof from "../../types/merkle-tree/MerkleAllowlistBuyerWithProof";
-import constructMerkleTree from "../../utils/merkle-tree/constructMerkleTree";
+import MERKLE_TREE_LEAF_COUNT_LIMIT from "constants/MerkleTreeLeafCountLimit";
+import MerkleAllowlistBuyerInfo from "types/merkle-tree/MerkleAllowlistBuyerInfo";
+import MerkleAllowlistBuyersList from "types/merkle-tree/MerkleAllowlistBuyersList";
+import MerkleAllowlistBuyerWithProof from "types/merkle-tree/MerkleAllowlistBuyerWithProof";
+import constructMerkleTree from "utils/merkle-tree/constructMerkleTree";
 
 export default function constructMerkleEditionAllowlist(
   masterEditionMint: PublicKey,

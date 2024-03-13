@@ -1,8 +1,8 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
-import { WALLET_CREATOR } from "../../tests/constants/Wallets";
-import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
-import verifyTradeState from "../../tests/utils/verifyTradeState";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import { WALLET_CREATOR } from "tests/constants/Wallets";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import verifyTradeState from "tests/utils/verifyTradeState";
 
 export default async function resetTradeState(
   sdk: AuctionHouseSdk,

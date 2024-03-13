@@ -1,6 +1,5 @@
-import { Maybe } from "../../../formfunction-program-shared/src";
+import { Maybe } from "@formfunction-hq/formfunction-program-shared";
 import { PublicKey } from "@solana/web3.js";
-import { expect } from "chai";
 
 export default function expectNeqPubkeys(
   pubkey1: Maybe<PublicKey>,

@@ -4,31 +4,31 @@ import {
   findEditionPda,
   getTokenAccountInfo,
   requestAirdrops,
-} from "../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import {
   Edition,
   MasterEditionV2,
 } from "@metaplex-foundation/mpl-token-metadata";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import AuctionHouseSdk from "../solana/auction-house/AuctionHouseSdk";
-import findEditionBuyerInfoAccountPda from "../solana/pdas/findEditionBuyerInfoAccountPda";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import findEditionBuyerInfoAccountPda from "solana/pdas/findEditionBuyerInfoAccountPda";
 import {
   BASIS_POINTS_100_PERCENT,
   BOT_TAX,
-} from "../tests/constants/AuctionHouse";
-import { IS_NATIVE } from "../tests/setup";
-import buyEditionForTest from "../tests/utils/buyEditionForTest";
-import createAuctionHouseHelper from "../tests/utils/createAuctionHouseHelper";
-import expectFunctionToFailWithErrorCode from "../tests/utils/errors/expectFunctionToFailWithErrorCode";
-import expectSlightlyGreaterThan from "../tests/utils/expectSlightlyGreaterThan";
-import expectSlightlyLessThan from "../tests/utils/expectSlightlyLessThan";
-import fundSplTokenAtas from "../tests/utils/fundSplTokenAccount";
-import getBalance from "../tests/utils/getBalance";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getEditionDistributorSetup from "../tests/utils/getEditionDistributorSetup";
-import getProgram from "../tests/utils/getProgram";
-import getTreasuryMint from "../tests/utils/getTreasuryMint";
-import PriceFunctionType from "../types/enum/PriceFunctionType";
+} from "tests/constants/AuctionHouse";
+import { IS_NATIVE } from "tests/setup";
+import buyEditionForTest from "tests/utils/buyEditionForTest";
+import createAuctionHouseHelper from "tests/utils/createAuctionHouseHelper";
+import expectFunctionToFailWithErrorCode from "tests/utils/errors/expectFunctionToFailWithErrorCode";
+import expectSlightlyGreaterThan from "tests/utils/expectSlightlyGreaterThan";
+import expectSlightlyLessThan from "tests/utils/expectSlightlyLessThan";
+import fundSplTokenAtas from "tests/utils/fundSplTokenAccount";
+import getBalance from "tests/utils/getBalance";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getEditionDistributorSetup from "tests/utils/getEditionDistributorSetup";
+import getProgram from "tests/utils/getProgram";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import PriceFunctionType from "types/enum/PriceFunctionType";
 
 const buyerKeypair = Keypair.generate();
 const buyer2Keypair = Keypair.generate();

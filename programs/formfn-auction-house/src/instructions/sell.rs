@@ -76,7 +76,7 @@ pub struct Sell<'info> {
     )]
     free_seller_trade_state: UncheckedAccount<'info>,
     // 9th account, new accounts should go below this to not mess up tx parsing (see parseSellTx.ts in monorepo)
-    token_mint: Account<'info, Mint>,
+    pub token_mint: Account<'info, Mint>,
     token_program: Program<'info, Token>,
     system_program: Program<'info, System>,
     /// CHECK: No need to deserialize.
@@ -95,6 +95,8 @@ pub struct Sell<'info> {
     /// CHECK: No need to deserialize.
     #[account(address = mpl_token_metadata::id())]
     metaplex_token_metadata_program: UncheckedAccount<'info>,
+    /// CHECK: This account is checked in the instruction
+    pub land_merkle_tree: UncheckedAccount<'info>,
 }
 
 pub fn handle_sell<'info>(

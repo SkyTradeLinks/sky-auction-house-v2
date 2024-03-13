@@ -25,10 +25,13 @@ type Accounts = {
   tokenMint: PublicKey;
   treasuryMint: PublicKey;
   walletSeller: PublicKey;
+  landMerkleTree: PublicKey;
+  remainingAccounts: any
 };
 
 type Args = {
   tokenSize?: number;
+  leavesData: any;
 };
 
 
@@ -44,8 +47,10 @@ export default async function auctionHouseSellIx(
     auctionHouse,
     treasuryMint,
     auctionHouseProgramId,
+    landMerkleTree,
+    remainingAccounts
   }: Accounts,
-  { tokenSize = 1 }: Args
+  { tokenSize = 1, leavesData }: Args
 ): Promise<TransactionInstruction> {
   const [tradeState, tradeBump, buyPriceAdjusted] = await getTradeState({
     auctionHouse,
@@ -74,7 +79,8 @@ export default async function auctionHouseSellIx(
       freeTradeBump,
       programAsSignerBump,
       buyPriceAdjusted,
-      new BN(tokenSize)
+      new BN(tokenSize),
+      leavesData
     )
     .accounts({
       auctionHouse,
@@ -92,6 +98,8 @@ export default async function auctionHouseSellIx(
       tokenMint,
       tokenProgram: TOKEN_PROGRAM_ID,
       wallet: walletSeller,
+      landMerkleTree: landMerkleTree
     })
+    .remainingAccounts(remainingAccounts)
     .instruction();
 }

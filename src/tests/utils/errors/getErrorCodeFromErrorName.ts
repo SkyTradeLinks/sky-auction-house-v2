@@ -1,5 +1,5 @@
-import { IDL as AUCTION_HOUSE_IDL } from "../../../idl/AuctionHouse";
-import ProgramErrorName from "../../../tests/constants/ProgramErrorName";
+import { IDL as AUCTION_HOUSE_IDL } from "idl/AuctionHouse";
+import ProgramErrorName from "tests/constants/ProgramErrorName";
 
 export default function getErrorCodeFromErrorName(
   errorName: ProgramErrorName

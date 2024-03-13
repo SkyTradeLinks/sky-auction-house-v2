@@ -1,6 +1,6 @@
 import { BN } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import findAuctionHouseTradeState from "../../solana/pdas/findAuctionHouseTradeState";
+import findAuctionHouseTradeState from "solana/pdas/findAuctionHouseTradeState";
 
 export default async function getTradeState({
   wallet,

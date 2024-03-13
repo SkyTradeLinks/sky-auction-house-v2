@@ -1,21 +1,20 @@
 import {
   getTokenAmount,
   logIfDebug,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import {
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
 } from "@solana/web3.js";
-import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
-import { ZERO_PUBKEY } from "../../tests/constants/AuctionHouse";
-import { WALLET_CREATOR } from "../../tests/constants/Wallets";
-import getBalance from "../../tests/utils/getBalance";
-import getCreatorShareInLamports from "../../tests/utils/getCreatorShareInLamports";
-import getSellerShareInLamports from "../../tests/utils/getSellerShareInLamports";
-import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
-import { expect } from "chai";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import { ZERO_PUBKEY } from "tests/constants/AuctionHouse";
+import { WALLET_CREATOR } from "tests/constants/Wallets";
+import getBalance from "tests/utils/getBalance";
+import getCreatorShareInLamports from "tests/utils/getCreatorShareInLamports";
+import getSellerShareInLamports from "tests/utils/getSellerShareInLamports";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
 
 export default async function executeSale(
   connection: Connection,

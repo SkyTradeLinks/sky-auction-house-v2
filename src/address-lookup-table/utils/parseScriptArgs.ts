@@ -3,9 +3,9 @@ import {
   Maybe,
   MaybeUndef,
   stringToPublicKey,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { PublicKey } from "@solana/web3.js";
-import parseEnvironmentArg from "../../address-lookup-table/utils/parseEnvironmentArg";
+import parseEnvironmentArg from "address-lookup-table/utils/parseEnvironmentArg";
 import yargs from "yargs";
 
 type Options = {

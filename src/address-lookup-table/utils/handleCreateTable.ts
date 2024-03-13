@@ -1,15 +1,15 @@
 import {
   Environment,
   ixToTx,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import {
   AddressLookupTableProgram,
   Connection,
   PublicKey,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import fundPayerKeypair from "../../address-lookup-table/utils/fundPayerKeypair";
-import getAuthorityKeypair from "../../address-lookup-table/utils/getAuthorityKeypair";
+import fundPayerKeypair from "address-lookup-table/utils/fundPayerKeypair";
+import getAuthorityKeypair from "address-lookup-table/utils/getAuthorityKeypair";
 
 export default async function handleCreateTable(
   environment: Environment,

@@ -27,3 +27,4 @@ spl-associated-token-account = { version = "1.1.2", features = [
   "no-entrypoint",
 ] }
 thiserror = "1.0"
+mpl-bubblegum = "1.0.0"

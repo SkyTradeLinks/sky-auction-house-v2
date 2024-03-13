@@ -5,6 +5,7 @@ pub mod edition_distributor;
 pub mod last_bid_price;
 pub mod price_function;
 pub mod trade_state;
+pub mod leaf_data;
 
 pub use auction_house::*;
 pub use edition_allowlist_settings::*;
@@ -13,3 +14,4 @@ pub use edition_distributor::*;
 pub use last_bid_price::*;
 pub use price_function::*;
 pub use trade_state::*;
+pub use leaf_data::*;

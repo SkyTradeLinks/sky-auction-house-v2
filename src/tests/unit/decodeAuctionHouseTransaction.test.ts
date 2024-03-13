@@ -5,19 +5,19 @@ import {
   expectPublicKeysEqual,
   GenericDecodedTransaction,
   uppercaseFirstLetter,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { Connection, PublicKey } from "@solana/web3.js";
-import getAuctionHouseProgramIdForEnvironment from "../../address-lookup-table/addresses/auction-house/getAuctionHouseProgramIdForEnvironment";
-import getRpcFromEnvironment from "../../address-lookup-table/utils/getRpcFromEnvironment";
-import { IDL as AUCTION_HOUSE_IDL } from "../../idl/AuctionHouse";
+import getAuctionHouseProgramIdForEnvironment from "address-lookup-table/addresses/auction-house/getAuctionHouseProgramIdForEnvironment";
+import getRpcFromEnvironment from "address-lookup-table/utils/getRpcFromEnvironment";
+import { IDL as AUCTION_HOUSE_IDL } from "idl/AuctionHouse";
 import TEST_MAINNET_TXIDS, {
   BUY_EDITION_V2_SET,
   CREATE_EDITION_DISTRIBUTOR_SET,
-} from "../../tests/constants/TestMainnetTxids";
+} from "tests/constants/TestMainnetTxids";
 import invariant from "tiny-invariant";
-import AuctionHouseInstructionName from "../../types/AuctionHouseInstructionName";
-import DecodedAuctionHouseTransactionResult from "../../types/DecodedAuctionHouseTransactionResult";
-import decodeAuctionHouseTransaction from "../../utils/decodeAuctionHouseTransaction";
+import AuctionHouseInstructionName from "types/AuctionHouseInstructionName";
+import DecodedAuctionHouseTransactionResult from "types/DecodedAuctionHouseTransactionResult";
+import decodeAuctionHouseTransaction from "utils/decodeAuctionHouseTransaction";
 
 const KNOWN_ACCOUNTS: Record<string, string> = {
   antiBotAuthority: "antiScHGm8NAqfpdFNYbv3c9ntY6xksvvTN3B9cDf5Y",

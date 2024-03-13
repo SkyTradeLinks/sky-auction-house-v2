@@ -1,4 +1,4 @@
-import { WRAPPED_SOL_MINT } from "../../../formfunction-program-shared/src";
+import { WRAPPED_SOL_MINT } from "@formfunction-hq/formfunction-program-shared";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,

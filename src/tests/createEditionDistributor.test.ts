@@ -1,6 +1,6 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import getEditionDistributorSetup from "../tests/utils/getEditionDistributorSetup";
-import PriceFunctionType from "../types/enum/PriceFunctionType";
+import getEditionDistributorSetup from "tests/utils/getEditionDistributorSetup";
+import PriceFunctionType from "types/enum/PriceFunctionType";
 
 describe("create edition distributor tests", () => {
   it("create no params", async () => {

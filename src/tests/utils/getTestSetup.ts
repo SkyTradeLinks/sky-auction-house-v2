@@ -10,7 +10,7 @@ import {
   logIfDebug,
   mintTo,
   requestAirdrops,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { DataV2 } from "@metaplex-foundation/mpl-token-metadata";
 import {
   Connection,
@@ -18,13 +18,13 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
 } from "@solana/web3.js";
-import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
-import createAuctionHouse from "../../tests/utils/createAuctionHouse";
-import fundSplTokenAtas from "../../tests/utils/fundSplTokenAccount";
-import getTestMetadata from "../../tests/utils/getTestMetadata";
-import getTestWallets from "../../tests/utils/getTestWallets";
-import getTreasuryWithdrawalDestination from "../../tests/utils/getTreasuryWithdrawalDestination";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import createAuctionHouse from "tests/utils/createAuctionHouse";
+import fundSplTokenAtas from "tests/utils/fundSplTokenAccount";
+import getTestMetadata from "tests/utils/getTestMetadata";
+import getTestWallets from "tests/utils/getTestWallets";
+import getTreasuryWithdrawalDestination from "tests/utils/getTreasuryWithdrawalDestination";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 export default async function getTestSetup(
   connection: Connection,

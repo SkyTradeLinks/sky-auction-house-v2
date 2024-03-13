@@ -1,10 +1,10 @@
 import {
   Environment,
   sleep,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { Connection, PublicKey } from "@solana/web3.js";
-import AuctionHouseOverrideForTest from "../../address-lookup-table/types/AuctionHouseOverrideForTest";
-import handleExtendTable from "../../address-lookup-table/utils/handleExtendTable";
+import AuctionHouseOverrideForTest from "address-lookup-table/types/AuctionHouseOverrideForTest";
+import handleExtendTable from "address-lookup-table/utils/handleExtendTable";
 
 export default async function extendAddressLookupTableForTest(
   connection: Connection,

@@ -2,15 +2,15 @@ import {
   findEditionPda,
   findTokenMetadataPda,
   TOKEN_METADATA_PROGRAM_ID,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { web3 } from "@project-serum/anchor";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { BN } from "bn.js";
-import getSellerFreeTradeState from "../../solana/auction-house/getSellerFreeTradeState";
-import getTradeState from "../../solana/auction-house/getTradeState";
-import findAuctionHouseProgramAsSigner from "../../solana/pdas/findAuctionHouseProgramAsSigner";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import getSellerFreeTradeState from "solana/auction-house/getSellerFreeTradeState";
+import getTradeState from "solana/auction-house/getTradeState";
+import findAuctionHouseProgramAsSigner from "solana/pdas/findAuctionHouseProgramAsSigner";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;
@@ -18,7 +18,7 @@ type Accounts = {
   authority: PublicKey;
   feeAccount: PublicKey;
   priceInLamports: number;
-  program: any;
+  program: AuctionHouseProgram;
   tokenAccount: PublicKey;
   tokenMint: PublicKey;
   treasuryMint: PublicKey;

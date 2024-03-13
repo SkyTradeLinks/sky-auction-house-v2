@@ -1,16 +1,4 @@
-// import {
-//   createAtaIx,
-//   createTransferAtaIx,
-//   filterNulls,
-//   findAtaPda,
-//   findTokenMetadataPda,
-//   getMasterEditionSupply,
-//   ixsToTx,
-//   ixToTx,
-//   Maybe,
-//   MaybeUndef,
-//   MerkleRoot,
-// } from "../formfunction-program-shared/src";
+
 import * as anchor from "@coral-xyz/anchor";
 // import { createMint } from "@solana/spl-token";
 import {
@@ -31,9 +19,21 @@ import findLastBidPrice from "./pdas/findLastBidPrice";
 import auctionHouseCreateTradeStateIx from "./instructions/auctionHouseCreateTradeStateIx";
 import auctionHouseCreateLastBidPriceIx from "./instructions/auctionHouseCreateLastBidPriceIx";
 import auctionHouseSellIx from "./instructions/auctionHouseSellIx";
-import { ixToTx } from "./program_shared/instructions";
+import { ixToTx, ixsToTx } from "./program_shared/instructions";
 import PdaResult from './types/PdaResult';
 import { BN } from "@coral-xyz/anchor";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import {
+    mintV1,
+    mplBubblegum,
+    createTree,
+    findLeafAssetIdPda,
+    parseLeafFromMintV1Transaction,
+    LeafSchema,
+    getAssetWithProof,
+    transfer,
+    fetchMerkleTree
+} from '@metaplex-foundation/mpl-bubblegum'
 
 
 const SIGNATURE_SIZE = 64;
@@ -53,11 +53,15 @@ export default class AuctionHouseSdk {
 
   public treasuryAccount: anchor.web3.PublicKey;
   public treasuryBump: number;
+  public umi;
 
   constructor(
     public readonly program: anchor.Program<AuctionHouse>,
     private readonly provider: anchor.AnchorProvider
-  ) {}
+  ) {
+    const umi = createUmi(provider.connection.rpcEndpoint).use(mplBubblegum());
+    this.umi = umi
+  }
 
   static async getInstance(
     program: anchor.Program<AuctionHouse>,
@@ -209,6 +213,9 @@ export default class AuctionHouseSdk {
   async sell(
     saleType: SaleType,
     shouldCreateLastBidPriceIfNotExists: boolean,
+    leavesData: any,
+    landMerkleTree: PublicKey,
+    remainingAccounts: any,
     {
       priceInLamports,
       tokenAccount,
@@ -249,9 +256,22 @@ export default class AuctionHouseSdk {
           tokenMint,
           treasuryMint: this.mintAccount,
           walletSeller: wallet,
+          landMerkleTree,
+          remainingAccounts
         },
-        { tokenSize }
+        { tokenSize, leavesData}
       ),
+    ]);
+
+    return ixsToTx([
+      // Executing a sale requires the last_bid_price account to be
+      // created. Thus, we initialize the account during listing if
+      // needed.
+      ...(createLastBidPriceTx == null
+        ? []
+        : createLastBidPriceTx.instructions),
+      tradeStateIx,
+      sellIx,
     ]);
   }
 }

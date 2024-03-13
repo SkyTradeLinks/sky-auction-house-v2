@@ -3,18 +3,18 @@ import {
   Environment,
   forEachAsync,
   ixToTx,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import {
   AddressLookupTableProgram,
   Connection,
   PublicKey,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import getAddressesForEnvironment from "../../address-lookup-table/addresses/getAddressesForEnvironment";
-import AuctionHouseOverrideForTest from "../../address-lookup-table/types/AuctionHouseOverrideForTest";
-import fetchAndPrintAddressLookupTable from "../../address-lookup-table/utils/fetchAndPrintAddressLookupTable";
-import fundPayerKeypair from "../../address-lookup-table/utils/fundPayerKeypair";
-import getAuthorityKeypair from "../../address-lookup-table/utils/getAuthorityKeypair";
+import getAddressesForEnvironment from "address-lookup-table/addresses/getAddressesForEnvironment";
+import AuctionHouseOverrideForTest from "address-lookup-table/types/AuctionHouseOverrideForTest";
+import fetchAndPrintAddressLookupTable from "address-lookup-table/utils/fetchAndPrintAddressLookupTable";
+import fundPayerKeypair from "address-lookup-table/utils/fundPayerKeypair";
+import getAuthorityKeypair from "address-lookup-table/utils/getAuthorityKeypair";
 import invariant from "tiny-invariant";
 
 export default async function handleExtendTable(

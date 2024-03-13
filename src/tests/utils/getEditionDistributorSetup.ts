@@ -11,25 +11,24 @@ import {
   logIfDebug,
   mintTo,
   requestAirdrops,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
-import findEditionDistributor from "../../solana/pdas/findEditionDistributor";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import findEditionDistributor from "solana/pdas/findEditionDistributor";
 import {
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
-} from "../../tests/constants/AuctionHouse";
-import createAuctionHouse from "../../tests/utils/createAuctionHouse";
-import fundSplTokenAtas from "../../tests/utils/fundSplTokenAccount";
-import getConnectionForTest from "../../tests/utils/getConnectionForTest";
-import getEditionDistributorPriceFunction from "../../tests/utils/getEditionDistributorPriceFunction";
-import getProgram from "../../tests/utils/getProgram";
-import getTestMetadata from "../../tests/utils/getTestMetadata";
-import getTreasuryMint from "../../tests/utils/getTreasuryMint";
-import getTreasuryWithdrawalDestination from "../../tests/utils/getTreasuryWithdrawalDestination";
-import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
-import PriceFunctionType from "../../types/enum/PriceFunctionType";
-import { expect } from "chai";
+} from "tests/constants/AuctionHouse";
+import createAuctionHouse from "tests/utils/createAuctionHouse";
+import fundSplTokenAtas from "tests/utils/fundSplTokenAccount";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getEditionDistributorPriceFunction from "tests/utils/getEditionDistributorPriceFunction";
+import getProgram from "tests/utils/getProgram";
+import getTestMetadata from "tests/utils/getTestMetadata";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import getTreasuryWithdrawalDestination from "tests/utils/getTreasuryWithdrawalDestination";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import PriceFunctionType from "types/enum/PriceFunctionType";
 
 const programCreator = Keypair.generate();
 const program = getProgram(programCreator);

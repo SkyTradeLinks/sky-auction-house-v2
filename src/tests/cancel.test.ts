@@ -1,29 +1,28 @@
 import {
   getTokenAccountInfo,
   logIfDebug,
-} from "../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import AuctionHouseSdk from "../solana/auction-house/AuctionHouseSdk";
-import findAuctionHouseProgramAsSigner from "../solana/pdas/findAuctionHouseProgramAsSigner";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import findAuctionHouseProgramAsSigner from "solana/pdas/findAuctionHouseProgramAsSigner";
 import {
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
   BUY_PRICE,
-} from "../tests/constants/AuctionHouse";
-import { WALLET_CREATOR } from "../tests/constants/Wallets";
-import NftTransactionType from "../tests/types/enums/NftTransactionType";
-import buy from "../tests/utils/buy";
-import expectEqPubkeys from "../tests/utils/expectEqPubkeys";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getProgram from "../tests/utils/getProgram";
-import getTestSetup from "../tests/utils/getTestSetup";
-import getTreasuryMint from "../tests/utils/getTreasuryMint";
-import sell from "../tests/utils/sell";
-import getNftTxs from "../tests/utils/txs/getNftTxs";
-import sendTransactionWithWallet from "../tests/utils/txs/sendTransactionWithWallet";
-import verifyDelegateAndFrozen from "../tests/utils/verifyDelegateAndFrozen";
-import SaleType from "../types/enum/SaleType";
-import { expect } from "chai";
+} from "tests/constants/AuctionHouse";
+import { WALLET_CREATOR } from "tests/constants/Wallets";
+import NftTransactionType from "tests/types/enums/NftTransactionType";
+import buy from "tests/utils/buy";
+import expectEqPubkeys from "tests/utils/expectEqPubkeys";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getProgram from "tests/utils/getProgram";
+import getTestSetup from "tests/utils/getTestSetup";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import sell from "tests/utils/sell";
+import getNftTxs from "tests/utils/txs/getNftTxs";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import verifyDelegateAndFrozen from "tests/utils/verifyDelegateAndFrozen";
+import SaleType from "types/enum/SaleType";
 
 let tokenMint: PublicKey;
 let tokenAccount: PublicKey;
@@ -41,7 +40,7 @@ const connection = getConnectionForTest();
 const programCreator = getProgram(WALLET_CREATOR);
 
 describe("cancel tests", () => {
-  before(async () => {
+  beforeAll(async () => {
     [
       auctionHouseSdk,
       _buyerTokenAccount,

@@ -2,13 +2,13 @@ import {
   chunkArray,
   forEachAsync,
   randomNumberInRange,
-} from "../../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import AuctionHouseSdk from "../../solana/auction-house/AuctionHouseSdk";
-import APPEND_MERKLE_ROOTS_LIMIT_PER_TX from "../../tests/constants/AppendMerkleRootsLimitPerTx";
-import sendTransactionWithWallet from "../../tests/utils/txs/sendTransactionWithWallet";
-import MerkleAllowlistBuyersList from "../../types/merkle-tree/MerkleAllowlistBuyersList";
-import constructMerkleEditionAllowlist from "../../utils/merkle-tree/constructMerkleEditionAllowlist";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import APPEND_MERKLE_ROOTS_LIMIT_PER_TX from "tests/constants/AppendMerkleRootsLimitPerTx";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import MerkleAllowlistBuyersList from "types/merkle-tree/MerkleAllowlistBuyersList";
+import constructMerkleEditionAllowlist from "utils/merkle-tree/constructMerkleEditionAllowlist";
 
 export default async function createEditionAllowlist({
   auctionHouseSdk,

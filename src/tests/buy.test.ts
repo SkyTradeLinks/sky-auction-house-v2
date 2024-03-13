@@ -1,30 +1,30 @@
-import { ixToTx, transfer } from "../../formfunction-program-shared/src";
+import { ixToTx, transfer } from "@formfunction-hq/formfunction-program-shared";
 import { DataV2 } from "@metaplex-foundation/mpl-token-metadata";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import dayjs from "dayjs";
-import AuctionHouseSdk from "../solana/auction-house/AuctionHouseSdk";
-import auctionHouseSetLastBidPriceIx from "../solana/instructions/auctionHouseSetLastBidPriceIx";
-import findLastBidPrice from "../solana/pdas/findLastBidPrice";
+import AuctionHouseSdk from "solana/auction-house/AuctionHouseSdk";
+import auctionHouseSetLastBidPriceIx from "solana/instructions/auctionHouseSetLastBidPriceIx";
+import findLastBidPrice from "solana/pdas/findLastBidPrice";
 import {
   BASIS_POINTS,
   BASIS_POINTS_SECONDARY,
   ZERO_PUBKEY,
-} from "../tests/constants/AuctionHouse";
-import { WALLET_CREATOR } from "../tests/constants/Wallets";
-import NftTransactionType from "../tests/types/enums/NftTransactionType";
-import buy from "../tests/utils/buy";
-import expectFunctionToFailWithErrorCode from "../tests/utils/errors/expectFunctionToFailWithErrorCode";
-import expectTransactionToFailWithErrorCode from "../tests/utils/errors/expectTransactionToFailWithErrorCode";
-import executeSale from "../tests/utils/executeSale";
-import getBuyerEscrowLamports from "../tests/utils/getBuyerEscrowLamports";
-import getConnectionForTest from "../tests/utils/getConnectionForTest";
-import getProgram from "../tests/utils/getProgram";
-import getTestSetup from "../tests/utils/getTestSetup";
-import getTreasuryMint from "../tests/utils/getTreasuryMint";
-import sell from "../tests/utils/sell";
-import getNftTxs from "../tests/utils/txs/getNftTxs";
-import sendTransactionWithWallet from "../tests/utils/txs/sendTransactionWithWallet";
-import SaleType from "../types/enum/SaleType";
+} from "tests/constants/AuctionHouse";
+import { WALLET_CREATOR } from "tests/constants/Wallets";
+import NftTransactionType from "tests/types/enums/NftTransactionType";
+import buy from "tests/utils/buy";
+import expectFunctionToFailWithErrorCode from "tests/utils/errors/expectFunctionToFailWithErrorCode";
+import expectTransactionToFailWithErrorCode from "tests/utils/errors/expectTransactionToFailWithErrorCode";
+import executeSale from "tests/utils/executeSale";
+import getBuyerEscrowLamports from "tests/utils/getBuyerEscrowLamports";
+import getConnectionForTest from "tests/utils/getConnectionForTest";
+import getProgram from "tests/utils/getProgram";
+import getTestSetup from "tests/utils/getTestSetup";
+import getTreasuryMint from "tests/utils/getTreasuryMint";
+import sell from "tests/utils/sell";
+import getNftTxs from "tests/utils/txs/getNftTxs";
+import sendTransactionWithWallet from "tests/utils/txs/sendTransactionWithWallet";
+import SaleType from "types/enum/SaleType";
 
 let tokenMint: PublicKey;
 let tokenAccount: PublicKey;

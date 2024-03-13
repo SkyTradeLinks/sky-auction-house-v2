@@ -1,5 +1,5 @@
-import { MaybeUndef } from "../../../formfunction-program-shared/src";
-import NftTransactionType from "../../tests/types/enums/NftTransactionType";
+import { MaybeUndef } from "@formfunction-hq/formfunction-program-shared";
+import NftTransactionType from "tests/types/enums/NftTransactionType";
 
 type NftTransaction = {
   blockTime: MaybeUndef<number>;

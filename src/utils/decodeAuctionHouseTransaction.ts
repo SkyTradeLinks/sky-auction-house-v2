@@ -1,10 +1,10 @@
 import {
   decodeTransactionUsingProgramIdl,
   Maybe,
-} from "../../formfunction-program-shared/src";
+} from "@formfunction-hq/formfunction-program-shared";
 import { ParsedTransactionWithMeta, PublicKey } from "@solana/web3.js";
-import AUCTION_HOUSE_PROGRAM_IDLS from "../idl/AuctionHouseProgramIdls";
-import DecodedAuctionHouseTransactionResult from "../types/DecodedAuctionHouseTransactionResult";
+import AUCTION_HOUSE_PROGRAM_IDLS from "idl/AuctionHouseProgramIdls";
+import DecodedAuctionHouseTransactionResult from "types/DecodedAuctionHouseTransactionResult";
 
 export default function decodeAuctionHouseTransaction(
   programId: PublicKey,

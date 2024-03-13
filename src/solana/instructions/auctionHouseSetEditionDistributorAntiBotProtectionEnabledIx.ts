@@ -1,6 +1,6 @@
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import findEditionDistributor from "../../solana/pdas/findEditionDistributor";
-import AuctionHouseProgram from "../../types/AuctionHouseProgram";
+import findEditionDistributor from "solana/pdas/findEditionDistributor";
+import AuctionHouseProgram from "types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;
