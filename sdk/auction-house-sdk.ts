@@ -239,6 +239,7 @@ export class AuctionHouseSdk {
     previousBidder: anchor.web3.PublicKey,
     lastBidPrice: anchor.web3.PublicKey,
     buyerAta: anchor.web3.PublicKey,
+    leafIndex: number,
     saleType: SaleType
   ) {
     const tx = new anchor.web3.Transaction();
@@ -263,13 +264,15 @@ export class AuctionHouseSdk {
         this.program.programId
       );
 
-    const [previousBidderEscrowPaymentAccount, previousBidderEscrowBump] =
-      findAuctionHouseBidderEscrowAccount(
-        this.auctionHouse,
-        previousBidder,
-        merkleTree,
-        this.program.programId
-      );
+    const [
+      previousBidderEscrowPaymentAccount,
+      previousBidderEscrowPaymentBump,
+    ] = findAuctionHouseBidderEscrowAccount(
+      this.auctionHouse,
+      previousBidder,
+      merkleTree,
+      this.program.programId
+    );
 
     let previousBidderRefundAccount = getAssociatedTokenAddressSync(
       this.mintAccount,
@@ -296,8 +299,9 @@ export class AuctionHouseSdk {
           tradeStateBump,
           escrowBump,
           normalizedPrice,
+          new anchor.BN(leafIndex),
           null,
-          previousBidderEscrowBump
+          previousBidderEscrowPaymentBump
         )
         .accounts({
           wallet: buyer,
@@ -333,6 +337,7 @@ export class AuctionHouseSdk {
     merkleTree: anchor.web3.PublicKey,
     buyerAta: anchor.web3.PublicKey,
     price: number,
+    leafIndex: number,
     saleType: SaleType
   ) {
     const [lastBidPrice] = this.findLastBidPrice(assetId);
@@ -357,25 +362,10 @@ export class AuctionHouseSdk {
       lastBidInfo.bidder,
       lastBidPrice,
       buyerAta,
+      leafIndex,
       saleType
     );
 
-    let a = await this.provider.connection.getAccountInfo(this.feeAccount);
-
     await this.sendTx(buyTx, [buyer]);
-
-    const [escrowPaymentAccount, escrowBump] =
-      findAuctionHouseBidderEscrowAccount(
-        this.auctionHouse,
-        buyer.publicKey,
-        merkleTree,
-        this.program.programId
-      );
-
-    // console.log(
-    //   await this.provider.connection.getBalance(escrowPaymentAccount)
-    // );
-
-    console.log(lastBidInfo);
   }
 }

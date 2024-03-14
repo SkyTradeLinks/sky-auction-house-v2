@@ -32,11 +32,13 @@ pub fn handle_set_previous_bidder<'info>(
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
 
     let last_bid_price = &mut ctx.accounts.last_bid_price;
-    assert_valid_last_bid_price(
-        &last_bid_price.to_account_info(),
-        ctx.program_id,
-        &token_mint.key(),
-    )?;
+
+    // fix
+    // assert_valid_last_bid_price(
+    //     &last_bid_price.to_account_info(),
+    //     ctx.program_id,
+    //     &token_mint.key(),
+    // )?;
 
     match bidder {
         None => {

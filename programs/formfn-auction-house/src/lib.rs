@@ -156,6 +156,7 @@ pub mod auction_house {
         trade_state_bump: u8,
         escrow_payment_bump: u8,
         buyer_price: u64,
+        leaf_index: u64,
         // Unix time (seconds since epoch)
         auction_end_time: Option<i64>,
         previous_bidder_escrow_payment_bump: u8,
@@ -165,6 +166,7 @@ pub mod auction_house {
             trade_state_bump,
             escrow_payment_bump,
             buyer_price,
+            leaf_index,
             auction_end_time,
             previous_bidder_escrow_payment_bump,
         )

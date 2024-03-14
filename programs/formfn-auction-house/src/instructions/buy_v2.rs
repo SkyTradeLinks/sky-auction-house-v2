@@ -13,7 +13,7 @@ use crate::{
 
 // Supports on-chain refunds
 #[derive(Accounts)]
-#[instruction(trade_state_bump: u8, escrow_payment_bump: u8, buyer_price: u64, auction_end_time: Option<i64>, previous_bidder_escrow_payment_bump: u8)]
+#[instruction(trade_state_bump: u8, escrow_payment_bump: u8, buyer_price: u64, auction_end_time: Option<i64>, leaf_index: u64, previous_bidder_escrow_payment_bump: u8)]
 pub struct BuyV2<'info> {
     #[account(mut)]
     wallet: Signer<'info>,
@@ -26,7 +26,10 @@ pub struct BuyV2<'info> {
 
     /// CHECK: No need to deserialize.
     asset_id: UncheckedAccount<'info>,
-    
+
+    /// CHECK: No need to deserialize.
+    merkle_tree: UncheckedAccount<'info>,
+
     /// CHECK: No need to deserialize.
     #[account(
         mut,
@@ -79,28 +82,32 @@ pub struct BuyV2<'info> {
         bump = trade_state_bump
     )]
     buyer_trade_state: UncheckedAccount<'info>,
-    /// CHECK: No need to deserialize.
-    merkle_tree: UncheckedAccount<'info>,
+
     #[account(mut)]
     last_bid_price: Box<Account<'info, LastBidPrice>>,
+
     token_program: Program<'info, Token>,
     system_program: Program<'info, System>,
+
     rent: Sysvar<'info, Rent>,
     clock: Sysvar<'info, Clock>,
+
     /// CHECK: No need to deserialize.
     previous_bidder_wallet: UncheckedAccount<'info>,
+
     /// CHECK: No need to deserialize.
     #[account(
         mut,
         seeds = [
             PREFIX.as_bytes(),
-            auction_house.key().as_ref(), 
+            auction_house.key().as_ref(),
             previous_bidder_wallet.key().as_ref(),
             merkle_tree.key().as_ref()
         ],
         bump = previous_bidder_escrow_payment_bump
     )]
     previous_bidder_escrow_payment_account: UncheckedAccount<'info>,
+
     /// CHECK: No need to deserialize.
     #[account(mut)]
     previous_bidder_refund_account: UncheckedAccount<'info>,
@@ -112,6 +119,7 @@ pub fn handle_buy_v2<'info>(
     trade_state_bump: u8,
     escrow_payment_bump: u8,
     buyer_price: u64,
+    leaf_index: u64,
     // Unix time (seconds since epoch)
     auction_end_time: Option<i64>,
     previous_bidder_escrow_payment_bump: u8,
@@ -138,15 +146,14 @@ pub fn handle_buy_v2<'info>(
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
 
+    assert_valid_nft(&asset_id.key(), &merkle_tree.key(), leaf_index)?;
 
-    // validate ownership (assetid is part of merkle_tree?)
-
-    // fix
-    // assert_valid_last_bid_price(
-    //     &last_bid_price.to_account_info(),
-    //     ctx.program_id,
-    //     &token_mint.key(),
-    // )?;
+    assert_valid_last_bid_price(
+        ctx.program_id,
+        &last_bid_price.to_account_info(),
+        &auction_house.key(),
+        &asset_id.key(),
+    )?;
 
     let is_native = treasury_mint.key() == spl_token::native_mint::id();
     let previous_bidder_wallet = &ctx.accounts.previous_bidder_wallet;
@@ -168,9 +175,6 @@ pub fn handle_buy_v2<'info>(
             }
         }
     }
-
-
-    
 
     let auction_house_key = auction_house.key();
     let seeds = [
@@ -247,12 +251,10 @@ pub fn handle_buy_v2<'info>(
         )?;
     }
 
-    // assert_metadata_valid(metadata, token_account)?;
-
     let ts_info = buyer_trade_state.to_account_info();
     if ts_info.data_is_empty() {
         let wallet_key = wallet.key();
-        
+
         let asset_id_key = asset_id.key;
         let ts_seeds = [
             PREFIX.as_bytes(),
@@ -310,24 +312,23 @@ pub fn handle_buy_v2<'info>(
                             return Err(AuctionHouseError::PreviousBidderIncorrect.into());
                         }
 
-                        // fix
-                        // withdraw_helper(
-                        //     previous_bidder_wallet,
-                        //     previous_bidder_refund_account,
-                        //     previous_bidder_escrow_payment_account,
-                        //     authority,
-                        //     auction_house,
-                        //     auction_house_fee_account,
-                        //     &treasury_mint.to_account_info(),
-                        //     token_mint,
-                        //     system_program,
-                        //     token_program,
-                        //     ata_program,
-                        //     rent,
-                        //     previous_bidder_escrow_payment_bump,
-                        //     last_bid_price.price,
-                        //     false,
-                        // )?;
+                        withdraw_helper(
+                            previous_bidder_wallet,
+                            previous_bidder_refund_account,
+                            previous_bidder_escrow_payment_account,
+                            authority,
+                            auction_house,
+                            auction_house_fee_account,
+                            &treasury_mint.to_account_info(),
+                            merkle_tree,
+                            system_program,
+                            token_program,
+                            ata_program,
+                            rent,
+                            previous_bidder_escrow_payment_bump,
+                            last_bid_price.price,
+                            false,
+                        )?;
                     }
                 }
 
@@ -369,24 +370,23 @@ pub fn handle_buy_v2<'info>(
                     return Err(AuctionHouseError::PreviousBidderIncorrect.into());
                 }
 
-                // fix
-                // withdraw_helper(
-                //     previous_bidder_wallet,
-                //     previous_bidder_refund_account,
-                //     previous_bidder_escrow_payment_account,
-                //     authority,
-                //     auction_house,
-                //     auction_house_fee_account,
-                //     &treasury_mint.to_account_info(),
-                //     token_mint,
-                //     system_program,
-                //     token_program,
-                //     ata_program,
-                //     rent,
-                //     previous_bidder_escrow_payment_bump,
-                //     last_bid_price.price,
-                //     false,
-                // )?;
+                withdraw_helper(
+                    previous_bidder_wallet,
+                    previous_bidder_refund_account,
+                    previous_bidder_escrow_payment_account,
+                    authority,
+                    auction_house,
+                    auction_house_fee_account,
+                    &treasury_mint.to_account_info(),
+                    merkle_tree,
+                    system_program,
+                    token_program,
+                    ata_program,
+                    rent,
+                    previous_bidder_escrow_payment_bump,
+                    last_bid_price.price,
+                    false,
+                )?;
             }
         }
 

@@ -31,11 +31,13 @@ pub fn handle_set_has_been_sold<'info>(
     let token_mint = &ctx.accounts.token_mint;
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
-    assert_valid_last_bid_price(
-        &last_bid_price.to_account_info(),
-        ctx.program_id,
-        &token_mint.key(),
-    )?;
+
+    // fix
+    // assert_valid_last_bid_price(
+    //     &last_bid_price.to_account_info(),
+    //     ctx.program_id,
+    //     &token_mint.key(),
+    // )?;
 
     last_bid_price.has_been_sold = match has_been_sold {
         false => 0,

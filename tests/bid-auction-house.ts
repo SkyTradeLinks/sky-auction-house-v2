@@ -2,8 +2,16 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AuctionHouse } from "../target/types/auction_house";
 import { AuctionHouseSdk } from "../sdk/auction-house-sdk";
-import { loadKeyPair, setupAirDrop } from "../sdk/utils/helper";
-import { getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import {
+  findAuctionHouseBidderEscrowAccount,
+  loadKeyPair,
+  setupAirDrop,
+} from "../sdk/utils/helper";
+import {
+  getAssociatedTokenAddress,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+} from "@solana/spl-token";
 import { auctionHouseAuthority } from "../sdk/utils/constants";
 import { findLeafAssetIdPda } from "@metaplex-foundation/mpl-bubblegum";
 import { publicKey } from "@metaplex-foundation/umi";
@@ -61,14 +69,15 @@ describe("bid-auction-house", async () => {
   // fund mint account with dev-usdc
 
   it("should make an offer on un-listed asset", async () => {
+    let leafIndex = 0;
     // dummy nft created
     const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
       merkleTree: publicKey(landMerkleTree),
-      leafIndex: 0,
+      leafIndex,
     });
 
     // USD
-    let cost = 2;
+    let cost = 22;
 
     await auctionHouseSdk.buy(
       bidder,
@@ -76,8 +85,32 @@ describe("bid-auction-house", async () => {
       landMerkleTree,
       bidderAta.address,
       cost,
+      leafIndex,
       SaleType.Offer
     );
+
+    const [escrowPaymentAccount, escrowBump] =
+      findAuctionHouseBidderEscrowAccount(
+        auctionHouseSdk.auctionHouse,
+        bidder.publicKey,
+        landMerkleTree,
+        program.programId
+      );
+
+    let acc = await getAssociatedTokenAddress(
+      auctionHouseSdk.mintAccount,
+      bidder.publicKey
+    );
+
+    let acc_balance = await provider.connection.getTokenAccountBalance(acc);
+
+    console.log(acc_balance);
+
+    // // console.log(
+    // //   await this.provider.connection.getBalance(escrowPaymentAccount)
+    // // );
+
+    // console.log(lastBidInfo);
 
     try {
     } catch (err: any) {}

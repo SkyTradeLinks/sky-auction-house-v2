@@ -195,11 +195,13 @@ pub fn handle_execute_sale_v2<'info>(
     let rent = &ctx.accounts.rent;
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
-    assert_valid_last_bid_price(
-        &last_bid_price.to_account_info(),
-        ctx.program_id,
-        &token_mint.key(),
-    )?;
+
+    // fix
+    // assert_valid_last_bid_price(
+    //     &last_bid_price.to_account_info(),
+    //     ctx.program_id,
+    //     &token_mint.key(),
+    // )?;
 
     let metadata_clone = metadata.to_account_info();
     let escrow_clone = escrow_payment_account.to_account_info();

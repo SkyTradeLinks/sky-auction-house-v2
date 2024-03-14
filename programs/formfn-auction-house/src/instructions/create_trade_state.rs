@@ -70,8 +70,6 @@ pub fn handle_create_trade_state<'info>(
 ) -> Result<()> {
     let wallet = &ctx.accounts.wallet;
     let authority = &ctx.accounts.authority;
-    // let token_mint = &ctx.accounts.token_mint;
-    // let token_account = &ctx.accounts.token_account;
 
     let asset_id = &ctx.accounts.asset_id;
     let merkle_tree = &ctx.accounts.merkle_tree;
@@ -90,7 +88,9 @@ pub fn handle_create_trade_state<'info>(
         Err(_err) => TRADE_STATE_SIZE,
     };
 
-    // // validate ownership (assetid is part of merkle_tree?)
+    //  validate ownership (assetid is part of merkle_tree?)
+
+    // assert_valid_nft(&asset_id.key(), &merkle_tree.key(), leaf_index)?;
 
     if !wallet.to_account_info().is_signer && !authority.to_account_info().is_signer {
         return Err(AuctionHouseError::NoValidSignerPresent.into());

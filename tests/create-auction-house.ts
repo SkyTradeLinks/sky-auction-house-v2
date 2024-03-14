@@ -24,8 +24,10 @@ describe("create-auction-house", async () => {
     auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
   });
 
+  // 1% goes to authority
   const listingFeePercent = (1 / 100) * 100;
   const subsequentListingFeePercent = (1 / 100) * 100;
+  
   const requiresSignOff = true;
   const canChangeSalePrice = false;
   const payAllFees = true;

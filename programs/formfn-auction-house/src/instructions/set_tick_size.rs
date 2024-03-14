@@ -47,11 +47,13 @@ pub fn handle_set_tick_size<'info>(
     let treasury_mint = &ctx.accounts.treasury_mint;
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
-    assert_valid_last_bid_price(
-        &last_bid_price.to_account_info(),
-        ctx.program_id,
-        &token_account.mint,
-    )?;
+
+    // fix
+    // assert_valid_last_bid_price(
+    //     &last_bid_price.to_account_info(),
+    //     ctx.program_id,
+    //     &token_account.mint,
+    // )?;
 
     if !owner.to_account_info().is_signer && !authority.to_account_info().is_signer {
         return Err(AuctionHouseError::NoValidSignerPresent.into());
