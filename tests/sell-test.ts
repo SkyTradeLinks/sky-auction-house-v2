@@ -29,9 +29,11 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
   createAccount,
-  createMint,
+    createMint,
+  createMultisig,
     getAssociatedTokenAddress,
-  getAssociatedTokenAddressSync
+    getAssociatedTokenAddressSync,
+  getOrCreateAssociatedTokenAccount
 } from "@solana/spl-token";
 import { SYSVAR_RENT_PUBKEY, Keypair, LAMPORTS_PER_SOL} from "@solana/web3.js";
 
@@ -42,11 +44,11 @@ import SaleType from "../sdk/types/SaleType";
 
 
 describe("Sell test Auction", async () => {
-    const endpoint = "https://api.devnet.solana.com";
+    const endpoint = "https://devnet.helius-rpc.com/?api-key=887524e6-92b0-4f96-973c-b37a53a9cfe4";
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
-    // const connection = provider.connection;
-    const connection = new anchor.web3.Connection(endpoint);
+    const connection = provider.connection;
+    // const connection = new anchor.web3.Connection(endpoint);
     // provider.connection = connection;
     // const umi = createUmi(provider.connection.rpcEndpoint).use(mplBubblegum());
     // const umi = createUmi(endpoint).use(mplBubblegum());
@@ -65,26 +67,22 @@ describe("Sell test Auction", async () => {
 
     let auctionHouseSdk: AuctionHouseSdk;
 
-    
+    let asset_id;
     
     
     before(async () => {
         auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
-        const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
-            merkleTree: publicKey(landMerkleTree),
-            leafIndex: 0,
-        });
-        const rpcAsset = await auctionHouseSdk.umi.rpc.getAsset(assetId)
 
-        console.log("AssetId", assetId)
-        console.log("Rpc-Asset", rpcAsset)
+        
+
        
 
         
     });
 
-    it("Should Sell", async () => {
+    it("should successfully mint rental token and sell", async () => {
         let land_nfts = [0];
+        
 
         let leavesData = [];
         let accountsToPass = [];
@@ -95,6 +93,7 @@ describe("Sell test Auction", async () => {
                 merkleTree: publicKey(landMerkleTree),
                 leafIndex: nft_index,
             });
+            
             let assetWithProof;
             try {
                 assetWithProof = await getAssetWithProof(auctionHouseSdk.umi, assetId);
@@ -102,8 +101,8 @@ describe("Sell test Auction", async () => {
             
             } catch (error) {
                 if (error.message.includes("Asset not found")) { 
-                    await mintV1(auctionHouseSdk.umi, {
-                        leafOwner: publicKey(landOwner),
+                    const tx = await mintV1(auctionHouseSdk.umi, {
+                        leafOwner: publicKey(seller.publicKey),
                         merkleTree: publicKey(landMerkleTree),
                         metadata: {
                             name: "Land NFT",
@@ -120,11 +119,23 @@ describe("Sell test Auction", async () => {
                             tokenStandard: TokenStandard.NonFungible,
                         },
                     }).sendAndConfirm(auctionHouseSdk.umi);
+                    console.log("CNFT MINT TX", tx)
+                    const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
+                        merkleTree: publicKey(landMerkleTree),
+                        leafIndex: 0,
+                    });
+                    asset_id = assetId;
+
+                    const rpcAsset = await auctionHouseSdk.umi.rpc.getAsset(assetId)
+
+                    console.log("AssetId", assetId)
+                    console.log("Rpc-Asset", rpcAsset)
 
                     assetWithProof = await getAssetWithProof(auctionHouseSdk.umi, assetId);
                 }
             }
             owner = new anchor.web3.PublicKey(assetWithProof.leafOwner);
+            console.log("Owner", owner)
 
             let leafData = {
                 leafIndex: new anchor.BN(assetWithProof.index),
@@ -148,17 +159,23 @@ describe("Sell test Auction", async () => {
 
             // Push Owner
             accountsToPass.push({
-                pubkey: owner,
+                pubkey: seller.publicKey,
                 isSigner: false,
                 isWritable: true,
             });
-            let owner_ata = getAssociatedTokenAddressSync(auctionHouseSdk.mintAccount, owner);
+            // let owner_ata = getAssociatedTokenAddressSync(auctionHouseSdk.mintAccount, owner);
 
-            accountsToPass.push({
-                pubkey: owner_ata,
-                isSigner: false,
-                isWritable: true,
-            });
+            // accountsToPass.push({
+            //     pubkey: owner_ata,
+            //     isSigner: false,
+            //     isWritable: true,
+            // });
+
+            // accountsToPass.push({
+            //     pubkey: landMerkleTree,
+            //     isSigner: false,
+            //     isWritable: true,
+            // });
 
            
             
@@ -166,18 +183,19 @@ describe("Sell test Auction", async () => {
         
 
 
-        const tokenAddress = await getAssociatedTokenAddress(
+        const tokenAccount = await getOrCreateAssociatedTokenAccount(
+            connection,
+            seller,
             auctionHouseSdk.mintAccount,
-            auctionHouseAuthority.publicKey,
-            true,
-            TOKEN_PROGRAM_ID,
-            ASSOCIATED_TOKEN_PROGRAM_ID 
+            owner.publicKey
         );
-        const tx = await auctionHouseSdk.sell(SaleType.Auction, true, leavesData, landMerkleTree, accountsToPass, {
+        
+        const tx = await auctionHouseSdk.sell(SaleType.Auction, true, accountsToPass, {
             priceInLamports: BUY_PRICE * LAMPORTS_PER_SOL,
-            tokenAccount: tokenAddress,
-            tokenMint: auctionHouseSdk.mintAccount,
-            wallet: owner.publicKey
+            merkleTree: landMerkleTree,
+            paymentAccount: new anchor.web3.PublicKey(tokenAccount),
+            assetId: new anchor.web3.PublicKey(asset_id),
+            wallet: seller
     
         }, {
             tokenSize: 1,
@@ -189,36 +207,36 @@ describe("Sell test Auction", async () => {
 
     })
 
-    it("should successfully mint rental token and sell", async () => {
+    // it("should successfully mint rental token and sell", async () => {
 
-        // console.log("UMI", umi)
-        // const merkleTree = generateSigner(umi)
-        // const customTreeCreator = generateSigner(umi)
+    //     // console.log("UMI", umi)
+    //     // const merkleTree = generateSigner(umi)
+    //     // const customTreeCreator = generateSigner(umi)
 
 
-        // const assetWithProof = await getAssetWithProof(umi, assetId)
-        // await transfer(umi, {
-        // ...assetWithProof,
-        // leafOwner: currentLeafOwner,
-        // newLeafOwner: seller.publicKey,
-        // }).sendAndConfirm(umi)
+    //     // const assetWithProof = await getAssetWithProof(umi, assetId)
+    //     // await transfer(umi, {
+    //     // ...assetWithProof,
+    //     // leafOwner: currentLeafOwner,
+    //     // newLeafOwner: seller.publicKey,
+    //     // }).sendAndConfirm(umi)
 
         
-        // const tokenAddress = await getAssociatedTokenAddress(
-        //         auctionHouseSdk.mintAccount,
-        //         auctionHouseAuthority.publicKey,
-        //         true,
-        //         TOKEN_PROGRAM_ID,
-        //         ASSOCIATED_TOKEN_PROGRAM_ID 
-        // );
+    //     // const tokenAddress = await getAssociatedTokenAddress(
+    //     //         auctionHouseSdk.mintAccount,
+    //     //         auctionHouseAuthority.publicKey,
+    //     //         true,
+    //     //         TOKEN_PROGRAM_ID,
+    //     //         ASSOCIATED_TOKEN_PROGRAM_ID 
+    //     // );
         
 
-        // await createAccount(connection,
-        //     seller,
-        //     auctionHouseSdk.mintAccount,
-        //     seller.publicKey,
-        // )
+    //     // await createAccount(connection,
+    //     //     seller,
+    //     //     auctionHouseSdk.mintAccount,
+    //     //     seller.publicKey,
+    //     // )
       
-    });
+    // });
 
 });

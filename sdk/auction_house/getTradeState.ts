@@ -1,34 +1,35 @@
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey , Signer} from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
 import findAuctionHouseTradeState from "../pdas/findAuctionHouseTradeState";
 
 export default async function getTradeState({
   wallet,
-  tokenAccount,
-  tokenMint,
+  merkleTree,
   priceInLamports,
   auctionHouse,
-  treasuryMint,
+  // treasuryMint,
+  assetId,
   auctionHouseProgramId,
   tokenSize = 1,
 }: {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
   priceInLamports: number;
-  tokenAccount: PublicKey;
-  tokenMint: PublicKey;
+  assetId: PublicKey;
+  // tokenMint: PublicKey;
+  merkleTree: PublicKey;
   tokenSize?: number;
-  treasuryMint: PublicKey;
-  wallet: PublicKey;
+  // treasuryMint: PublicKey;
+  wallet: Signer;
 }): Promise<[PublicKey, number, BN]> {
   const priceAdjusted = new BN(priceInLamports);
 
   const [tradeState, tradeStateBump] = findAuctionHouseTradeState(
     auctionHouse,
     wallet,
-    tokenAccount,
-    treasuryMint,
-    tokenMint,
+    // treasuryMint,
+    merkleTree,
+    assetId,
     new BN(tokenSize),
     priceAdjusted,
     auctionHouseProgramId

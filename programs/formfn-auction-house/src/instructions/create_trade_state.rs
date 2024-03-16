@@ -12,10 +12,16 @@ pub struct CreateTradeState<'info> {
     /// CHECK: No need to deserialize.
     authority: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
-    wallet: UncheckedAccount<'info>,
-    token_mint: Account<'info, Mint>,
-    #[account(owner=token::ID)]
-    token_account: Account<'info, TokenAccount>,
+    wallet: Signer<'info>,
+    /// CHECK: No need to deserialize.
+    asset_id: UncheckedAccount<'info>,
+    // token_mint: Account<'info, Mint>,
+    treasury_mint: Account<'info, Mint>,
+    // #[account(owner=token::ID)]
+    // token_account: UncheckedAccount<'info>,
+    /// CHECK: No need to deserialize.
+    #[account(mut)]
+    payment_account: UncheckedAccount<'info>,
     #[account(
         has_one = authority,
         has_one = auction_house_fee_account,
@@ -39,20 +45,22 @@ pub struct CreateTradeState<'info> {
     )]
     auction_house_fee_account: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
+    merkle_tree: UncheckedAccount<'info>,
+    /// CHECK: No need to deserialize.
     #[account(
         mut,
         seeds = [
             PREFIX.as_bytes(),
             wallet.key().as_ref(),
             auction_house.key().as_ref(),
-            token_account.key().as_ref(),
-            auction_house.treasury_mint.as_ref(),
-            token_mint.key().as_ref(),
+            merkle_tree.key().as_ref(),
+            // treasury_mint.as_ref(),
+            asset_id.key().as_ref(),
             &buyer_price.to_le_bytes(),
             &token_size.to_le_bytes()
         ],
         bump = trade_state_bump
-    )]
+    )]  
     trade_state: UncheckedAccount<'info>,
     system_program: Program<'info, System>,
     rent: Sysvar<'info, Rent>,
@@ -68,8 +76,11 @@ pub fn handle_create_trade_state<'info>(
 ) -> Result<()> {
     let wallet = &ctx.accounts.wallet;
     let authority = &ctx.accounts.authority;
-    let token_mint = &ctx.accounts.token_mint;
-    let token_account = &ctx.accounts.token_account;
+    // let token_mint = &ctx.accounts.token_mint;
+    // let token_account = &ctx.accounts.token_account;
+    let payment_account = &ctx.accounts.payment_account;
+    let asset_id = &ctx.accounts.asset_id;
+    let treasury_mint = &ctx.accounts.treasury_mint;
     let auction_house = &ctx.accounts.auction_house;
     let auction_house_fee_account = &ctx.accounts.auction_house_fee_account;
     let trade_state = &mut ctx.accounts.trade_state;
@@ -84,12 +95,16 @@ pub fn handle_create_trade_state<'info>(
         Err(_err) => TRADE_STATE_SIZE,
     };
 
-    assert_keys_equal(token_mint.key(), token_account.mint)?;
+    // assert_keys_equal(token_mint.key(), token_account.mint)?;
+    assert_keys_equal(treasury_mint.key(), auction_house.treasury_mint)?;
 
     if !wallet.to_account_info().is_signer && !authority.to_account_info().is_signer {
         return Err(AuctionHouseError::NoValidSignerPresent.into());
     }
-    if token_account.amount < 1 {
+    // if token_account.amount < 1 {
+    //     return Err(AuctionHouseError::InvalidTokenAccountAmount.into());
+    // }
+    if token_size < 1 {
         return Err(AuctionHouseError::InvalidTokenAccountAmount.into());
     }
     let ts_info = trade_state.to_account_info();
@@ -111,15 +126,16 @@ pub fn handle_create_trade_state<'info>(
         auction_house_fee_account.to_account_info(),
         &seeds,
     )?;
-    let token_account_key = token_account.key();
+    // let token_account_key = token_account.key();
+    let payment_account_key = payment_account.key();
     let wallet_key = wallet.key();
     let ts_seeds = [
         PREFIX.as_bytes(),
         wallet_key.as_ref(),
         auction_house_key.as_ref(),
-        token_account_key.as_ref(),
+        payment_account_key.as_ref(),
         auction_house.treasury_mint.as_ref(),
-        token_account.mint.as_ref(),
+        // token_account.mint.as_ref(),
         &price.to_le_bytes(),
         &token_size.to_le_bytes(),
         &[trade_state_bump],

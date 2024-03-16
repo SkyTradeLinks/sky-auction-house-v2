@@ -2,6 +2,7 @@ import {
   PublicKey,
   SystemProgram,
   TransactionInstruction,
+  Signer
 } from "@solana/web3.js";
 import findLastBidPrice from "../pdas/findLastBidPrice";
 import AuctionHouseProgram from "../types/AuctionHouseProgram";
@@ -10,18 +11,18 @@ type Accounts = {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
   program: AuctionHouseProgram;
-  tokenMint: PublicKey;
-  wallet: PublicKey;
+  treasuryMint: PublicKey;
+  wallet: Signer;
 };
 
 export default async function auctionHouseCreateLastBidPriceIx({
   program,
   wallet,
-  tokenMint,
+  treasuryMint,
   auctionHouse,
   auctionHouseProgramId,
 }: Accounts): Promise<TransactionInstruction> {
-  const [lastBidPrice] = findLastBidPrice(tokenMint, auctionHouseProgramId, auctionHouse);
+  const [lastBidPrice] = findLastBidPrice(treasuryMint, auctionHouseProgramId, auctionHouse);
 
   return program.methods
     .createLastBidPrice()
@@ -29,8 +30,8 @@ export default async function auctionHouseCreateLastBidPriceIx({
       auctionHouse,
       lastBidPrice,
       systemProgram: SystemProgram.programId,
-      tokenMint,
-      wallet,
+      treasuryMint,
+      wallet: wallet.publicKey,
     })
     .instruction();
 }

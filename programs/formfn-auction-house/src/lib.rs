@@ -1,9 +1,6 @@
 use anchor_lang::prelude::*;
 
-use anchor_spl::{
-    associated_token::{create, get_associated_token_address, AssociatedToken, Create},
-    token::{transfer_checked, Mint, Token, TokenAccount, TransferChecked},
-};
+
 
 use mpl_bubblegum::{
     hash::{hash_creators, hash_metadata},
@@ -26,7 +23,7 @@ pub use state::*;
 
 // use crate::{LeafData};
 
-anchor_lang::declare_id!("GdJJcnQywhGy57YPRnDgdL79kUE6bkyMxADaTw15ehTM");
+anchor_lang::declare_id!("55HD6CSvJwJDWFkYSya72urWCBEv28qsCypgygERQtaC");
 
 #[program]
 pub mod auction_house {
@@ -152,24 +149,10 @@ pub mod auction_house {
         free_trade_state_bump: u8,
         program_as_signer_bump: u8,
         buyer_price: u64,
-        token_size: u64,
-        leaves_data: Vec<LeafData>,
+        token_size: u64
+        // leaf_data: LeafData,
     ) -> Result<()> { 
-        let accounts = &mut ctx.remaining_accounts.iter();
-        let length: usize = accounts.len() / 2;
-
-        for index in 0..length {
-            let land_owner = next_account_info(accounts)?;
-            let land_owner_ata = next_account_info(accounts)?;
-
-            let expected_ata = get_associated_token_address(land_owner.key, &ctx.accounts.token_mint.key());
-
-            let leaf_data = &leaves_data[index];
-
-            if land_owner_ata.key() != expected_ata || leaf_data.owner != land_owner.key() {
-                return err!(AuctionHouseError::IncorrectOwner);
-            }
-        }
+ 
 
         handle_sell(
             ctx,
@@ -177,7 +160,9 @@ pub mod auction_house {
             free_trade_state_bump,
             program_as_signer_bump,
             buyer_price,
-            token_size,
+            token_size
+            // leaf_data
+       
         )
     }
 
