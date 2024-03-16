@@ -12,7 +12,7 @@ import { LAMPORTS_PER_SOL, PublicKey ,  sendAndConfirmTransaction,
   SendOptions,
   Transaction,
   TransactionMessage,
-  VersionedTransaction,} from "@solana/web3.js";
+  VersionedTransaction, Signer} from "@solana/web3.js";
 import { getUSDC, setupAirDrop } from "./utils/helper";
 import { AuctionHouse } from "../target/types/auction_house";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
@@ -488,13 +488,15 @@ export default class AuctionHouseSdk {
 
   private createTradeState(
     {
-      tokenAccount,
-      tokenMint,
+      merkleTree,
+      paymentAccount,
       wallet,
+      assetId
     }: {
-      tokenAccount: PublicKey;
-      tokenMint: PublicKey;
-      wallet: PublicKey;
+      merkleTree: PublicKey;
+      paymentAccount: PublicKey;
+      wallet: Signer;
+      assetId: PublicKey;
     },
     {
       allocationSize,
@@ -516,8 +518,9 @@ export default class AuctionHouseSdk {
         auctionHouseProgramId: this.program.programId,
         authority: auctionHouseAuthority.publicKey,
         program: this.program,
-        tokenAccount,
-        tokenMint,
+        merkleTree,
+        paymentAccount,
+        assetId,
         treasuryMint: this.mintAccount,
         wallet,
       },
@@ -532,11 +535,11 @@ export default class AuctionHouseSdk {
   }
 
   async createLastBidPriceTx({
-    tokenMint,
+    treasuryMint,
     wallet,
   }: {
-    tokenMint: PublicKey;
-    wallet: PublicKey;
+    treasuryMint: PublicKey;
+    wallet: Signer;
   }) {
     const auctionHouseAddressKey = this.auctionHouse;
 
@@ -544,30 +547,30 @@ export default class AuctionHouseSdk {
       auctionHouse: auctionHouseAddressKey,
       auctionHouseProgramId: this.program.programId,
       program: this.program,
-      tokenMint,
+      treasuryMint,
       wallet,
     });
     return ixToTx(ix);
   }
 
-  async findLastBidPrice(tokenMint: PublicKey) {
-    return findLastBidPrice(tokenMint, this.program.programId, this.auctionHouse);
+  async findLastBidPrice(treasuryMint: PublicKey) {
+    return findLastBidPrice(treasuryMint, this.program.programId, this.auctionHouse);
   }
 
   private async createLastBidPriceIfNotExistsTx({
-    tokenMint,
+    treasuryMint,
     wallet,
   }: {
-    tokenMint: PublicKey;
-    wallet: PublicKey;
+    treasuryMint: PublicKey;
+    wallet: Signer;
   }) {
-    const [lastBidPrice] = await this.findLastBidPrice(tokenMint);
+    const [lastBidPrice] = await this.findLastBidPrice(treasuryMint);
     const lastBidPriceAccount = await this.program.provider.connection.getAccountInfo(lastBidPrice);
     if (lastBidPriceAccount != null) {
       return null;
     }
 
-    return this.createLastBidPriceTx({ tokenMint, wallet });
+    return this.createLastBidPriceTx({ treasuryMint, wallet });
   }
 
 
@@ -575,27 +578,29 @@ export default class AuctionHouseSdk {
   async sell(
     saleType: SaleType,
     shouldCreateLastBidPriceIfNotExists: boolean,
-    leavesData: any,
-    landMerkleTree: PublicKey,
     remainingAccounts: any,
+    // leaf_data: any,
     {
       priceInLamports,
-      tokenAccount,
-      tokenMint,
+      assetId,
+      merkleTree,
       wallet,
+      paymentAccount
     }: {
       priceInLamports: number;
-      tokenAccount: PublicKey;
-      tokenMint: PublicKey;
-      wallet: PublicKey;
+      assetId: PublicKey;
+      merkleTree: PublicKey;
+      wallet: Signer;
+      paymentAccount: PublicKey;
     },
     { tokenSize = 1 }: { tokenSize?: number }
   ) {
     const tradeStateIx = await this.createTradeState(
       {
-        tokenAccount,
-        tokenMint,
+        merkleTree,
+        assetId,
         wallet,
+        paymentAccount
       },
       {
         priceInLamports,
@@ -605,7 +610,7 @@ export default class AuctionHouseSdk {
     )
 
     const [createLastBidPriceTx, sellIx] = await Promise.all([shouldCreateLastBidPriceIfNotExists
-      ? this.createLastBidPriceIfNotExistsTx({ tokenMint, wallet }) : null,
+      ? this.createLastBidPriceIfNotExistsTx({ treasuryMint: this.mintAccount, wallet }) : null,
       auctionHouseSellIx(
         {
           auctionHouse: this.auctionHouse,
@@ -614,14 +619,15 @@ export default class AuctionHouseSdk {
           feeAccount: this.feeAccount,
           priceInLamports,
           program: this.program,
-          tokenAccount,
-          tokenMint,
+          merkleTree,
+          assetId,
           treasuryMint: this.mintAccount,
-          walletSeller: wallet,
-          landMerkleTree,
-          remainingAccounts
+          sellerWallet: wallet,
+          remainingAccounts,
+          paymentAccount
+          // leaf_data
         },
-        { tokenSize, leavesData}
+        { tokenSize}
       ),
     ]);
 

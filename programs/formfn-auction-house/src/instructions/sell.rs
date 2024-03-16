@@ -3,22 +3,33 @@ use anchor_lang::{
     solana_program::program::{invoke, invoke_signed},
 };
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
+use anchor_spl::{
+    associated_token::{create, get_associated_token_address, AssociatedToken, Create},
+    token::{transfer_checked, TransferChecked},
+};
 use spl_token::instruction::approve;
 
-use crate::{constants::*, utils::*, AuctionHouse, AuctionHouseError};
+use mpl_bubblegum::{instructions::DelegateBuilder, utils::get_asset_id};
+
+use crate::{constants::*, utils::*, state::*, AuctionHouse, AuctionHouseError};
+
 
 #[derive(Accounts)]
 #[instruction(trade_state_bump: u8, free_trade_state_bump: u8, program_as_signer_bump: u8, buyer_price: u64, token_size: u64)]
 pub struct Sell<'info> {
+    #[account(mut)]
+    wallet: Signer<'info>,
+    // #[account(
+    //     mut,
+    //     owner = token::ID
+    // )]
     /// CHECK: No need to deserialize.
-    wallet: UncheckedAccount<'info>,
-    #[account(
-        mut,
-        owner = token::ID
-    )]
-    token_account: Account<'info, TokenAccount>,
+    #[account(mut)]
+    payment_account: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
-    metadata: UncheckedAccount<'info>,
+    asset_id: UncheckedAccount<'info>,
+    /// CHECK: No need to deserialize.
+    // metadata: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
     authority: UncheckedAccount<'info>,
     #[account(
@@ -50,9 +61,10 @@ pub struct Sell<'info> {
             PREFIX.as_bytes(),
             wallet.key().as_ref(),
             auction_house.key().as_ref(),
-            token_account.key().as_ref(),
+            merkle_tree.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
-            token_account.mint.as_ref(),
+            // token_account.mint.as_ref(),
+            asset_id.key().as_ref(),
             &buyer_price.to_le_bytes(),
             &token_size.to_le_bytes()
         ],
@@ -66,9 +78,10 @@ pub struct Sell<'info> {
             PREFIX.as_bytes(),
             wallet.key().as_ref(),
             auction_house.key().as_ref(),
-            token_account.key().as_ref(),
+            merkle_tree.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
-            token_account.mint.as_ref(),
+            // token_account.mint.as_ref(),
+            asset_id.key().as_ref(),
             &0u64.to_le_bytes(),
             &token_size.to_le_bytes()
         ],
@@ -76,7 +89,8 @@ pub struct Sell<'info> {
     )]
     free_seller_trade_state: UncheckedAccount<'info>,
     // 9th account, new accounts should go below this to not mess up tx parsing (see parseSellTx.ts in monorepo)
-    pub token_mint: Account<'info, Mint>,
+    // pub token_mint: Account<'info, Mint>,
+    treasury_mint: Account<'info, Mint>,
     token_program: Program<'info, Token>,
     system_program: Program<'info, System>,
     /// CHECK: No need to deserialize.
@@ -95,8 +109,8 @@ pub struct Sell<'info> {
     /// CHECK: No need to deserialize.
     #[account(address = mpl_token_metadata::id())]
     metaplex_token_metadata_program: UncheckedAccount<'info>,
-    /// CHECK: This account is checked in the instruction
-    pub land_merkle_tree: UncheckedAccount<'info>,
+    /// CHECK: No need to deserialize.
+    merkle_tree: UncheckedAccount<'info>,
 }
 
 pub fn handle_sell<'info>(
@@ -106,29 +120,56 @@ pub fn handle_sell<'info>(
     program_as_signer_bump: u8,
     buyer_price: u64,
     token_size: u64,
+    // leaf_data: LeafData,
 ) -> Result<()> {
     let wallet = &ctx.accounts.wallet;
-    let token_account = &ctx.accounts.token_account;
-    let metadata = &ctx.accounts.metadata;
+    // let token_account = &ctx.accounts.token_account;
+    // let metadata = &ctx.accounts.metadata;
     let authority = &ctx.accounts.authority;
     let seller_trade_state = &ctx.accounts.seller_trade_state;
     let free_seller_trade_state = &ctx.accounts.free_seller_trade_state;
     let auction_house = &ctx.accounts.auction_house;
     let auction_house_fee_account = &ctx.accounts.auction_house_fee_account;
-    let token_mint = &ctx.accounts.token_mint;
+    // let token_mint = &ctx.accounts.token_mint;
+    let payment_account = &ctx.accounts.payment_account;
+    let treasury_mint = &ctx.accounts.treasury_mint;
     let token_program = &ctx.accounts.token_program;
     let system_program = &ctx.accounts.system_program;
     let program_as_signer = &ctx.accounts.program_as_signer;
     let rent = &ctx.accounts.rent;
     let master_edition = &ctx.accounts.master_edition;
     let metaplex_token_metadata_program = &ctx.accounts.metaplex_token_metadata_program;
+    let asset_id = &ctx.accounts.asset_id;
+    // let leaf_data = &leaf_data;
+
+    let accounts = &mut ctx.remaining_accounts.iter();
+
+    let land_owner = next_account_info(accounts)?;
+
+    
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
 
     let sale_type = get_trade_state_sale_type(&seller_trade_state.to_account_info());
     msg!("seller_sale_type = {}", sale_type);
-    assert_keys_equal(token_mint.key(), token_account.mint)?;
-    assert_token_account_owner(token_account.owner, wallet.key())?;
+    
+    assert_keys_equal(treasury_mint.key(), auction_house.treasury_mint)?;
+    // check that the payment_account belongs to the seller
+    assert_token_account_owner(*payment_account.owner, wallet.key())?;
+    // assert_token_account_owner(*land_owner.key, wallet.key())?;
+
+    // validate asset_id
+    // let token_asset_id = get_asset_id(
+    //     ctx.accounts.merkle_tree.key,
+    //     leaf_data.leaf_nonce.into(),
+    // );
+
+    // if leaf_data.owner != wallet.key() || asset_id.key() != token_asset_id.key() {
+    //     return Err(AuctionHouseError::IncorrectOwner.into());
+
+    // }
+
+
 
     if !wallet.to_account_info().is_signer {
         if buyer_price == 0 {
@@ -161,9 +202,13 @@ pub fn handle_sell<'info>(
         &seeds,
     )?;
 
-    assert_metadata_valid(metadata, token_account)?;
+    // assert_metadata_valid(metadata, token_account)?;
 
-    if token_size > token_account.amount {
+    // if token_size > token_account.amount {
+    //     return Err(AuctionHouseError::InvalidTokenAmount.into());
+    // }
+
+    if token_size > 1 {
         return Err(AuctionHouseError::InvalidTokenAmount.into());
     }
 
@@ -171,7 +216,7 @@ pub fn handle_sell<'info>(
         invoke(
             &approve(
                 &token_program.key(),
-                &token_account.key(),
+                &payment_account.key(),
                 &program_as_signer.key(),
                 &wallet.key(),
                 &[],
@@ -180,7 +225,7 @@ pub fn handle_sell<'info>(
             .unwrap(),
             &[
                 token_program.to_account_info(),
-                token_account.to_account_info(),
+                payment_account.to_account_info(),
                 program_as_signer.to_account_info(),
                 wallet.to_account_info(),
             ],
@@ -189,15 +234,15 @@ pub fn handle_sell<'info>(
 
     let ts_info = seller_trade_state.to_account_info();
     if ts_info.data_is_empty() {
-        let token_account_key = token_account.key();
+        let payment_account_key = payment_account.key();
         let wallet_key = wallet.key();
         let ts_seeds = [
             PREFIX.as_bytes(),
             wallet_key.as_ref(),
             auction_house_key.as_ref(),
-            token_account_key.as_ref(),
+            payment_account_key.as_ref(),
             auction_house.treasury_mint.as_ref(),
-            token_account.mint.as_ref(),
+            // treasury_mint.as_ref(),
             &buyer_price.to_le_bytes(),
             &token_size.to_le_bytes(),
             &[trade_state_bump],
@@ -223,25 +268,25 @@ pub fn handle_sell<'info>(
         &[program_as_signer_bump],
     ];
 
-    if !token_account.is_frozen() {
-        invoke_signed(
-            &mpl_token_metadata::instruction::freeze_delegated_account(
-                mpl_token_metadata::id(),
-                program_as_signer.key(),
-                token_account.key(),
-                master_edition.key(),
-                token_mint.key(),
-            ),
-            &[
-                program_as_signer.to_account_info(),
-                token_account.to_account_info(),
-                master_edition.to_account_info(),
-                token_mint.to_account_info(),
-                metaplex_token_metadata_program.to_account_info(),
-            ],
-            &[&program_as_signer_seeds],
-        )?;
-    }
+    // if !token_account.is_frozen() {
+    //     invoke_signed(
+    //         &mpl_token_metadata::instruction::freeze_delegated_account(
+    //             mpl_token_metadata::id(),
+    //             program_as_signer.key(),
+    //             token_account.key(),
+    //             master_edition.key(),
+    //             token_mint.key(),
+    //         ),
+    //         &[
+    //             program_as_signer.to_account_info(),
+    //             token_account.to_account_info(),
+    //             master_edition.to_account_info(),
+    //             token_mint.to_account_info(),
+    //             metaplex_token_metadata_program.to_account_info(),
+    //         ],
+    //         &[&program_as_signer_seeds],
+    //     )?;
+    // }
 
     Ok(())
 }
