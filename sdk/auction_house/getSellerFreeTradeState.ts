@@ -7,29 +7,29 @@ import { BN } from "@coral-xyz/anchor";
 
 export default async function getSellerFreeTradeState({
   wallet,
-  assetId,
+  // assetIdOwner,
   merkleTree,
   auctionHouse,
-  // treasuryMint,
+  assetId,
   auctionHouseProgramId,
   tokenSize = 1,
 }: {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
-  assetId: PublicKey;
+  // assetIdOwner: PublicKey;
   merkleTree: PublicKey;
   tokenSize?: number;
-  // treasuryMint: PublicKey;
-  wallet: Signer;
+  assetId: PublicKey;
+  wallet: PublicKey;
 }): Promise<[PublicKey, number, BN]> {
   return getTradeState({
     auctionHouse,
     auctionHouseProgramId,
     priceInLamports: 0,
-    assetId,
+    // assetIdOwner,
     merkleTree,
     tokenSize,
-    // treasuryMint,
+    assetId,
     wallet,
   });
 }

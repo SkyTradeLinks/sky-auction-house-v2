@@ -7,10 +7,10 @@ import { BN } from "@coral-xyz/anchor";
 
 export default function findAuctionHouseTradeState(
   auctionHouse: PublicKey,
-  wallet: Signer,
-  // treasuryMint: PublicKey,
-  merkleTree: PublicKey,
+  wallet: PublicKey,
   assetId: PublicKey,
+  merkleTree: PublicKey,
+  // assetIdOwner: PublicKey,
   // tokenMint: PublicKey,
   tokenSize: BN,
   buyPrice: BN,
@@ -19,12 +19,11 @@ export default function findAuctionHouseTradeState(
   return anchor.web3.PublicKey.findProgramAddressSync(
     [
       Buffer.from(AUCTION_HOUSE),
-      wallet.publicKey.toBuffer(),
+      wallet.toBuffer(),
       auctionHouse.toBuffer(),
       merkleTree.toBuffer(),
-      // treasuryMint.toBuffer(),
+      // assetIdOwner.toBuffer(),
       assetId.toBuffer(),
-      // tokenMint.toBuffer(),
       buyPrice.toArrayLike(Buffer, "le", 8),
       tokenSize.toArrayLike(Buffer, "le", 8),
     ],

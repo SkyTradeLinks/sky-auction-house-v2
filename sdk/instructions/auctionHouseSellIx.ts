@@ -21,13 +21,13 @@ type Accounts = {
   feeAccount: PublicKey;
   priceInLamports: number;
   program: AuctionHouseProgram;
-  assetId: PublicKey;
+  // assetIdOwner: PublicKey;
   paymentAccount: PublicKey;
   merkleTree: PublicKey;
   treasuryMint: PublicKey;
-  sellerWallet: Signer;
+  sellerWallet: PublicKey;
   remainingAccounts: any
-  // leaf_data: any
+  assetId: PublicKey
 };
 
 type Args = {
@@ -40,7 +40,7 @@ export default async function auctionHouseSellIx(
     program,
     sellerWallet,
     paymentAccount,
-    assetId,
+    // assetIdOwner,
     feeAccount,
     merkleTree,
     priceInLamports,
@@ -49,6 +49,7 @@ export default async function auctionHouseSellIx(
     treasuryMint,
     auctionHouseProgramId,
     remainingAccounts,
+    assetId
  
   }: Accounts,
   { tokenSize = 1 }: Args
@@ -57,9 +58,9 @@ export default async function auctionHouseSellIx(
     auctionHouse,
     auctionHouseProgramId,
     priceInLamports,
-    assetId,
+    // assetIdOwner,
     merkleTree,
-    // treasuryMint,
+    assetId,
     wallet: sellerWallet,
   });
   const [programAsSigner, programAsSignerBump] = findAuctionHouseProgramAsSigner(auctionHouseProgramId);
@@ -68,9 +69,9 @@ export default async function auctionHouseSellIx(
   const [freeTradeState, freeTradeBump] = await getSellerFreeTradeState({
     auctionHouse,
     auctionHouseProgramId,
-    assetId,
+    // assetIdOwner,
     merkleTree,
-    // treasuryMint,
+    assetId,
     wallet: sellerWallet,
   });
 
@@ -88,7 +89,7 @@ export default async function auctionHouseSellIx(
       authority,
       freeSellerTradeState: freeTradeState,
       masterEdition,
-      // metadata,
+      assetId,
       metaplexTokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
       programAsSigner,
       rent: SYSVAR_RENT_PUBKEY,
@@ -98,8 +99,8 @@ export default async function auctionHouseSellIx(
       treasuryMint,
       merkleTree,
       tokenProgram: TOKEN_PROGRAM_ID,
-      wallet: sellerWallet.publicKey,
-      assetId: assetId
+      wallet: sellerWallet,
+      // assetIdOwner: assetIdOwner
     })
     .remainingAccounts(remainingAccounts)
     .instruction();

@@ -7,29 +7,29 @@ export default async function getTradeState({
   merkleTree,
   priceInLamports,
   auctionHouse,
-  // treasuryMint,
   assetId,
+  // assetIdOwner,
   auctionHouseProgramId,
   tokenSize = 1,
 }: {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
   priceInLamports: number;
-  assetId: PublicKey;
+  // assetIdOwner: PublicKey;
   // tokenMint: PublicKey;
   merkleTree: PublicKey;
   tokenSize?: number;
-  // treasuryMint: PublicKey;
-  wallet: Signer;
+  assetId: PublicKey;
+  wallet: PublicKey;
 }): Promise<[PublicKey, number, BN]> {
   const priceAdjusted = new BN(priceInLamports);
 
   const [tradeState, tradeStateBump] = findAuctionHouseTradeState(
     auctionHouse,
     wallet,
-    // treasuryMint,
-    merkleTree,
     assetId,
+    merkleTree,
+    // assetIdOwner,
     new BN(tokenSize),
     priceAdjusted,
     auctionHouseProgramId

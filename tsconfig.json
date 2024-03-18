@@ -1,14 +1,11 @@
 {
-  "compilerOptions": {
-    "types": ["mocha", "chai"],
-    "typeRoots": ["./node_modules/@types"],
-    "lib": ["es2015"],
-    "module": "commonjs",
-    "target": "es6",
-    "esModuleInterop": true,
-  },
-    "include": [
-    "src/**/*.ts",    // Include TypeScript files in the src directory and its subdirectories
-    "tests/**/*.ts"   // Include TypeScript files in the tests directory and its subdirectories
-  ]
-}
+            "compilerOptions": {
+              
+              "types": ["mocha", "chai"],
+              "typeRoots": ["./node_modules/@types"],
+              "lib": ["es2015"],
+              "module": "commonjs",
+              "target": "ES2019",
+              "esModuleInterop": true
+            }
+          }

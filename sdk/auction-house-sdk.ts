@@ -63,6 +63,10 @@ export default class AuctionHouseSdk {
     this.umi = umi
   }
 
+  getCustomUmi() {
+    return this.umi;
+  }
+
   static async getInstance(
     program: anchor.Program<AuctionHouse>,
     provider: anchor.AnchorProvider
@@ -129,11 +133,13 @@ export default class AuctionHouseSdk {
       merkleTree,
       paymentAccount,
       wallet,
+      // assetIdOwner,
       assetId
     }: {
       merkleTree: PublicKey;
       paymentAccount: PublicKey;
-      wallet: Signer;
+      wallet: PublicKey;
+      // assetIdOwner: PublicKey;
       assetId: PublicKey;
     },
     {
@@ -158,9 +164,10 @@ export default class AuctionHouseSdk {
         program: this.program,
         merkleTree,
         paymentAccount,
-        assetId,
+        // assetIdOwner,
         treasuryMint: this.mintAccount,
         wallet,
+        assetId
       },
       {
         allocationSize,
@@ -177,7 +184,7 @@ export default class AuctionHouseSdk {
     wallet,
   }: {
     treasuryMint: PublicKey;
-    wallet: Signer;
+    wallet: PublicKey;
   }) {
     const auctionHouseAddressKey = this.auctionHouse;
 
@@ -200,7 +207,7 @@ export default class AuctionHouseSdk {
     wallet,
   }: {
     treasuryMint: PublicKey;
-    wallet: Signer;
+    wallet: PublicKey;
   }) {
     const [lastBidPrice] = await this.findLastBidPrice(treasuryMint);
     const lastBidPriceAccount = await this.program.provider.connection.getAccountInfo(lastBidPrice);
@@ -217,28 +224,30 @@ export default class AuctionHouseSdk {
     saleType: SaleType,
     shouldCreateLastBidPriceIfNotExists: boolean,
     remainingAccounts: any,
-    // leaf_data: any,
+    assetId: PublicKey,
     {
       priceInLamports,
-      assetId,
+      // assetIdOwner,
       merkleTree,
       wallet,
       paymentAccount
     }: {
       priceInLamports: number;
-      assetId: PublicKey;
+      // assetIdOwner: PublicKey;
       merkleTree: PublicKey;
-      wallet: Signer;
+      wallet: PublicKey;
       paymentAccount: PublicKey;
     },
     { tokenSize = 1 }: { tokenSize?: number }
   ) {
+    // console.log("Transforming asset id", assetId, typeof assetId)
     const tradeStateIx = await this.createTradeState(
       {
         merkleTree,
-        assetId,
+        // assetIdOwner,
         wallet,
-        paymentAccount
+        paymentAccount,
+        assetId
       },
       {
         priceInLamports,
@@ -258,12 +267,12 @@ export default class AuctionHouseSdk {
           priceInLamports,
           program: this.program,
           merkleTree,
-          assetId,
+          // assetIdOwner,
           treasuryMint: this.mintAccount,
           sellerWallet: wallet,
           remainingAccounts,
-          paymentAccount
-          // leaf_data
+          paymentAccount,
+          assetId
         },
         { tokenSize}
       ),

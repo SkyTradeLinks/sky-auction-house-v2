@@ -12,7 +12,7 @@ type Accounts = {
   auctionHouseProgramId: PublicKey;
   program: AuctionHouseProgram;
   treasuryMint: PublicKey;
-  wallet: Signer;
+  wallet: PublicKey;
 };
 
 export default async function auctionHouseCreateLastBidPriceIx({
@@ -31,7 +31,7 @@ export default async function auctionHouseCreateLastBidPriceIx({
       lastBidPrice,
       systemProgram: SystemProgram.programId,
       treasuryMint,
-      wallet: wallet.publicKey,
+      wallet: wallet,
     })
     .instruction();
 }
