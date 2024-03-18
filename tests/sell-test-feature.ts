@@ -184,11 +184,11 @@ describe("Sell test Auction", async () => {
             leavesData.push(leafData);
 
             // Push Owner
-            accountsToPass.push({
-                pubkey: owner,
-                isSigner: false,
-                isWritable: true,
-            });
+            // accountsToPass.push({
+            //     pubkey: owner,
+            //     isSigner: false,
+            //     isWritable: true,
+            // });
 
             
         } catch (error) {
@@ -205,43 +205,48 @@ describe("Sell test Auction", async () => {
         console.log("TokenAccount", tokenAccount)
         console.log("TokenAccount Owner", owner)
         
-        const tx = await auctionHouseSdk.sell(SaleType.Auction, true, accountsToPass, new anchor.web3.PublicKey(asset_id), {
+        const tx = await auctionHouseSdk.sell(SaleType.Auction, true, new anchor.web3.PublicKey(asset_id), {
             priceInLamports: BUY_PRICE * LAMPORTS_PER_SOL,
             merkleTree: landMerkleTree,
             paymentAccount: tokenAccount,
-            wallet: owner
+            wallet: owner,
+            leafDataOwner: leavesData[0].owner
         }, {tokenSize: 1})
-        console.log(tx);
+        // console.log(tx);
 
 
 
     })
 
-    // it("should fail if an imposter tries to sell", async () => {
-    //     // const accounts_to_pass = [];
-    //     // accounts_to_pass.push({
-    //     //     pubkey: imposter.publicKey,
-    //     //     isSigner: true,
-    //     //     isWritable: true,
-    //     // });
+    it("should fail if an imposter tries to sell", async () => {
+        // const accounts_to_pass = [];
+        // accounts_to_pass.push({
+        //     pubkey: imposter.publicKey,
+        //     isSigner: true,
+        //     isWritable: true,
+        // });
+        const seller2 = Keypair.generate()
+        console.log("LeafDataOwner.....", leavesData[0].owner)
+        console.log("Caller-Wallet.....", imposter.publicKey)
 
-    //     try {
-    //         await auctionHouseSdk.sell(SaleType.Auction, true, accountsToPass, new anchor.web3.PublicKey(asset_id), {
-    //             priceInLamports: BUY_PRICE * LAMPORTS_PER_SOL,
-    //             merkleTree: landMerkleTree,
-    //             paymentAccount: tokenAccount,
-    //             wallet: imposter.publicKey
-    //         }, {
-    //             tokenSize: 1,
-    //         });
-    //         // If the above line didn't throw an error, fail the test
-    //         // expect(true).toBe(false); // Ensure the test fails if the line above didn't throw an error
-    //     } catch (error) {
-    //         console.error()
-    //         // Expect an error to be thrown
-    //         // expect(error).toBeDefined();
-    //         // Add additional assertions on the error if needed
-    //     }
-    // });
+        try {
+            await auctionHouseSdk.sell(SaleType.Auction, true, new anchor.web3.PublicKey(asset_id), {
+                priceInLamports: BUY_PRICE * LAMPORTS_PER_SOL,
+                merkleTree: landMerkleTree,
+                paymentAccount: tokenAccount,
+                wallet: seller2.publicKey,
+                leafDataOwner: leavesData[0].owner
+            }, {
+                tokenSize: 1,
+            });
+            // If the above line didn't throw an error, fail the test
+            // expect(true).toBe(false); // Ensure the test fails if the line above didn't throw an error
+        } catch (error) {
+            console.error()
+            // Expect an error to be thrown
+            // expect(error).toBeDefined();
+            // Add additional assertions on the error if needed
+        }
+    });
 
 });

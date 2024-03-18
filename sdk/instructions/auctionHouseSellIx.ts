@@ -21,12 +21,11 @@ type Accounts = {
   feeAccount: PublicKey;
   priceInLamports: number;
   program: AuctionHouseProgram;
-  // assetIdOwner: PublicKey;
+  leafDataOwner: PublicKey;
   paymentAccount: PublicKey;
   merkleTree: PublicKey;
   treasuryMint: PublicKey;
   sellerWallet: PublicKey;
-  remainingAccounts: any
   assetId: PublicKey
 };
 
@@ -47,8 +46,8 @@ export default async function auctionHouseSellIx(
     auctionHouse,
     treasuryMint,
     auctionHouseProgramId,
-    remainingAccounts,
-    assetId
+    assetId,
+    leafDataOwner
  
   }: Accounts,
   { tokenSize = 1 }: Args
@@ -97,7 +96,7 @@ export default async function auctionHouseSellIx(
       merkleTree,
       tokenProgram: TOKEN_PROGRAM_ID,
       wallet: sellerWallet,
+      leafDataOwner
     })
-    .remainingAccounts(remainingAccounts)
     .instruction();
 }

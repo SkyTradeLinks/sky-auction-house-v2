@@ -223,17 +223,17 @@ export default class AuctionHouseSdk {
   async sell(
     saleType: SaleType,
     shouldCreateLastBidPriceIfNotExists: boolean,
-    remainingAccounts: any,
+ 
     assetId: PublicKey,
     {
       priceInLamports,
-      // assetIdOwner,
+      leafDataOwner,
       merkleTree,
       wallet,
       paymentAccount
     }: {
       priceInLamports: number;
-      // assetIdOwner: PublicKey;
+      leafDataOwner: PublicKey;
       merkleTree: PublicKey;
       wallet: PublicKey;
       paymentAccount: PublicKey;
@@ -267,10 +267,9 @@ export default class AuctionHouseSdk {
           priceInLamports,
           program: this.program,
           merkleTree,
-          // assetIdOwner,
+          leafDataOwner,
           treasuryMint: this.mintAccount,
           sellerWallet: wallet,
-          remainingAccounts,
           paymentAccount,
           assetId
         },

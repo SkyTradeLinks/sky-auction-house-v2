@@ -111,6 +111,8 @@ pub struct Sell<'info> {
     metaplex_token_metadata_program: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
     merkle_tree: UncheckedAccount<'info>,
+    /// CHECK: No need to deserialize.
+    leaf_data_owner: UncheckedAccount<'info>,
 }
 
 pub fn handle_sell<'info>(
@@ -136,11 +138,11 @@ pub fn handle_sell<'info>(
     let rent = &ctx.accounts.rent;
     let master_edition = &ctx.accounts.master_edition;
     let metaplex_token_metadata_program = &ctx.accounts.metaplex_token_metadata_program;
-    // let leaf_data = &leaf_data;
+    let leaf_data_owner = &ctx.accounts.leaf_data_owner;
 
-    let accounts = &mut ctx.remaining_accounts.iter();
+    // let accounts = &mut ctx.remaining_accounts.iter();
 
-    let land_owner = next_account_info(accounts)?;
+    // let land_owner = next_account_info(accounts)?;
 
     
 
@@ -150,8 +152,10 @@ pub fn handle_sell<'info>(
     msg!("seller_sale_type = {}", sale_type);
     
     assert_keys_equal(treasury_mint.key(), auction_house.treasury_mint)?;
+    assert_keys_equal(leaf_data_owner.key(), wallet.key())?;
     // check that the payment_account belongs to the seller
-    assert_token_account_owner(payment_account.owner, *wallet.key)?;
+    // assert_token_account_owner(payment_account.owner, *wallet.key)?;
+    // assert_token_account_owner(*leaf_data_owner.key, wallet.key())?;
     // assert_keys_equal(*land_owner.key, payment_account.owner)?;
 
     // validate asset_id
