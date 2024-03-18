@@ -65,8 +65,6 @@ pub struct Sell<'info> {
             auction_house.key().as_ref(),
             merkle_tree.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
-            // token_account.mint.as_ref(),
-            // asset_id_owner.key().as_ref(),
             asset_id.key().as_ref(),
             &buyer_price.to_le_bytes(),
             &token_size.to_le_bytes()
@@ -83,8 +81,6 @@ pub struct Sell<'info> {
             auction_house.key().as_ref(),
             merkle_tree.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
-            // token_account.mint.as_ref(),
-            // asset_id_owner.key().as_ref(),
             asset_id.key().as_ref(),
             &0u64.to_le_bytes(),
             &token_size.to_le_bytes()
@@ -124,17 +120,14 @@ pub fn handle_sell<'info>(
     program_as_signer_bump: u8,
     buyer_price: u64,
     token_size: u64,
-    // leaf_data: LeafData,
 ) -> Result<()> {
     let wallet = &ctx.accounts.wallet;
-    // let token_account = &ctx.accounts.token_account;
     // let metadata = &ctx.accounts.metadata;
     let authority = &ctx.accounts.authority;
     let seller_trade_state = &ctx.accounts.seller_trade_state;
     let free_seller_trade_state = &ctx.accounts.free_seller_trade_state;
     let auction_house = &ctx.accounts.auction_house;
     let auction_house_fee_account = &ctx.accounts.auction_house_fee_account;
-    // let token_mint = &ctx.accounts.token_mint;
     let payment_account = &ctx.accounts.payment_account;
     let treasury_mint = &ctx.accounts.treasury_mint;
     let token_program = &ctx.accounts.token_program;
@@ -143,7 +136,6 @@ pub fn handle_sell<'info>(
     let rent = &ctx.accounts.rent;
     let master_edition = &ctx.accounts.master_edition;
     let metaplex_token_metadata_program = &ctx.accounts.metaplex_token_metadata_program;
-    // let asset_id_owner = &ctx.accounts.asset_id_owner;
     // let leaf_data = &leaf_data;
 
     let accounts = &mut ctx.remaining_accounts.iter();
@@ -159,8 +151,8 @@ pub fn handle_sell<'info>(
     
     assert_keys_equal(treasury_mint.key(), auction_house.treasury_mint)?;
     // check that the payment_account belongs to the seller
-    assert_token_account_owner(payment_account.owner, wallet.key())?;
-    assert_keys_equal(*land_owner.key, payment_account.owner)?;
+    assert_token_account_owner(payment_account.owner, *wallet.key)?;
+    // assert_keys_equal(*land_owner.key, payment_account.owner)?;
 
     // validate asset_id
     // let token_asset_id = get_asset_id(

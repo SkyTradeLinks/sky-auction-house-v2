@@ -16,7 +16,6 @@ export default async function getSellerFreeTradeState({
 }: {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
-  // assetIdOwner: PublicKey;
   merkleTree: PublicKey;
   tokenSize?: number;
   assetId: PublicKey;
@@ -26,7 +25,6 @@ export default async function getSellerFreeTradeState({
     auctionHouse,
     auctionHouseProgramId,
     priceInLamports: 0,
-    // assetIdOwner,
     merkleTree,
     tokenSize,
     assetId,

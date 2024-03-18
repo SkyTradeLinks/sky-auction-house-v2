@@ -15,7 +15,6 @@ type Accounts = {
   auctionHouseProgramId: PublicKey;
   authority: PublicKey;
   program: AuctionHouseProgram; // change this to the AuctionHouseProgram type
-  // assetIdOwner: PublicKey;
   merkleTree: PublicKey;
   paymentAccount: PublicKey;
   treasuryMint: PublicKey;
@@ -37,7 +36,6 @@ export default async function auctionHouseCreateTradeStateIx(
     auctionHouseProgramId,
     authority,
     program,
-    // assetIdOwner,
     merkleTree,
     treasuryMint,
     paymentAccount,
@@ -50,7 +48,6 @@ export default async function auctionHouseCreateTradeStateIx(
     auctionHouse,
     auctionHouseProgramId,
     priceInLamports,
-    // assetIdOwner,
     merkleTree,
     assetId,
     wallet,
@@ -70,7 +67,6 @@ export default async function auctionHouseCreateTradeStateIx(
       authority,
       rent: SYSVAR_RENT_PUBKEY,
       systemProgram: SystemProgram.programId,
-      // assetIdOwner,
       paymentAccount,
       treasuryMint, 
       merkleTree,

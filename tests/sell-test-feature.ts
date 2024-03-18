@@ -63,6 +63,7 @@ describe("Sell test Auction", async () => {
         "73ajJBDet2TbccHesc1CgHcMbDG83fafiy5iP3iGCEYL"
     );
     const imposter = Keypair.generate();
+    console.log("Imposter", imposter.publicKey)
 
     
     
@@ -202,6 +203,7 @@ describe("Sell test Auction", async () => {
         );
 
         console.log("TokenAccount", tokenAccount)
+        console.log("TokenAccount Owner", owner)
         
         const tx = await auctionHouseSdk.sell(SaleType.Auction, true, accountsToPass, new anchor.web3.PublicKey(asset_id), {
             priceInLamports: BUY_PRICE * LAMPORTS_PER_SOL,

@@ -56,8 +56,6 @@ pub struct CreateTradeState<'info> {
             wallet.key().as_ref(),
             auction_house.key().as_ref(),
             merkle_tree.key().as_ref(),
-            // treasury_mint.as_ref(),
-            // asset_id_owner.key().as_ref(),
             asset_id.key().as_ref(),
             &buyer_price.to_le_bytes(),
             &token_size.to_le_bytes()
@@ -79,10 +77,7 @@ pub fn handle_create_trade_state<'info>(
 ) -> Result<()> {
     let wallet = &ctx.accounts.wallet;
     let authority = &ctx.accounts.authority;
-    // let token_mint = &ctx.accounts.token_mint;
-    // let token_account = &ctx.accounts.token_account;
     let payment_account = &ctx.accounts.payment_account;
-    // let asset_id_owner = &ctx.accounts.asset_id_owner;
     let asset_id = &ctx.accounts.asset_id;
     let treasury_mint = &ctx.accounts.treasury_mint;
     let auction_house = &ctx.accounts.auction_house;

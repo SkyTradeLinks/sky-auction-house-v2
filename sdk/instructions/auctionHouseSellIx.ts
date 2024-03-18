@@ -40,7 +40,6 @@ export default async function auctionHouseSellIx(
     program,
     sellerWallet,
     paymentAccount,
-    // assetIdOwner,
     feeAccount,
     merkleTree,
     priceInLamports,
@@ -58,7 +57,6 @@ export default async function auctionHouseSellIx(
     auctionHouse,
     auctionHouseProgramId,
     priceInLamports,
-    // assetIdOwner,
     merkleTree,
     assetId,
     wallet: sellerWallet,
@@ -69,7 +67,6 @@ export default async function auctionHouseSellIx(
   const [freeTradeState, freeTradeBump] = await getSellerFreeTradeState({
     auctionHouse,
     auctionHouseProgramId,
-    // assetIdOwner,
     merkleTree,
     assetId,
     wallet: sellerWallet,
@@ -100,7 +97,6 @@ export default async function auctionHouseSellIx(
       merkleTree,
       tokenProgram: TOKEN_PROGRAM_ID,
       wallet: sellerWallet,
-      // assetIdOwner: assetIdOwner
     })
     .remainingAccounts(remainingAccounts)
     .instruction();
