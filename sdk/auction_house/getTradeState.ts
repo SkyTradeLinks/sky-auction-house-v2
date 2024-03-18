@@ -8,15 +8,12 @@ export default async function getTradeState({
   priceInLamports,
   auctionHouse,
   assetId,
-  // assetIdOwner,
   auctionHouseProgramId,
   tokenSize = 1,
 }: {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
   priceInLamports: number;
-  // assetIdOwner: PublicKey;
-  // tokenMint: PublicKey;
   merkleTree: PublicKey;
   tokenSize?: number;
   assetId: PublicKey;
@@ -29,7 +26,6 @@ export default async function getTradeState({
     wallet,
     assetId,
     merkleTree,
-    // assetIdOwner,
     new BN(tokenSize),
     priceAdjusted,
     auctionHouseProgramId
