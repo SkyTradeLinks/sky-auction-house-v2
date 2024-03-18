@@ -15,11 +15,12 @@ type Accounts = {
   auctionHouseProgramId: PublicKey;
   authority: PublicKey;
   program: AuctionHouseProgram; // change this to the AuctionHouseProgram type
-  assetId: PublicKey;
+  // assetIdOwner: PublicKey;
   merkleTree: PublicKey;
   paymentAccount: PublicKey;
   treasuryMint: PublicKey;
-  wallet: Signer;
+  wallet: PublicKey;
+  assetId: PublicKey;
 };
 
 type Args = {
@@ -36,11 +37,12 @@ export default async function auctionHouseCreateTradeStateIx(
     auctionHouseProgramId,
     authority,
     program,
-    assetId,
+    // assetIdOwner,
     merkleTree,
     treasuryMint,
     paymentAccount,
     wallet,
+    assetId
   }: Accounts,
   { allocationSize, priceInLamports, saleType, tokenSize = 1 }: Args
 ): Promise<TransactionInstruction> {
@@ -48,9 +50,9 @@ export default async function auctionHouseCreateTradeStateIx(
     auctionHouse,
     auctionHouseProgramId,
     priceInLamports,
-    assetId,
+    // assetIdOwner,
     merkleTree,
-    // treasuryMint,
+    assetId,
     wallet,
   });
 
@@ -68,12 +70,13 @@ export default async function auctionHouseCreateTradeStateIx(
       authority,
       rent: SYSVAR_RENT_PUBKEY,
       systemProgram: SystemProgram.programId,
-      assetId,
+      // assetIdOwner,
       paymentAccount,
       treasuryMint, 
       merkleTree,
       tradeState,
-      wallet: wallet.publicKey,
+      wallet: wallet,
+      assetId
     })
     .instruction();
 }

@@ -9,7 +9,7 @@ use anchor_spl::{
 };
 use spl_token::instruction::approve;
 
-use mpl_bubblegum::{instructions::DelegateBuilder, utils::get_asset_id};
+// use mpl_bubblegum::{instructions::DelegateBuilder, utils::get_asset_id};
 
 use crate::{constants::*, utils::*, state::*, AuctionHouse, AuctionHouseError};
 
@@ -25,7 +25,9 @@ pub struct Sell<'info> {
     // )]
     /// CHECK: No need to deserialize.
     #[account(mut)]
-    payment_account: UncheckedAccount<'info>,
+    payment_account: Account<'info, TokenAccount>,
+    /// CHECK: No need to deserialize.
+    // asset_id_owner: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
     asset_id: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
@@ -64,6 +66,7 @@ pub struct Sell<'info> {
             merkle_tree.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
             // token_account.mint.as_ref(),
+            // asset_id_owner.key().as_ref(),
             asset_id.key().as_ref(),
             &buyer_price.to_le_bytes(),
             &token_size.to_le_bytes()
@@ -81,6 +84,7 @@ pub struct Sell<'info> {
             merkle_tree.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
             // token_account.mint.as_ref(),
+            // asset_id_owner.key().as_ref(),
             asset_id.key().as_ref(),
             &0u64.to_le_bytes(),
             &token_size.to_le_bytes()
@@ -139,7 +143,7 @@ pub fn handle_sell<'info>(
     let rent = &ctx.accounts.rent;
     let master_edition = &ctx.accounts.master_edition;
     let metaplex_token_metadata_program = &ctx.accounts.metaplex_token_metadata_program;
-    let asset_id = &ctx.accounts.asset_id;
+    // let asset_id_owner = &ctx.accounts.asset_id_owner;
     // let leaf_data = &leaf_data;
 
     let accounts = &mut ctx.remaining_accounts.iter();
@@ -155,8 +159,8 @@ pub fn handle_sell<'info>(
     
     assert_keys_equal(treasury_mint.key(), auction_house.treasury_mint)?;
     // check that the payment_account belongs to the seller
-    assert_token_account_owner(*payment_account.owner, wallet.key())?;
-    // assert_token_account_owner(*land_owner.key, wallet.key())?;
+    assert_token_account_owner(payment_account.owner, wallet.key())?;
+    assert_keys_equal(*land_owner.key, payment_account.owner)?;
 
     // validate asset_id
     // let token_asset_id = get_asset_id(
