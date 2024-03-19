@@ -69,50 +69,51 @@ describe("bid-auction-house", async () => {
   // fund mint account with dev-usdc
 
   it("should make an offer on un-listed asset", async () => {
-    let leafIndex = 0;
-    // dummy nft created
-    const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
-      merkleTree: publicKey(landMerkleTree),
-      leafIndex,
-    });
+    try {
+      let leafIndex = 1;
+      // dummy nft created
+      const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
+        merkleTree: publicKey(landMerkleTree),
+        leafIndex,
+      });
 
-    // USD
-    let cost = 22;
+      // USD
+      let cost = 22;
 
-    await auctionHouseSdk.buy(
-      bidder,
-      new anchor.web3.PublicKey(assetId.toString()),
-      landMerkleTree,
-      bidderAta.address,
-      cost,
-      leafIndex,
-      SaleType.Offer
-    );
-
-    const [escrowPaymentAccount, escrowBump] =
-      findAuctionHouseBidderEscrowAccount(
-        auctionHouseSdk.auctionHouse,
-        bidder.publicKey,
+      await auctionHouseSdk.buy(
+        bidder,
+        new anchor.web3.PublicKey(assetId.toString()),
         landMerkleTree,
-        program.programId
+        bidderAta.address,
+        cost,
+        leafIndex,
+        SaleType.Offer
       );
 
-    let acc = await getAssociatedTokenAddress(
-      auctionHouseSdk.mintAccount,
-      bidder.publicKey
-    );
+      const [escrowPaymentAccount, escrowBump] =
+        findAuctionHouseBidderEscrowAccount(
+          auctionHouseSdk.auctionHouse,
+          bidder.publicKey,
+          landMerkleTree,
+          program.programId
+        );
 
-    let acc_balance = await provider.connection.getTokenAccountBalance(acc);
+      let acc = await getAssociatedTokenAddress(
+        auctionHouseSdk.mintAccount,
+        bidder.publicKey
+      );
 
-    console.log(acc_balance);
+      let acc_balance = await provider.connection.getTokenAccountBalance(acc);
 
-    // // console.log(
-    // //   await this.provider.connection.getBalance(escrowPaymentAccount)
-    // // );
+      console.log(acc_balance);
 
-    // console.log(lastBidInfo);
+      // // console.log(
+      // //   await this.provider.connection.getBalance(escrowPaymentAccount)
+      // // );
 
-    try {
-    } catch (err: any) {}
+      // console.log(lastBidInfo);
+    } catch (err: any) {
+      console.log(err);
+    }
   });
 });

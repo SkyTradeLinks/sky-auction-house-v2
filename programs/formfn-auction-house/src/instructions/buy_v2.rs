@@ -13,7 +13,7 @@ use crate::{
 
 // Supports on-chain refunds
 #[derive(Accounts)]
-#[instruction(trade_state_bump: u8, escrow_payment_bump: u8, buyer_price: u64, auction_end_time: Option<i64>, leaf_index: u64, previous_bidder_escrow_payment_bump: u8)]
+#[instruction(trade_state_bump: u8, escrow_payment_bump: u8, buyer_price: u64, leaf_index: u64, auction_end_time: Option<i64>, previous_bidder_escrow_payment_bump: u8)]
 pub struct BuyV2<'info> {
     #[account(mut)]
     wallet: Signer<'info>,
