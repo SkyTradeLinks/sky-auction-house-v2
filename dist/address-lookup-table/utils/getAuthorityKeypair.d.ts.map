@@ -1,0 +1,1 @@
+{"version":3,"file":"getAuthorityKeypair.d.ts","sourceRoot":"","sources":["../../../src/address-lookup-table/utils/getAuthorityKeypair.ts"],"names":[],"mappings":"AAAA,OAAO,EAEL,WAAW,EACZ,MAAM,8CAA8C,CAAC;AACtD,OAAO,EAAE,OAAO,EAAE,MAAM,iBAAiB,CAAC;AAQ1C,MAAM,CAAC,OAAO,UAAU,mBAAmB,CAAC,WAAW,EAAE,WAAW,GAAG,OAAO,CAkB7E"}

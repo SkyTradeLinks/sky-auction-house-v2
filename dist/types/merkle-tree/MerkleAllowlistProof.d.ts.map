@@ -1,0 +1,1 @@
+{"version":3,"file":"MerkleAllowlistProof.d.ts","sourceRoot":"","sources":["../../../src/types/merkle-tree/MerkleAllowlistProof.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,MAAM,8CAA8C,CAAC;AAE9E,KAAK,oBAAoB,GAAG,KAAK,CAAC,cAAc,CAAC,CAAC;AAElD,eAAe,oBAAoB,CAAC"}

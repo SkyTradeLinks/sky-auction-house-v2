@@ -1,0 +1,1 @@
+{"version":3,"file":"getWalletIfNativeElseAta.d.ts","sourceRoot":"","sources":["../../../src/solana/utils/getWalletIfNativeElseAta.ts"],"names":[],"mappings":"AAIA,OAAO,EAAE,SAAS,EAAE,MAAM,iBAAiB,CAAC;AAE5C,wBAA8B,wBAAwB,CACpD,MAAM,EAAE,SAAS,EACjB,YAAY,EAAE,SAAS,gBAQxB"}
