@@ -1,1 +1,0 @@
-{"version":3,"file":"handleCreateTable.d.ts","sourceRoot":"","sources":["../../../src/address-lookup-table/utils/handleCreateTable.ts"],"names":[],"mappings":"AAAA,OAAO,EACL,WAAW,EAEZ,MAAM,8CAA8C,CAAC;AACtD,OAAO,EAEL,UAAU,EACV,SAAS,EAEV,MAAM,iBAAiB,CAAC;AAIzB,wBAA8B,iBAAiB,CAC7C,WAAW,EAAE,WAAW,EACxB,UAAU,EAAE,UAAU,GACrB,OAAO,CAAC,SAAS,CAAC,CA+BpB"}

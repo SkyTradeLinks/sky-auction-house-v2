@@ -12,8 +12,6 @@ import { SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 import { auctionHouseAuthority } from "../sdk/utils/constants";
 import { AuctionHouseSdk } from "../sdk/auction-house-sdk";
 
-
-
 describe("create-auction-house", async () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);

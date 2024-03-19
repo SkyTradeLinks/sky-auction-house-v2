@@ -1,4 +1,0 @@
-declare const INSTRUCTION_NAMES: ("appendEditionAllowlistMerkleRoots" | "buyEditionV2" | "buyV2" | "cancelV2" | "clearEditionAllowlistMerkleRoots" | "closeEditionAllowlistSettingsAccount" | "closeEditionDistributor" | "closeEditionDistributorTokenAccount" | "createAuctionHouse" | "createEditionDistributor" | "createLastBidPrice" | "createTradeState" | "deposit" | "executeSaleV2" | "sell" | "setEditionDistributorBotProtectionEnabled" | "setEditionDistributorLimitPerAddress" | "setHasBeenSold" | "setLastBidPrice" | "setPreviousBidder" | "setTickSize" | "thawDelegatedAccount" | "updateAuctionHouse" | "updateEditionDistributor" | "withdraw" | "withdrawBonk" | "withdrawFromFee" | "withdrawFromTreasury")[];
-type AuctionHouseInstructionName = typeof INSTRUCTION_NAMES[0];
-export default AuctionHouseInstructionName;
-//# sourceMappingURL=AuctionHouseInstructionName.d.ts.map

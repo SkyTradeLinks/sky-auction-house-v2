@@ -124,7 +124,7 @@ pub fn handle_buy_v2<'info>(
     auction_end_time: Option<i64>,
     previous_bidder_escrow_payment_bump: u8,
 ) -> Result<()> {
-    /* let wallet = &ctx.accounts.wallet;
+    let wallet = &ctx.accounts.wallet;
     let payment_account = &ctx.accounts.payment_account;
     let transfer_authority = &ctx.accounts.transfer_authority;
     let treasury_mint = &ctx.accounts.treasury_mint;
@@ -392,7 +392,7 @@ pub fn handle_buy_v2<'info>(
 
         last_bid_price.price = buyer_price;
         last_bid_price.bidder = Some(wallet.key());
-    } */
+    }
 
     Ok(())
 }

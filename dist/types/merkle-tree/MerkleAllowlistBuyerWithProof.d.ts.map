@@ -1,1 +1,0 @@
-{"version":3,"file":"MerkleAllowlistBuyerWithProof.d.ts","sourceRoot":"","sources":["../../../src/types/merkle-tree/MerkleAllowlistBuyerWithProof.ts"],"names":[],"mappings":"AAAA,OAAO,wBAAwB,MAAM,4CAA4C,CAAC;AAElF,UAAU,6BAA8B,SAAQ,wBAAwB;IACtE,eAAe,EAAE,MAAM,CAAC;IACxB,eAAe,EAAE,MAAM,CAAC;CACzB;AAED,eAAe,6BAA6B,CAAC"}
