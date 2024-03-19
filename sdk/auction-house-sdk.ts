@@ -19,6 +19,7 @@ import findLastBidPrice from "./pdas/findLastBidPrice";
 import auctionHouseCreateTradeStateIx from "./instructions/auctionHouseCreateTradeStateIx";
 import auctionHouseCreateLastBidPriceIx from "./instructions/auctionHouseCreateLastBidPriceIx";
 import auctionHouseSellIx from "./instructions/auctionHouseSellIx";
+import auctionHouseCancelV2Ix from "./instructions/auctionHouseCancelV2Ix";
 import { ixToTx, ixsToTx } from "./program_shared/instructions";
 import PdaResult from './types/PdaResult';
 import { BN } from "@coral-xyz/anchor";
@@ -223,7 +224,6 @@ export default class AuctionHouseSdk {
   async sell(
     saleType: SaleType,
     shouldCreateLastBidPriceIfNotExists: boolean,
- 
     assetId: PublicKey,
     {
       priceInLamports,
@@ -287,5 +287,41 @@ export default class AuctionHouseSdk {
       tradeStateIx,
       sellIx,
     ]);
+  }
+
+  async cancelTx(assetId: PublicKey,
+    {
+      priceInLamports,
+      leafDataOwner,
+      merkleTree,
+      wallet,
+      paymentAccount
+    }: {
+      priceInLamports: number;
+      leafDataOwner: PublicKey;
+      merkleTree: PublicKey;
+      wallet: PublicKey;
+      paymentAccount: PublicKey;
+    },
+    { tokenSize = 1 }: { tokenSize?: number }
+  ) {
+    const ix = await auctionHouseCancelV2Ix(
+      {
+        auctionHouse: this.auctionHouse,
+        auctionHouseProgramId: this.program.programId,
+        authority: auctionHouseAuthority.publicKey,
+        feeAccount: this.feeAccount,
+        priceInLamports,
+        program: this.program,
+        paymentAccount,
+        merkleTree,
+        leafDataOwner,
+        treasuryMint: this.mintAccount,
+        sellerWallet: wallet,
+        assetId
+      },
+      { tokenSize }
+    );
+    return ixToTx(ix);
   }
 }
