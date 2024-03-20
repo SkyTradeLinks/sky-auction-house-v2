@@ -261,6 +261,7 @@ export class AuctionHouseSdk {
         this.auctionHouse,
         buyer,
         merkleTree,
+        assetId,
         this.program.programId
       );
 
@@ -270,7 +271,7 @@ export class AuctionHouseSdk {
     ] = findAuctionHouseBidderEscrowAccount(
       this.auctionHouse,
       previousBidder,
-      merkleTree,
+      merkleTree,assetId,
       this.program.programId
     );
 
@@ -407,6 +408,7 @@ export class AuctionHouseSdk {
     assetId,
     this.mintAccount,
     merkleTree,
+    
     normalizedPrice,
     this.program.programId
   );
@@ -418,6 +420,7 @@ export class AuctionHouseSdk {
     this.auctionHouse,
     buyer.publicKey,
     merkleTree,
+    assetId,
     this.program.programId
   );
 
@@ -430,6 +433,7 @@ export class AuctionHouseSdk {
   this.auctionHouse,
   lastBidInfo.bidder,
   merkleTree,
+  assetId,
   this.program.programId
 ); 
 

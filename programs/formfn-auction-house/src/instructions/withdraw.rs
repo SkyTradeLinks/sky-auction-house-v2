@@ -83,6 +83,7 @@ pub fn handle_withdraw(ctx: Context<Withdraw>, escrow_payment_bump: u8, amount: 
         auction_house_fee_account,
         &treasury_mint.to_account_info(),
         token_mint,
+        token_mint,
         system_program,
         token_program,
         ata_program,

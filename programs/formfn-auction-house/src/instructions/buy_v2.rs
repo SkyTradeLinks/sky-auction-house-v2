@@ -37,7 +37,7 @@ pub struct BuyV2<'info> {
             PREFIX.as_bytes(),
             auction_house.key().as_ref(),
             wallet.key().as_ref(),
-            merkle_tree.key().as_ref()
+            asset_id.key().as_ref()
         ],
         bump = escrow_payment_bump
     )]
@@ -102,7 +102,8 @@ pub struct BuyV2<'info> {
             PREFIX.as_bytes(),
             auction_house.key().as_ref(),
             previous_bidder_wallet.key().as_ref(),
-            merkle_tree.key().as_ref()
+            
+            asset_id.key().as_ref()
         ],
         bump = previous_bidder_escrow_payment_bump
     )]
@@ -195,12 +196,13 @@ pub fn handle_buy_v2<'info>(
     let auction_house_key = auction_house.key();
     let wallet_key = wallet.key();
     let merkle_tree_key = merkle_tree.key();
-
+    let asset_id_key=asset_id.key();
     let escrow_signer_seeds = [
         PREFIX.as_bytes(),
         auction_house_key.as_ref(),
         wallet_key.as_ref(),
-        merkle_tree_key.as_ref(),
+        
+        asset_id_key.as_ref(),
         &[escrow_payment_bump],
     ];
 
@@ -282,7 +284,7 @@ pub fn handle_buy_v2<'info>(
     buyer_trade_state_data[0] = trade_state_bump;
 
     // Execute various checks and other business logic based on the type of sale
-    if buyer_trade_state_data_len > 1 {
+     if buyer_trade_state_data_len > 1 {
         // Manually "deserialize" data here instead of relying on anchor since we
         // use `create_or_allocate_account_raw` to initialize these accounts using a
         // dynamic fee_payer (vs. Anchor where we need to specify fee_payer)
@@ -321,6 +323,7 @@ pub fn handle_buy_v2<'info>(
                             auction_house_fee_account,
                             &treasury_mint.to_account_info(),
                             merkle_tree,
+                            asset_id,
                             system_program,
                             token_program,
                             ata_program,
@@ -341,6 +344,8 @@ pub fn handle_buy_v2<'info>(
                     // If sale type for buy is not auction and auction is already
                     // in progress, do not allow
                     return Err(AuctionHouseError::CannotPlaceOfferWhileOnAuction.into());
+                }else{
+                    //add checks for updating the bid.
                 }
             }
             _ => {
@@ -379,6 +384,7 @@ pub fn handle_buy_v2<'info>(
                     auction_house_fee_account,
                     &treasury_mint.to_account_info(),
                     merkle_tree,
+                    asset_id,
                     system_program,
                     token_program,
                     ata_program,
@@ -393,6 +399,6 @@ pub fn handle_buy_v2<'info>(
         last_bid_price.price = buyer_price;
         last_bid_price.bidder = Some(wallet.key());
     } 
-
+ 
     Ok(())
 }

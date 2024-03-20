@@ -70,7 +70,7 @@ describe("bid-auction-house", async () => {
 
   it("should make an offer on un-listed asset", async () => {
     try {
-      let leafIndex = 3;
+      let leafIndex = 5;
       // dummy nft created
       const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
         merkleTree: publicKey(landMerkleTree),
@@ -78,7 +78,7 @@ describe("bid-auction-house", async () => {
       });
 
       // USD
-      let cost = 5;
+      let cost = 7;
 
       await auctionHouseSdk.buy(
         bidder,
@@ -95,6 +95,7 @@ describe("bid-auction-house", async () => {
           auctionHouseSdk.auctionHouse,
           bidder.publicKey,
           landMerkleTree,
+          new anchor.web3.PublicKey(assetId.toString()),
           program.programId
         );
 
