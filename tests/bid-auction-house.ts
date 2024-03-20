@@ -70,7 +70,7 @@ describe("bid-auction-house", async () => {
 
   it("should make an offer on un-listed asset", async () => {
     try {
-      let leafIndex = 1;
+      let leafIndex = 3;
       // dummy nft created
       const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
         merkleTree: publicKey(landMerkleTree),
@@ -78,7 +78,7 @@ describe("bid-auction-house", async () => {
       });
 
       // USD
-      let cost = 22;
+      let cost = 5;
 
       await auctionHouseSdk.buy(
         bidder,
@@ -106,12 +106,18 @@ describe("bid-auction-house", async () => {
       let acc_balance = await provider.connection.getTokenAccountBalance(acc);
 
       console.log(acc_balance);
+      console.log('es',escrowPaymentAccount)
 
       // // console.log(
       // //   await this.provider.connection.getBalance(escrowPaymentAccount)
       // // );
+      
+      /* const [lastBidPrice] = auctionHouseSdk.findLastBidPrice(assetId);
+      let lastBidInfo = await auctionHouseSdk.program.account.lastBidPrice.fetch(
+        lastBidPrice
+      );
 
-      // console.log(lastBidInfo);
+       console.log(lastBidInfo); */
     } catch (err: any) {
       console.log(err);
     }
