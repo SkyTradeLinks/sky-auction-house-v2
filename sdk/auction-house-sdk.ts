@@ -1,4 +1,3 @@
-
 import * as anchor from "@coral-xyz/anchor";
 // import { createMint } from "@solana/spl-token";
 import {
@@ -7,39 +6,43 @@ import {
   TREASURY,
   auctionHouseAuthority,
 } from "./utils/constants";
-import { LAMPORTS_PER_SOL, PublicKey ,  sendAndConfirmTransaction,
+import {
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  sendAndConfirmTransaction,
   SendOptions,
   Transaction,
   TransactionMessage,
-  VersionedTransaction, Signer} from "@solana/web3.js";
+  VersionedTransaction,
+  Signer,
+} from "@solana/web3.js";
 import { getUSDC, setupAirDrop } from "./utils/helper";
 import { AuctionHouse } from "../target/types/auction_house";
-import  SaleType from "./types/SaleType";
+import SaleType from "./types/SaleType";
 import findLastBidPrice from "./pdas/findLastBidPrice";
 import auctionHouseCreateTradeStateIx from "./instructions/auctionHouseCreateTradeStateIx";
 import auctionHouseCreateLastBidPriceIx from "./instructions/auctionHouseCreateLastBidPriceIx";
 import auctionHouseSellIx from "./instructions/auctionHouseSellIx";
+import auctionHouseDepositIx from "./instructions/auctionHouseDepositIx";
 import auctionHouseCancelV2Ix from "./instructions/auctionHouseCancelV2Ix";
 import { ixToTx, ixsToTx } from "./program_shared/instructions";
-import PdaResult from './types/PdaResult';
+import PdaResult from "./types/PdaResult";
 import { BN } from "@coral-xyz/anchor";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import {
-    mintV1,
-    mplBubblegum,
-    createTree,
-    findLeafAssetIdPda,
-    parseLeafFromMintV1Transaction,
-    LeafSchema,
-    getAssetWithProof,
-    transfer,
-    fetchMerkleTree
-} from '@metaplex-foundation/mpl-bubblegum'
-
+  mintV1,
+  mplBubblegum,
+  createTree,
+  findLeafAssetIdPda,
+  parseLeafFromMintV1Transaction,
+  LeafSchema,
+  getAssetWithProof,
+  transfer,
+  fetchMerkleTree,
+} from "@metaplex-foundation/mpl-bubblegum";
 
 const SIGNATURE_SIZE = 64;
 const MAX_SUPPORTED_TRANSACTION_VERSION = 0;
-
 
 export default class AuctionHouseSdk {
   private static instance: AuctionHouseSdk;
@@ -61,7 +64,7 @@ export default class AuctionHouseSdk {
     private readonly provider: anchor.AnchorProvider
   ) {
     const umi = createUmi(provider.connection.rpcEndpoint).use(mplBubblegum());
-    this.umi = umi
+    this.umi = umi;
   }
 
   getCustomUmi() {
@@ -128,14 +131,13 @@ export default class AuctionHouseSdk {
     this.treasuryBump = treasuryBump;
   }
 
-
   private createTradeState(
     {
       merkleTree,
       paymentAccount,
       wallet,
       // assetIdOwner,
-      assetId
+      assetId,
     }: {
       merkleTree: PublicKey;
       paymentAccount: PublicKey;
@@ -155,7 +157,6 @@ export default class AuctionHouseSdk {
       tokenSize?: number;
     }
   ) {
-
     return auctionHouseCreateTradeStateIx(
       {
         auctionHouse: this.auctionHouse,
@@ -168,7 +169,7 @@ export default class AuctionHouseSdk {
         // assetIdOwner,
         treasuryMint: this.mintAccount,
         wallet,
-        assetId
+        assetId,
       },
       {
         allocationSize,
@@ -177,7 +178,6 @@ export default class AuctionHouseSdk {
         tokenSize,
       }
     );
-
   }
 
   async createLastBidPriceTx({
@@ -200,7 +200,11 @@ export default class AuctionHouseSdk {
   }
 
   async findLastBidPrice(treasuryMint: PublicKey) {
-    return findLastBidPrice(treasuryMint, this.program.programId, this.auctionHouse);
+    return findLastBidPrice(
+      treasuryMint,
+      this.program.programId,
+      this.auctionHouse
+    );
   }
 
   private async createLastBidPriceIfNotExistsTx({
@@ -211,15 +215,14 @@ export default class AuctionHouseSdk {
     wallet: PublicKey;
   }) {
     const [lastBidPrice] = await this.findLastBidPrice(treasuryMint);
-    const lastBidPriceAccount = await this.program.provider.connection.getAccountInfo(lastBidPrice);
+    const lastBidPriceAccount =
+      await this.program.provider.connection.getAccountInfo(lastBidPrice);
     if (lastBidPriceAccount != null) {
       return null;
     }
 
     return this.createLastBidPriceTx({ treasuryMint, wallet });
   }
-
-
 
   async sell(
     saleType: SaleType,
@@ -230,7 +233,7 @@ export default class AuctionHouseSdk {
       leafDataOwner,
       merkleTree,
       wallet,
-      paymentAccount
+      paymentAccount,
     }: {
       priceInLamports: number;
       leafDataOwner: PublicKey;
@@ -247,17 +250,22 @@ export default class AuctionHouseSdk {
         // assetIdOwner,
         wallet,
         paymentAccount,
-        assetId
+        assetId,
       },
       {
         priceInLamports,
         saleType,
         tokenSize,
       }
-    )
+    );
 
-    const [createLastBidPriceTx, sellIx] = await Promise.all([shouldCreateLastBidPriceIfNotExists
-      ? this.createLastBidPriceIfNotExistsTx({ treasuryMint: this.mintAccount, wallet }) : null,
+    const [createLastBidPriceTx, sellIx] = await Promise.all([
+      shouldCreateLastBidPriceIfNotExists
+        ? this.createLastBidPriceIfNotExistsTx({
+            treasuryMint: this.mintAccount,
+            wallet,
+          })
+        : null,
       auctionHouseSellIx(
         {
           auctionHouse: this.auctionHouse,
@@ -271,9 +279,9 @@ export default class AuctionHouseSdk {
           treasuryMint: this.mintAccount,
           sellerWallet: wallet,
           paymentAccount,
-          assetId
+          assetId,
         },
-        { tokenSize}
+        { tokenSize }
       ),
     ]);
 
@@ -289,13 +297,14 @@ export default class AuctionHouseSdk {
     ]);
   }
 
-  async cancelTx(assetId: PublicKey,
+  async cancelTx(
+    assetId: PublicKey,
     {
       priceInLamports,
       leafDataOwner,
       merkleTree,
       wallet,
-      paymentAccount
+      paymentAccount,
     }: {
       priceInLamports: number;
       leafDataOwner: PublicKey;
@@ -318,9 +327,41 @@ export default class AuctionHouseSdk {
         leafDataOwner,
         treasuryMint: this.mintAccount,
         sellerWallet: wallet,
-        assetId
+        assetId,
       },
       { tokenSize }
+    );
+    return ixToTx(ix);
+  }
+
+  async depositTx(
+    {
+      paymentAccount,
+      transferAuthority,
+      wallet,
+    }: {
+      paymentAccount?: PublicKey;
+      transferAuthority: PublicKey;
+      wallet: PublicKey;
+    },
+    { amount }: { amount: number }
+  ) {
+    const ix = await auctionHouseDepositIx(
+      {
+        auctionHouse: this.auctionHouse,
+        auctionHouseProgramId: this.program.programId,
+        authority: auctionHouseAuthority.publicKey,
+        feeAccount: this.feeAccount,
+        paymentAccount,
+        // paymentAccount:
+        //   paymentAccount ??
+        //   (await getWalletIfNativeElseAta(wallet, this.mintAccount)),
+        program: this.program,
+        transferAuthority,
+        auctionHouseTreasuryMint: this.mintAccount,
+        wallet,
+      },
+      { amount }
     );
     return ixToTx(ix);
   }

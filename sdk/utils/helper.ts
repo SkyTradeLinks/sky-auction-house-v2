@@ -15,6 +15,15 @@ export const loadKeyPair = (filename) => {
 };
 
 export const loadKeyPairV2 = (key) => {
+  console.log(key);
+  // const walletFile = "/home/chukky_/.config/solana/id.json";
+  // const walletContents = fs.readFileSync(walletFile, "utf-8");
+  // console.log("Passed Walletcontents:", JSON.parse(walletContents));
+
+  // const decodedKey = new Uint8Array(JSON.parse(walletContents).toString());
+  // console.log("Decodede Key...", decodedKey);
+  // // const walletData = JSON.parse(walletContents);
+  // let keyPair = anchor.web3.Keypair.fromSecretKey(decodedKey);
   const decodedKey = new Uint8Array(JSON.parse(key));
 
   const keyPair = anchor.web3.Keypair.fromSecretKey(decodedKey);

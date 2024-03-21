@@ -14,6 +14,8 @@ pub struct Deposit<'info> {
     #[account(mut)]
     payment_account: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
+    // asset_id: UncheckedAccount<'info>,
+    /// CHECK: No need to deserialize.
     transfer_authority: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
     #[account(
@@ -22,7 +24,8 @@ pub struct Deposit<'info> {
             PREFIX.as_bytes(),
             auction_house.key().as_ref(),
             wallet.key().as_ref(),
-            token_mint.key().as_ref()
+            // asset_id().as_ref(),
+            auction_house.treasury_mint.as_ref()
         ],
         bump = escrow_payment_bump
     )]
@@ -55,7 +58,7 @@ pub struct Deposit<'info> {
     )]
     auction_house_fee_account: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
-    token_mint: UncheckedAccount<'info>,
+    // token_mint: UncheckedAccount<'info>,
     token_program: Program<'info, Token>,
     system_program: Program<'info, System>,
     rent: Sysvar<'info, Rent>,
@@ -70,7 +73,7 @@ pub fn handle_deposit(ctx: Context<Deposit>, escrow_payment_bump: u8, amount: u6
     let auction_house = &ctx.accounts.auction_house;
     let auction_house_fee_account = &ctx.accounts.auction_house_fee_account;
     let treasury_mint = &ctx.accounts.treasury_mint;
-    let token_mint = &ctx.accounts.token_mint;
+    // let token_mint = &ctx.accounts.token_mint;
     let system_program = &ctx.accounts.system_program;
     let token_program = &ctx.accounts.token_program;
     let rent = &ctx.accounts.rent;
@@ -83,13 +86,13 @@ pub fn handle_deposit(ctx: Context<Deposit>, escrow_payment_bump: u8, amount: u6
         &[auction_house.fee_payer_bump],
     ];
     let wallet_key = wallet.key();
-    let token_mint_key = token_mint.key();
+    let treasury_mint_key = treasury_mint.key();
 
     let escrow_signer_seeds = [
         PREFIX.as_bytes(),
         auction_house_key.as_ref(),
         wallet_key.as_ref(),
-        token_mint_key.as_ref(),
+        treasury_mint_key.as_ref(),
         &[escrow_payment_bump],
     ];
 
@@ -101,22 +104,22 @@ pub fn handle_deposit(ctx: Context<Deposit>, escrow_payment_bump: u8, amount: u6
         &seeds,
     )?;
 
-    let is_native = treasury_mint.key() == spl_token::native_mint::id();
+    // let is_native = treasury_mint.key() == spl_token::native_mint::id();
 
-    create_program_token_account_if_not_present(
-        escrow_payment_account,
-        system_program,
-        &fee_payer,
-        token_program,
-        treasury_mint,
-        &auction_house.to_account_info(),
-        rent,
-        &escrow_signer_seeds,
-        fee_seeds,
-        is_native,
-    )?;
+    // create_program_token_account_if_not_present(
+    //     escrow_payment_account,
+    //     system_program,
+    //     &fee_payer,
+    //     token_program,
+    //     treasury_mint,
+    //     &auction_house.to_account_info(),
+    //     rent,
+    //     &escrow_signer_seeds,
+    //     fee_seeds,
+    //     is_native,
+    // )?;
 
-    if !is_native {
+    // if !is_native {
         assert_is_ata(payment_account, &wallet.key(), &treasury_mint.key())?;
         invoke(
             &spl_token::instruction::transfer(
@@ -134,21 +137,21 @@ pub fn handle_deposit(ctx: Context<Deposit>, escrow_payment_bump: u8, amount: u6
                 transfer_authority.to_account_info(),
             ],
         )?;
-    } else {
-        assert_keys_equal(payment_account.key(), wallet.key())?;
-        invoke(
-            &system_instruction::transfer(
-                &payment_account.key(),
-                &escrow_payment_account.key(),
-                amount,
-            ),
-            &[
-                escrow_payment_account.to_account_info(),
-                payment_account.to_account_info(),
-                system_program.to_account_info(),
-            ],
-        )?;
-    }
+    // } else {
+    //     assert_keys_equal(payment_account.key(), wallet.key())?;
+    //     invoke(
+    //         &system_instruction::transfer(
+    //             &payment_account.key(),
+    //             &escrow_payment_account.key(),
+    //             amount,
+    //         ),
+    //         &[
+    //             escrow_payment_account.to_account_info(),
+    //             payment_account.to_account_info(),
+    //             system_program.to_account_info(),
+    //         ],
+    //     )?;
+    // }
 
     Ok(())
 }
