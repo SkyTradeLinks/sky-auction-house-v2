@@ -52,7 +52,6 @@ pub struct CreateTradeState<'info> {
             asset_id.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
             merkle_tree.key().as_ref(),
-            &buyer_price.to_le_bytes(),
         ],
         bump = trade_state_bump
     )]
@@ -89,7 +88,6 @@ pub fn handle_create_trade_state<'info>(
     };
 
     //  validate ownership (assetid is part of merkle_tree?)
-
     // assert_valid_nft(&asset_id.key(), &merkle_tree.key(), leaf_index)?;
 
     if !wallet.to_account_info().is_signer && !authority.to_account_info().is_signer {
@@ -98,54 +96,60 @@ pub fn handle_create_trade_state<'info>(
 
     let ts_info = trade_state.to_account_info();
     if !ts_info.data_is_empty() {
-        return Err(AuctionHouseError::TradeStateAlreadyInitialized.into());
-    }
+        let data = &mut ts_info.data.borrow_mut();
 
-    let auction_house_key = auction_house.key();
-    let seeds = [
-        PREFIX.as_bytes(),
-        auction_house_key.as_ref(),
-        FEE_PAYER.as_bytes(),
-        &[auction_house.fee_payer_bump],
-    ];
+        if trade_state_allocation_size > (1 as usize) {
+            data[1] = sale_type;
+            data[2..10].copy_from_slice(&price.to_le_bytes())
+        }
+    } else {
+        let auction_house_key = auction_house.key();
+        let seeds = [
+            PREFIX.as_bytes(),
+            auction_house_key.as_ref(),
+            FEE_PAYER.as_bytes(),
+            &[auction_house.fee_payer_bump],
+        ];
 
-    let (fee_payer, fee_seeds) = get_fee_payer(
-        authority,
-        auction_house,
-        wallet.to_account_info(),
-        auction_house_fee_account.to_account_info(),
-        &seeds,
-    )?;
-    let asset_id_key = asset_id.key();
-    let merkle_tree_key = merkle_tree.key();
-    let wallet_key = wallet.key();
+        let (fee_payer, fee_seeds) = get_fee_payer(
+            authority,
+            auction_house,
+            wallet.to_account_info(),
+            auction_house_fee_account.to_account_info(),
+            &seeds,
+        )?;
+        let asset_id_key = asset_id.key();
+        let merkle_tree_key = merkle_tree.key();
+        let wallet_key = wallet.key();
 
-    let ts_seeds = [
-        PREFIX.as_bytes(),
-        wallet_key.as_ref(),
-        auction_house_key.as_ref(),
-        asset_id_key.as_ref(),
-        auction_house.treasury_mint.as_ref(),
-        merkle_tree_key.as_ref(),
-        &price.to_le_bytes(),
-        &[trade_state_bump],
-    ];
+        let ts_seeds = [
+            PREFIX.as_bytes(),
+            wallet_key.as_ref(),
+            auction_house_key.as_ref(),
+            asset_id_key.as_ref(),
+            auction_house.treasury_mint.as_ref(),
+            merkle_tree_key.as_ref(),
+            // &price.to_le_bytes(),
+            &[trade_state_bump],
+        ];
 
-    create_or_allocate_account_raw(
-        *ctx.program_id,
-        &ts_info,
-        &rent.to_account_info(),
-        &system_program,
-        &fee_payer,
-        trade_state_allocation_size,
-        fee_seeds,
-        &ts_seeds,
-    )?;
+        create_or_allocate_account_raw(
+            *ctx.program_id,
+            &ts_info,
+            &rent.to_account_info(),
+            &system_program,
+            &fee_payer,
+            trade_state_allocation_size,
+            fee_seeds,
+            &ts_seeds,
+        )?;
 
-    let data = &mut ts_info.data.borrow_mut();
-    data[0] = trade_state_bump;
-    if trade_state_allocation_size > (1 as usize) {
-        data[1] = sale_type;
+        let data = &mut ts_info.data.borrow_mut();
+        data[0] = trade_state_bump;
+        if trade_state_allocation_size > (1 as usize) {
+            data[1] = sale_type;
+            data[2..10].copy_from_slice(&price.to_le_bytes())
+        }
     }
 
     Ok(())

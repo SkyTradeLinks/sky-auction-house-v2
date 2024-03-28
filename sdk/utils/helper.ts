@@ -6,7 +6,11 @@ import {
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import { createMint } from "@solana/spl-token";
-import { AUCTION_HOUSE, auctionHouseAuthority } from "./constants";
+import {
+  AUCTION_HOUSE,
+  LAST_BID_PRICE,
+  auctionHouseAuthority,
+} from "./constants";
 
 export const loadKeyPair = (filename) => {
   const decodedKey = new Uint8Array(
@@ -76,7 +80,7 @@ export const findAuctionHouseBidderEscrowAccount = (
   auctionHouse: PublicKey,
   wallet: PublicKey,
   merkleTree: PublicKey,
-  assetId:PublicKey,
+  assetId: PublicKey,
   auctionHouseProgramId: PublicKey
 ) => {
   return PublicKey.findProgramAddressSync(
@@ -84,8 +88,8 @@ export const findAuctionHouseBidderEscrowAccount = (
       Buffer.from(AUCTION_HOUSE),
       auctionHouse.toBuffer(),
       wallet.toBuffer(),
-      
-      assetId.toBuffer()
+
+      assetId.toBuffer(),
     ],
     auctionHouseProgramId
   );
@@ -108,8 +112,19 @@ export const findAuctionHouseTradeState = (
       assetId.toBuffer(),
       treasuryMint.toBuffer(),
       merkleTree.toBuffer(),
-      buyPrice.toArrayLike(Buffer, "le", 8),
+      // buyPrice.toArrayLike(Buffer, "le", 8),
     ],
+    auctionHouseProgramId
+  );
+};
+
+export const findLastBidPrice = (
+  auctionHouse: PublicKey,
+  assetId: anchor.web3.PublicKey,
+  auctionHouseProgramId: PublicKey
+) => {
+  return anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from(LAST_BID_PRICE), auctionHouse.toBuffer(), assetId.toBuffer()],
     auctionHouseProgramId
   );
 };

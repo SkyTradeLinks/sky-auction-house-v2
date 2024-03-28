@@ -23,5 +23,6 @@ impl std::fmt::Display for TradeStateSaleType {
 
 pub const TRADE_STATE_SIZE_U16: u16 = 1 + // bump
 1 + // sale type Enum
+8 + // current buyer price
 128; // padding
 pub const TRADE_STATE_SIZE: usize = TRADE_STATE_SIZE_U16 as usize;

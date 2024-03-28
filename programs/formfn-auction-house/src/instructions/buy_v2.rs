@@ -8,15 +8,16 @@ use anchor_spl::{
 };
 
 use crate::{
-    constants::*, utils::*, AuctionHouse, AuctionHouseError, LastBidPrice, TradeStateSaleType,
+    constants::*, utils::*, AuctionHouse, AuctionHouseError, LastBidPrice, TradeStateSaleType, TRADE_STATE_SIZE,
 };
 
 // Supports on-chain refunds
 #[derive(Accounts)]
-#[instruction(trade_state_bump: u8, escrow_payment_bump: u8, buyer_price: u64, leaf_index: u64, auction_end_time: Option<i64>, previous_bidder_escrow_payment_bump: u8)]
+#[instruction(trade_state_bump: u8, escrow_payment_bump: u8, buyer_price: u64, leaf_index: u64, sale_type: u8, auction_end_time: Option<i64>, previous_bidder_escrow_payment_bump: u8)]
 pub struct BuyV2<'info> {
+    /// CHECK: No need to deserialize.
     #[account(mut)]
-    wallet: Signer<'info>,
+    wallet: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
     #[account(mut)]
     payment_account: UncheckedAccount<'info>,
@@ -77,7 +78,6 @@ pub struct BuyV2<'info> {
             asset_id.key().as_ref(),
             treasury_mint.key().as_ref(),
             merkle_tree.key().as_ref(),
-            &buyer_price.to_le_bytes(),
         ],
         bump = trade_state_bump
     )]
@@ -121,6 +121,7 @@ pub fn handle_buy_v2<'info>(
     escrow_payment_bump: u8,
     buyer_price: u64,
     leaf_index: u64,
+    sale_type: u8,
     // Unix time (seconds since epoch)
     auction_end_time: Option<i64>,
     previous_bidder_escrow_payment_bump: u8,
@@ -145,6 +146,7 @@ pub fn handle_buy_v2<'info>(
     let rent = &ctx.accounts.rent;
     let clock = &ctx.accounts.clock;
 
+
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
 
     assert_valid_nft(&asset_id.key(), &merkle_tree.key(), leaf_index)?;
@@ -163,8 +165,6 @@ pub fn handle_buy_v2<'info>(
         &ctx.accounts.previous_bidder_escrow_payment_account;
     let ata_program = &ctx.accounts.ata_program;
 
-    let sale_type = get_trade_state_sale_type(&buyer_trade_state.to_account_info());
-    msg!("buyer_sale_type = {}", sale_type);
 
     match auction_end_time {
         None => {
@@ -195,13 +195,12 @@ pub fn handle_buy_v2<'info>(
 
     let auction_house_key = auction_house.key();
     let wallet_key = wallet.key();
-    let merkle_tree_key = merkle_tree.key();
+
     let asset_id_key=asset_id.key();
     let escrow_signer_seeds = [
         PREFIX.as_bytes(),
         auction_house_key.as_ref(),
         wallet_key.as_ref(),
-        
         asset_id_key.as_ref(),
         &[escrow_payment_bump],
     ];
@@ -219,6 +218,152 @@ pub fn handle_buy_v2<'info>(
         is_native,
     )?;
 
+
+
+    let ts_info = buyer_trade_state.to_account_info();
+    if ts_info.data_is_empty() {
+        let wallet_key = wallet.key();
+
+        let asset_id_key = asset_id.key;
+        let ts_seeds = [
+            PREFIX.as_bytes(),
+            wallet_key.as_ref(),
+            auction_house_key.as_ref(),
+            asset_id_key.as_ref(),
+            auction_house.treasury_mint.as_ref(),
+            merkle_tree.key.as_ref(),
+            &[trade_state_bump],
+        ];
+        create_or_allocate_account_raw(
+            *ctx.program_id,
+            &ts_info,
+            &rent.to_account_info(),
+            &system_program,
+            &fee_payer,
+            TRADE_STATE_SIZE,
+            fee_seeds,
+            &ts_seeds,
+        )?;
+    }
+
+    let buyer_trade_state_data = &mut ts_info.data.borrow_mut();
+    buyer_trade_state_data[0] = trade_state_bump;
+    buyer_trade_state_data[1] = sale_type;
+
+
+
+
+
+    // if price in trade_state, compare against buyer_price, and then withdraw based off stuff
+
+    
+
+    // Execute various checks and other business logic based on the type of sale
+    // Manually "deserialize" data here instead of relying on anchor since we
+    // use `create_or_allocate_account_raw` to initialize these accounts using a
+    // dynamic fee_payer (vs. Anchor where we need to specify fee_payer)
+    let buyer_sale_type = buyer_trade_state_data[1];
+
+
+    let mut deposit = buyer_price;
+
+    // https://stackoverflow.com/a/28029667
+    match buyer_sale_type {
+        sale_type if sale_type == TradeStateSaleType::Auction as u8 => {
+            if last_bid_price.price > 0 {
+                let min_price_diff = get_min_price_diff_in_lamports(
+                    last_bid_price.price,
+                    last_bid_price.tick_size_constant_in_lamports,
+                    treasury_mint.decimals,
+                )?;
+                let min_price = last_bid_price
+                    .price
+                    .checked_add(min_price_diff)
+                    .ok_or(AuctionHouseError::NumericalOverflow)?;
+                if buyer_price < min_price {
+                    return Err(AuctionHouseError::BidTooLow.into());
+                }
+            }
+
+            if let Some(last_bid_price_bidder) = last_bid_price.bidder {
+                if last_bid_price.price > 0 && last_bid_price_bidder != ZERO_PUBKEY {
+                    if previous_bidder_wallet.key() != last_bid_price_bidder {
+                        return Err(AuctionHouseError::PreviousBidderIncorrect.into());
+                    }
+
+                    withdraw_helper(
+                        previous_bidder_wallet,
+                        previous_bidder_refund_account,
+                        previous_bidder_escrow_payment_account,
+                        authority,
+                        auction_house,
+                        auction_house_fee_account,
+                        &treasury_mint.to_account_info(),
+                        merkle_tree,
+                        asset_id,
+                        system_program,
+                        token_program,
+                        ata_program,
+                        rent,
+                        previous_bidder_escrow_payment_bump,
+                        last_bid_price.price,
+                        false,
+                    )?;
+                }
+            }
+
+            // Only set last bid price if this is for an auction
+            last_bid_price.price = buyer_price;
+            last_bid_price.bidder = Some(wallet.key());
+        }
+        sale_type if sale_type == TradeStateSaleType::Offer as u8 => {
+            if last_bid_price.price > 0 || last_bid_price.bidder != Some(ZERO_PUBKEY) {
+                // If sale type for buy is not auction and auction is already
+                // in progress, do not allow
+                return Err(AuctionHouseError::CannotPlaceOfferWhileOnAuction.into());
+            }else{
+                //add checks for updating the bid.
+                let current_trade_state_price = u64::from_le_bytes(buyer_trade_state_data[2..10].try_into().unwrap());
+
+                msg!(current_trade_state_price.to_string().as_str());
+
+                if current_trade_state_price > buyer_price {
+                    // withdraw the difference
+                    withdraw_helper(
+                        wallet,
+                        payment_account,
+                        escrow_payment_account,
+                        authority,
+                        auction_house,
+                        auction_house_fee_account,
+                        &treasury_mint.to_account_info(),
+                        merkle_tree,
+                        asset_id,
+                        system_program,
+                        token_program,
+                        ata_program,
+                        rent,
+                        escrow_payment_bump,
+                        current_trade_state_price,
+                        false,
+                    )?;
+                } else if current_trade_state_price <  buyer_price {
+
+                    deposit =  buyer_price - current_trade_state_price;
+
+                } else {
+                    // throw error
+                    return Err(AuctionHouseError::InvalidTokenAmount.into());
+                }
+            }
+        }
+        
+        _ => {
+            // Do nothing
+        }
+    }
+
+    // do transfer_at_the_end
     if is_native {
         assert_keys_equal(wallet.key(), payment_account.key())?;
 
@@ -226,7 +371,7 @@ pub fn handle_buy_v2<'info>(
             &system_instruction::transfer(
                 &payment_account.key(),
                 &escrow_payment_account.key(),
-                buyer_price,
+                deposit,
             ),
             &[
                 payment_account.to_account_info(),
@@ -242,7 +387,7 @@ pub fn handle_buy_v2<'info>(
                 &escrow_payment_account.key(),
                 &transfer_authority.key(),
                 &[],
-                buyer_price,
+                deposit,
             )?,
             &[
                 transfer_authority.to_account_info(),
@@ -253,152 +398,10 @@ pub fn handle_buy_v2<'info>(
         )?;
     }
 
-    let ts_info = buyer_trade_state.to_account_info();
-    if ts_info.data_is_empty() {
-        let wallet_key = wallet.key();
+    // keep current price
+    buyer_trade_state_data[2..10].copy_from_slice(&buyer_price.to_le_bytes());
 
-        let asset_id_key = asset_id.key;
-        let ts_seeds = [
-            PREFIX.as_bytes(),
-            wallet_key.as_ref(),
-            auction_house_key.as_ref(),
-            asset_id_key.as_ref(),
-            auction_house.treasury_mint.as_ref(),
-            merkle_tree.key.as_ref(),
-            &buyer_price.to_le_bytes(),
-            &[trade_state_bump],
-        ];
-        create_or_allocate_account_raw(
-            *ctx.program_id,
-            &ts_info,
-            &rent.to_account_info(),
-            &system_program,
-            &fee_payer,
-            1 as usize,
-            fee_seeds,
-            &ts_seeds,
-        )?;
-    }
-    let buyer_trade_state_data_len = ts_info.data_len();
-    let buyer_trade_state_data = &mut ts_info.data.borrow_mut();
-    buyer_trade_state_data[0] = trade_state_bump;
-
-    // Execute various checks and other business logic based on the type of sale
-     if buyer_trade_state_data_len > 1 {
-        // Manually "deserialize" data here instead of relying on anchor since we
-        // use `create_or_allocate_account_raw` to initialize these accounts using a
-        // dynamic fee_payer (vs. Anchor where we need to specify fee_payer)
-        let buyer_sale_type = buyer_trade_state_data[1];
-
-        // https://stackoverflow.com/a/28029667
-        match buyer_sale_type {
-            sale_type if sale_type == TradeStateSaleType::Auction as u8 => {
-                if last_bid_price.price > 0 {
-                    let min_price_diff = get_min_price_diff_in_lamports(
-                        last_bid_price.price,
-                        last_bid_price.tick_size_constant_in_lamports,
-                        treasury_mint.decimals,
-                    )?;
-                    let min_price = last_bid_price
-                        .price
-                        .checked_add(min_price_diff)
-                        .ok_or(AuctionHouseError::NumericalOverflow)?;
-                    if buyer_price < min_price {
-                        return Err(AuctionHouseError::BidTooLow.into());
-                    }
-                }
-
-                if let Some(last_bid_price_bidder) = last_bid_price.bidder {
-                    if last_bid_price.price > 0 && last_bid_price_bidder != ZERO_PUBKEY {
-                        if previous_bidder_wallet.key() != last_bid_price_bidder {
-                            return Err(AuctionHouseError::PreviousBidderIncorrect.into());
-                        }
-
-                        withdraw_helper(
-                            previous_bidder_wallet,
-                            previous_bidder_refund_account,
-                            previous_bidder_escrow_payment_account,
-                            authority,
-                            auction_house,
-                            auction_house_fee_account,
-                            &treasury_mint.to_account_info(),
-                            merkle_tree,
-                            asset_id,
-                            system_program,
-                            token_program,
-                            ata_program,
-                            rent,
-                            previous_bidder_escrow_payment_bump,
-                            last_bid_price.price,
-                            false,
-                        )?;
-                    }
-                }
-
-                // Only set last bid price if this is for an auction
-                last_bid_price.price = buyer_price;
-                last_bid_price.bidder = Some(wallet.key());
-            }
-            sale_type if sale_type == TradeStateSaleType::Offer as u8 => {
-                if last_bid_price.price > 0 || last_bid_price.bidder != Some(ZERO_PUBKEY) {
-                    // If sale type for buy is not auction and auction is already
-                    // in progress, do not allow
-                    return Err(AuctionHouseError::CannotPlaceOfferWhileOnAuction.into());
-                }else{
-                    //add checks for updating the bid.
-                }
-            }
-            _ => {
-                // Do nothing
-            }
-        }
-    } else {
-        // Keep legacy logic around to not break old listings
-        if last_bid_price.price > 0 {
-            let min_price_diff = get_min_price_diff_in_lamports(
-                last_bid_price.price,
-                last_bid_price.tick_size_constant_in_lamports,
-                treasury_mint.decimals,
-            )?;
-            let min_price = last_bid_price
-                .price
-                .checked_add(min_price_diff)
-                .ok_or(AuctionHouseError::NumericalOverflow)?;
-            if buyer_price < min_price {
-                return Err(AuctionHouseError::BidTooLow.into());
-            }
-        }
-
-        if let Some(last_bid_price_bidder) = last_bid_price.bidder {
-            if last_bid_price.price > 0 && last_bid_price_bidder != ZERO_PUBKEY {
-                if previous_bidder_wallet.key() != last_bid_price_bidder {
-                    return Err(AuctionHouseError::PreviousBidderIncorrect.into());
-                }
-
-                withdraw_helper(
-                    previous_bidder_wallet,
-                    previous_bidder_refund_account,
-                    previous_bidder_escrow_payment_account,
-                    authority,
-                    auction_house,
-                    auction_house_fee_account,
-                    &treasury_mint.to_account_info(),
-                    merkle_tree,
-                    asset_id,
-                    system_program,
-                    token_program,
-                    ata_program,
-                    rent,
-                    previous_bidder_escrow_payment_bump,
-                    last_bid_price.price,
-                    false,
-                )?;
-            }
-        }
-
-        last_bid_price.price = buyer_price;
-        last_bid_price.bidder = Some(wallet.key());
-    } 
+    
  
     Ok(())
 }

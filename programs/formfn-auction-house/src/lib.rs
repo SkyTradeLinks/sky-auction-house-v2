@@ -12,7 +12,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-anchor_lang::declare_id!("6tptr1Kvt96JcVcpYQHL1ZjufYnMkaW8EhoeeinnjZKa");
+anchor_lang::declare_id!("GjF7g6QAqfhNz8Eb7AN8T5m6d8Lzqq7zTSWPfx6r6fYd");
 
 #[program]
 pub mod auction_house {
@@ -157,6 +157,7 @@ pub mod auction_house {
         escrow_payment_bump: u8,
         buyer_price: u64,
         leaf_index: u64,
+        sale_type: u8,
         // Unix time (seconds since epoch)
         auction_end_time: Option<i64>,
         previous_bidder_escrow_payment_bump: u8,
@@ -167,6 +168,7 @@ pub mod auction_house {
             escrow_payment_bump,
             buyer_price,
             leaf_index,
+            sale_type,
             auction_end_time,
             previous_bidder_escrow_payment_bump,
         )

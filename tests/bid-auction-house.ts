@@ -70,15 +70,35 @@ describe("bid-auction-house", async () => {
 
   it("should make an offer on un-listed asset", async () => {
     try {
-      let leafIndex = 5;
+      let leafIndex = 0;
       // dummy nft created
       const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
         merkleTree: publicKey(landMerkleTree),
         leafIndex,
       });
 
+      let acc = await getAssociatedTokenAddress(
+        auctionHouseSdk.mintAccount,
+        bidder.publicKey
+      );
+
+      let acc_balance = await provider.connection.getTokenAccountBalance(acc);
+
+      console.log(acc_balance);
+
+      const [escrowPaymentAccount, escrowBump] =
+        findAuctionHouseBidderEscrowAccount(
+          auctionHouseSdk.auctionHouse,
+          bidder.publicKey,
+          landMerkleTree,
+          new anchor.web3.PublicKey(assetId.toString()),
+          program.programId
+        );
+
+      console.log("es", escrowPaymentAccount);
+
       // USD
-      let cost = 7;
+      let cost = 10;
 
       await auctionHouseSdk.buy(
         bidder,
@@ -90,29 +110,12 @@ describe("bid-auction-house", async () => {
         SaleType.Offer
       );
 
-      const [escrowPaymentAccount, escrowBump] =
-        findAuctionHouseBidderEscrowAccount(
-          auctionHouseSdk.auctionHouse,
-          bidder.publicKey,
-          landMerkleTree,
-          new anchor.web3.PublicKey(assetId.toString()),
-          program.programId
-        );
-
-      let acc = await getAssociatedTokenAddress(
-        auctionHouseSdk.mintAccount,
-        bidder.publicKey
-      );
-
-      let acc_balance = await provider.connection.getTokenAccountBalance(acc);
-
-      console.log(acc_balance);
-      console.log('es',escrowPaymentAccount)
+      console.log("es", escrowPaymentAccount);
 
       // // console.log(
       // //   await this.provider.connection.getBalance(escrowPaymentAccount)
       // // );
-      
+
       /* const [lastBidPrice] = auctionHouseSdk.findLastBidPrice(assetId);
       let lastBidInfo = await auctionHouseSdk.program.account.lastBidPrice.fetch(
         lastBidPrice

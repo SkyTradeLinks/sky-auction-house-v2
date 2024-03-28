@@ -1,8 +1,8 @@
-import { loadKeyPairV2 } from "./helper";
+import { loadKeyPair } from "./helper";
 import "dotenv/config";
 
 // HdgFFgSrfav2mmbacqY6yZa4kyvjaA4LQDvSPvphjPSP
-export const auctionHouseAuthority = loadKeyPairV2(
+export const auctionHouseAuthority = loadKeyPair(
   process.env.AUCTION_HOUSE_AUTHORITY
 );
 
