@@ -12,22 +12,4 @@ wallet = "/home/chuksud77/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
-# test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/sell-test.ts"
 
-[test]
-# name = "Sell test Auction"
-# path = "tests/sell-test-feature.ts"  # Specify the correct path to your TypeScript test file
-# language = "typescript"  # Add this line to specify the language
-startup_wait = 60000
-shutdown_wait = 2000
-upgradeable = false
-
-
-
-# [test]
-# name = "Your Test Name"
-# path = "tests/sell-test.ts"  # Specify the correct path to your TypeScript test file
-# language = "typescript"  # Add this line to specify the language
-# startup_wait = 60000
-# shutdown_wait = 2000
-# upgradeable = false
