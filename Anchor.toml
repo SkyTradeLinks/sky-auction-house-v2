@@ -6,8 +6,8 @@ skip-lint = false
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
-wallet = "/home/erenaspire7/.config/solana/id.json"
+cluster = "https://devnet.helius-rpc.com/?api-key=887524e6-92b0-4f96-973c-b37a53a9cfe4"
+wallet = "/home/zeher/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

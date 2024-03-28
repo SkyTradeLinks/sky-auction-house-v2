@@ -29,6 +29,8 @@ use {
     std::{convert::TryInto, io::Write, slice::Iter, str::FromStr},
 };
 
+use mpl_bubblegum::utils::get_asset_id;
+
 // 0.01 SOL
 const BOT_FEE: u64 = 10u64.pow(7);
 
@@ -215,7 +217,7 @@ pub fn assert_valid_auction_house(program_id: &Pubkey, auction_house: &Pubkey) -
 fn assert_last_bid_price_derivation(
     program_id: &Pubkey,
     last_bid_price: &AccountInfo,
-    mint: &Pubkey,
+    asset_id: &Pubkey,
     auction_house_account_key_as_string: &str,
 ) -> Result<u8> {
     let auction_house_account_key = Pubkey::from_str(auction_house_account_key_as_string).unwrap();
@@ -225,25 +227,23 @@ fn assert_last_bid_price_derivation(
         &[
             LAST_BID_PRICE.as_bytes(),
             auction_house_account_key.as_ref(),
-            mint.as_ref(),
+            asset_id.as_ref(),
         ],
     );
 }
 
 pub fn assert_valid_last_bid_price(
-    last_bid_price: &AccountInfo,
     program_id: &Pubkey,
-    mint: &Pubkey,
+    last_bid_price: &AccountInfo,
+    auction_house_account_key: &Pubkey,
+    asset_id: &Pubkey,
 ) -> Result<()> {
-    let auction_house_account_key = match &*program_id.to_string() {
-        AUCTION_HOUSE_MAINNET_PROGRAM_ID => SOL_AUCTION_HOUSE_ACCOUNT_MAINNET,
-        AUCTION_HOUSE_DEVNET_PROGRAM_ID => SOL_AUCTION_HOUSE_ACCOUNT_DEVNET,
-        AUCTION_HOUSE_TESTNET_PROGRAM_ID => SOL_AUCTION_HOUSE_ACCOUNT_TESTNET,
-        AUCTION_HOUSE_LOCALNET_PROGRAM_ID => SOL_AUCTION_HOUSE_ACCOUNT_LOCALNET,
-        _ => panic!("Invalid program ID"),
-    };
-
-    assert_last_bid_price_derivation(program_id, last_bid_price, mint, &auction_house_account_key)?;
+    assert_last_bid_price_derivation(
+        program_id,
+        last_bid_price,
+        asset_id,
+        auction_house_account_key.to_string().as_str(),
+    )?;
 
     return Ok(());
 }
@@ -701,7 +701,8 @@ pub fn withdraw_helper<'info>(
     auction_house: &anchor_lang::prelude::Account<'info, AuctionHouse>,
     auction_house_fee_account: &UncheckedAccount<'info>,
     treasury_mint: &AccountInfo<'info>,
-    token_mint: &UncheckedAccount<'info>,
+    merkle_tree: &UncheckedAccount<'info>,
+    asset_id: &UncheckedAccount<'info>,
     system_program: &Program<'info, System>,
     token_program: &Program<'info, Token>,
     ata_program: &Program<'info, AssociatedToken>,
@@ -727,8 +728,8 @@ pub fn withdraw_helper<'info>(
 
     let auction_house_key = auction_house.key();
     let wallet_key = wallet.key();
-    let token_mint_key = token_mint.key();
-
+    let merkle_tree_key = merkle_tree.key();
+    let asset_id_key = asset_id.key();
     if enforce_signer
         && !wallet.to_account_info().is_signer
         && !authority.to_account_info().is_signer
@@ -740,7 +741,8 @@ pub fn withdraw_helper<'info>(
         PREFIX.as_bytes(),
         auction_house_key.as_ref(),
         wallet_key.as_ref(),
-        token_mint_key.as_ref(),
+        
+        asset_id_key.as_ref(),
         &[escrow_payment_bump],
     ];
 
@@ -1241,6 +1243,16 @@ pub fn write_anchor_account_discriminator<'a>(
     let data_as_byte_array: &mut [u8] = &mut data;
     let mut cursor = std::io::Cursor::new(data_as_byte_array);
     cursor.write_all(discriminator)?;
+    Ok(())
+}
+
+pub fn assert_valid_nft(asset_id: &Pubkey, merkle_tree: &Pubkey, leaf_index: u64) -> Result<()> {
+    let generated_asset_id = get_asset_id(merkle_tree, leaf_index);
+
+    if generated_asset_id != asset_id.key() {
+        return Err(AuctionHouseError::InvalidEdition.into());
+    }
+
     Ok(())
 }
 

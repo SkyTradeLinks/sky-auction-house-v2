@@ -12,6 +12,8 @@ import { SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 import { auctionHouseAuthority } from "../sdk/utils/constants";
 import { AuctionHouseSdk } from "../sdk/auction-house-sdk";
 
+
+
 describe("create-auction-house", async () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
@@ -24,13 +26,16 @@ describe("create-auction-house", async () => {
     auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
   });
 
+  // 1% goes to authority
   const listingFeePercent = (1 / 100) * 100;
   const subsequentListingFeePercent = (1 / 100) * 100;
+  
   const requiresSignOff = true;
   const canChangeSalePrice = false;
   const payAllFees = true;
 
   it("should not fetch auction house", async () => {
+    // will pass if it exists as it's on devnet
     try {
       await program.account.auctionHouse.fetch(auctionHouseSdk.auctionHouse);
     } catch (err: any) {
