@@ -76,6 +76,7 @@ export const findAuctionHouseBidderEscrowAccount = (
   auctionHouse: PublicKey,
   wallet: PublicKey,
   merkleTree: PublicKey,
+  assetId:PublicKey,
   auctionHouseProgramId: PublicKey
 ) => {
   return PublicKey.findProgramAddressSync(
@@ -83,7 +84,8 @@ export const findAuctionHouseBidderEscrowAccount = (
       Buffer.from(AUCTION_HOUSE),
       auctionHouse.toBuffer(),
       wallet.toBuffer(),
-      merkleTree.toBuffer(),
+      
+      assetId.toBuffer()
     ],
     auctionHouseProgramId
   );

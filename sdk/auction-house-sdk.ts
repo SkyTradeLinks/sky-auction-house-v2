@@ -261,6 +261,7 @@ export class AuctionHouseSdk {
         this.auctionHouse,
         buyer,
         merkleTree,
+        assetId,
         this.program.programId
       );
 
@@ -270,7 +271,7 @@ export class AuctionHouseSdk {
     ] = findAuctionHouseBidderEscrowAccount(
       this.auctionHouse,
       previousBidder,
-      merkleTree,
+      merkleTree,assetId,
       this.program.programId
     );
 
@@ -332,16 +333,16 @@ export class AuctionHouseSdk {
   }
 
   public async buy(
-    buyer: anchor.web3.Keypair,
+     buyer: anchor.web3.Keypair,
     assetId: anchor.web3.PublicKey,
     merkleTree: anchor.web3.PublicKey,
     buyerAta: anchor.web3.PublicKey,
     price: number,
     leafIndex: number,
-    saleType: SaleType
+    saleType: SaleType 
   ) {
-    const [lastBidPrice] = this.findLastBidPrice(assetId);
-
+     const [lastBidPrice] = this.findLastBidPrice(assetId);
+    console.log('LBp') 
     if ((await this.provider.connection.getAccountInfo(lastBidPrice)) == null) {
       const createBidTx = new anchor.web3.Transaction().add(
         await this.createLastBidPriceTx(assetId, lastBidPrice)
@@ -366,6 +367,90 @@ export class AuctionHouseSdk {
       saleType
     );
 
-    await this.sendTx(buyTx, [buyer]);
+    await this.sendTx(buyTx, [buyer]); 
+    let lastBidInfo1 = await this.program.account.lastBidPrice.fetch(
+      lastBidPrice
+    );
+    console.log('final',lastBidInfo1)
   }
+
+
+  public async cancel(
+    buyer: anchor.web3.Keypair,
+   assetId: anchor.web3.PublicKey,
+   merkleTree: anchor.web3.PublicKey,
+   buyerAta: anchor.web3.PublicKey,
+   price: number,
+   leafIndex: number,
+   saleType: SaleType 
+ ) {
+    const [lastBidPrice] = this.findLastBidPrice(assetId);
+    console.log('lastBidPrice',lastBidPrice)
+   console.log('LBF',await this.provider.connection.getAccountInfo(lastBidPrice)) 
+     if ((await this.provider.connection.getAccountInfo(lastBidPrice)) == null) {
+     const createBidTx = new anchor.web3.Transaction().add(
+       await this.createLastBidPriceTx(assetId, lastBidPrice)
+     );
+
+     await this.sendTx(createBidTx, [auctionHouseAuthority]);
+   }
+
+   let lastBidInfo = await this.program.account.lastBidPrice.fetch(
+     lastBidPrice
+   );
+   console.log('cencel lBI',lastBidInfo)
+   
+   let normalizedPrice = new anchor.BN(price * Math.pow(10, 6));
+
+   const [tradeState, tradeStateBump] = findAuctionHouseTradeState(
+    this.auctionHouse,
+    buyer.publicKey,
+    assetId,
+    this.mintAccount,
+    merkleTree,
+    
+    normalizedPrice,
+    this.program.programId
+  );
+  console.log('ts',tradeState) 
+
+
+  const [escrowPaymentAccount, escrowBump] =
+  findAuctionHouseBidderEscrowAccount(
+    this.auctionHouse,
+    buyer.publicKey,
+    merkleTree,
+    assetId,
+    this.program.programId
+  );
+
+  console.log('escrow',escrowPaymentAccount)
+
+ const [
+  previousBidderEscrowPaymentAccount,
+  previousBidderEscrowPaymentBump,
+] = findAuctionHouseBidderEscrowAccount(
+  this.auctionHouse,
+  lastBidInfo.bidder,
+  merkleTree,
+  assetId,
+  this.program.programId
+); 
+
+console.log('prev bi',previousBidderEscrowPaymentAccount)
+/*
+   let buyTx = await this.createBuyTx(
+     price,
+     buyer.publicKey,
+     assetId,
+     merkleTree,
+     lastBidInfo.bidder,
+     lastBidPrice,
+     buyerAta,
+     leafIndex,
+     saleType
+   );
+
+   await this.sendTx(buyTx, [buyer]); */
+ }
 }

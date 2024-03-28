@@ -702,6 +702,7 @@ pub fn withdraw_helper<'info>(
     auction_house_fee_account: &UncheckedAccount<'info>,
     treasury_mint: &AccountInfo<'info>,
     merkle_tree: &UncheckedAccount<'info>,
+    asset_id: &UncheckedAccount<'info>,
     system_program: &Program<'info, System>,
     token_program: &Program<'info, Token>,
     ata_program: &Program<'info, AssociatedToken>,
@@ -728,7 +729,7 @@ pub fn withdraw_helper<'info>(
     let auction_house_key = auction_house.key();
     let wallet_key = wallet.key();
     let merkle_tree_key = merkle_tree.key();
-
+    let asset_id_key = asset_id.key();
     if enforce_signer
         && !wallet.to_account_info().is_signer
         && !authority.to_account_info().is_signer
@@ -740,7 +741,8 @@ pub fn withdraw_helper<'info>(
         PREFIX.as_bytes(),
         auction_house_key.as_ref(),
         wallet_key.as_ref(),
-        merkle_tree_key.as_ref(),
+        
+        asset_id_key.as_ref(),
         &[escrow_payment_bump],
     ];
 

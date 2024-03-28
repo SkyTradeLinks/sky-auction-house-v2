@@ -12,7 +12,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-anchor_lang::declare_id!("FsCyjMWU12ZLGjZ7pxwwfFNjDt4RSvwTUntZvbujyLvW");
+anchor_lang::declare_id!("6tptr1Kvt96JcVcpYQHL1ZjufYnMkaW8EhoeeinnjZKa");
 
 #[program]
 pub mod auction_house {
