@@ -23,11 +23,7 @@ import {
 import { createAssociatedTokenAccount } from "@solana/spl-token";
 import { SYSVAR_RENT_PUBKEY, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-import {
-  auctionHouseAuthority,
-  BUY_PRICE,
-  getAuthorityKeypair,
-} from "../sdk/utils/constants";
+import { auctionHouseAuthority, BUY_PRICE } from "../sdk/utils/constants";
 import { loadKeyPair } from "../sdk/utils/helper";
 import AuctionHouseSdk from "../sdk/auction-house-sdk";
 import SaleType from "../sdk/types/enum/SaleType";
@@ -69,7 +65,7 @@ describe("Sell test Auction", async () => {
       1 * LAMPORTS_PER_SOL
     );
     const latestBlockHash = await connection.getLatestBlockhash();
-    const confirmation = await connection.confirmTransaction({
+    await connection.confirmTransaction({
       blockhash: latestBlockHash.blockhash,
       lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
       signature: airdropSignature,
@@ -79,7 +75,7 @@ describe("Sell test Auction", async () => {
       1 * LAMPORTS_PER_SOL
     );
     const latestBlockHash1 = await connection.getLatestBlockhash();
-    const confirmation1 = await connection.confirmTransaction({
+    await connection.confirmTransaction({
       blockhash: latestBlockHash1.blockhash,
       lastValidBlockHeight: latestBlockHash1.lastValidBlockHeight,
       signature: airdropSignature1,
@@ -88,7 +84,7 @@ describe("Sell test Auction", async () => {
     // Initialize Sdk
     auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
     umi = auctionHouseSdk.getCustomUmi();
-    const authorityKeypair = getAuthorityKeypair();
+    const authorityKeypair = auctionHouseAuthority;
     const signer = createSignerFromKeypair(umi, {
       secretKey: authorityKeypair.secretKey,
       publicKey: publicKey(authorityKeypair.publicKey),
@@ -170,13 +166,6 @@ describe("Sell test Auction", async () => {
         ),
       };
       leavesData.push(leafData);
-
-      // Push Owner
-      // accountsToPass.push({
-      //     pubkey: owner,
-      //     isSigner: false,
-      //     isWritable: true,
-      // });
     } catch (error) {
       console.log(error);
     }
@@ -207,15 +196,7 @@ describe("Sell test Auction", async () => {
   });
 
   it("should fail if an imposter tries to sell", async () => {
-    // const accounts_to_pass = [];
-    // accounts_to_pass.push({
-    //     pubkey: imposter.publicKey,
-    //     isSigner: true,
-    //     isWritable: true,
-    // });
     const seller2 = Keypair.generate();
-    console.log("LeafDataOwner.....", leavesData[0].owner);
-    console.log("Caller-Wallet.....", imposter.publicKey);
 
     try {
       await auctionHouseSdk.sell(
