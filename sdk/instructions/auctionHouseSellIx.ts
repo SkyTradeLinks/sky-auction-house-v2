@@ -1,18 +1,19 @@
 import { BN } from "@coral-xyz/anchor";
 import getTradeState from "../auction_house/getTradeState";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { PublicKey, TransactionInstruction, SYSVAR_RENT_PUBKEY, SystemProgram, Signer } from "@solana/web3.js";
+import {
+  PublicKey,
+  TransactionInstruction,
+  SYSVAR_RENT_PUBKEY,
+  SystemProgram,
+  Signer,
+} from "@solana/web3.js";
 import findAuctionHouseProgramAsSigner from "../pdas/findAuctionHouseProgramAsSigner";
-import findEditionPda from "../program_shared/pdas/findEditionPda";
+import findEditionPda from "../utils/pdas/findEditionPda";
 // import findTokenMetadataPda from "../program_shared/pdas/findTokenMetadataPda";
 import getSellerFreeTradeState from "../auction_house/getSellerFreeTradeState";
-import { TOKEN_METADATA_PROGRAM_ID } from "../program_shared/constants/ProgramIds"
-import AuctionHouseProgram from '../types/AuctionHouseProgram';
-
-
-
-
-
+import { TOKEN_METADATA_PROGRAM_ID } from "../utils";
+import AuctionHouseProgram from "../types/AuctionHouseProgram";
 
 type Accounts = {
   auctionHouse: PublicKey;
@@ -26,13 +27,12 @@ type Accounts = {
   merkleTree: PublicKey;
   treasuryMint: PublicKey;
   sellerWallet: PublicKey;
-  assetId: PublicKey
+  assetId: PublicKey;
 };
 
 type Args = {
   tokenSize?: number;
 };
-
 
 export default async function auctionHouseSellIx(
   {
@@ -47,8 +47,7 @@ export default async function auctionHouseSellIx(
     treasuryMint,
     auctionHouseProgramId,
     assetId,
-    leafDataOwner
- 
+    leafDataOwner,
   }: Accounts,
   { tokenSize = 1 }: Args
 ): Promise<TransactionInstruction> {
@@ -60,7 +59,8 @@ export default async function auctionHouseSellIx(
     assetId,
     wallet: sellerWallet,
   });
-  const [programAsSigner, programAsSignerBump] = findAuctionHouseProgramAsSigner(auctionHouseProgramId);
+  const [programAsSigner, programAsSignerBump] =
+    findAuctionHouseProgramAsSigner(auctionHouseProgramId);
   const [masterEdition] = findEditionPda(treasuryMint);
   // const [metadata] = findTokenMetadataPda(treasuryMint);
   const [freeTradeState, freeTradeBump] = await getSellerFreeTradeState({
@@ -77,7 +77,7 @@ export default async function auctionHouseSellIx(
       freeTradeBump,
       programAsSignerBump,
       buyPriceAdjusted,
-      new BN(tokenSize),
+      new BN(tokenSize)
     )
     .accounts({
       auctionHouse,
@@ -96,7 +96,7 @@ export default async function auctionHouseSellIx(
       merkleTree,
       tokenProgram: TOKEN_PROGRAM_ID,
       wallet: sellerWallet,
-      leafDataOwner
+      leafDataOwner,
     })
     .instruction();
 }

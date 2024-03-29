@@ -56,6 +56,7 @@ pub struct CreateTradeState<'info> {
             wallet.key().as_ref(),
             auction_house.key().as_ref(),
             merkle_tree.key().as_ref(),
+            auction_house.treasury_mint.as_ref(),
             asset_id.key().as_ref(),
             &buyer_price.to_le_bytes(),
         ],
