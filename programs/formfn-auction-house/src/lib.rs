@@ -12,7 +12,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-anchor_lang::declare_id!("GjF7g6QAqfhNz8Eb7AN8T5m6d8Lzqq7zTSWPfx6r6fYd");
+anchor_lang::declare_id!("6tptr1Kvt96JcVcpYQHL1ZjufYnMkaW8EhoeeinnjZKa");
 
 #[program]
 pub mod auction_house {
@@ -105,11 +105,23 @@ pub mod auction_house {
     // // in a backwards compatible way and thus we are introducing a new IX.
     pub fn cancel_v2<'info>(
         ctx: Context<'_, '_, '_, 'info, CancelV2<'info>>,
+        trade_state_bump: u8,
+        escrow_payment_bump: u8,
         buyer_price: u64,
-        token_size: u64,
-        program_as_signer_bump: u8,
+        leaf_index: u64,
+        // Unix time (seconds since epoch)
+        auction_end_time: Option<i64>,
+        previous_bidder_escrow_payment_bump: u8,
     ) -> Result<()> {
-        handle_cancel_v2(ctx, buyer_price, token_size, program_as_signer_bump)
+        handle_cancel_v2(
+            ctx,
+            trade_state_bump,
+            escrow_payment_bump,
+            buyer_price,
+            leaf_index,
+            auction_end_time,
+            previous_bidder_escrow_payment_bump,
+        )
     }
 
     pub fn execute_sale_v2<'info>(

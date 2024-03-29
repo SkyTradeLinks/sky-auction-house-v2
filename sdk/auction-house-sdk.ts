@@ -368,91 +368,159 @@ export class AuctionHouseSdk {
       lastBidPrice
     );
     console.log("final", lastBidInfo1);
+    const [escrowPaymentAccount, escrowBump] =
+    findAuctionHouseBidderEscrowAccount(
+      this.auctionHouse,
+      buyer.publicKey,
+      merkleTree,
+      assetId,
+      this.program.programId
+    );
+    console.log('escrow ',escrowPaymentAccount)
   }
 
   public async cancel(
     buyer: anchor.web3.Keypair,
-    assetId: anchor.web3.PublicKey,
-    merkleTree: anchor.web3.PublicKey,
-    buyerAta: anchor.web3.PublicKey,
-    price: number,
-    leafIndex: number,
-    saleType: SaleType
-  ) {
+   assetId: anchor.web3.PublicKey,
+   merkleTree: anchor.web3.PublicKey,
+   buyerAta: anchor.web3.PublicKey,
+   price: number,
+   leafIndex: number,
+   saleType: SaleType 
+ ) {
+    //const [lastBidPrice] = this.findLastBidPrice(assetId);
     const [lastBidPrice] = findLastBidPrice(
       this.auctionHouse,
       assetId,
       this.program.programId
     );
+  
+    console.log('LBp') 
+   if ((await this.provider.connection.getAccountInfo(lastBidPrice)) == null) {
+     const createBidTx = new anchor.web3.Transaction().add(
+       await this.createLastBidPriceTx(assetId, lastBidPrice)
+     );
 
-    console.log("lastBidPrice", lastBidPrice);
-    console.log(
-      "LBF",
-      await this.provider.connection.getAccountInfo(lastBidPrice)
-    );
-    if ((await this.provider.connection.getAccountInfo(lastBidPrice)) == null) {
-      const createBidTx = new anchor.web3.Transaction().add(
-        await this.createLastBidPriceTx(assetId, lastBidPrice)
-      );
+     await this.sendTx(createBidTx, [auctionHouseAuthority]);
+   }
 
-      await this.sendTx(createBidTx, [auctionHouseAuthority]);
-    }
+   let lastBidInfo = await this.program.account.lastBidPrice.fetch(
+     lastBidPrice
+   );
+   let buyer1=buyer.publicKey
 
-    let lastBidInfo = await this.program.account.lastBidPrice.fetch(
-      lastBidPrice
-    );
-    console.log("cencel lBI", lastBidInfo);
-
-    let normalizedPrice = new anchor.BN(price * Math.pow(10, 6));
-
-    const [tradeState, tradeStateBump] = findAuctionHouseTradeState(
-      this.auctionHouse,
-      buyer.publicKey,
-      assetId,
-      this.mintAccount,
-      merkleTree,
-
-      normalizedPrice,
-      this.program.programId
-    );
-    console.log("ts", tradeState);
-
-    const [escrowPaymentAccount, escrowBump] =
-      findAuctionHouseBidderEscrowAccount(
-        this.auctionHouse,
-        buyer.publicKey,
-        merkleTree,
-        assetId,
-        this.program.programId
-      );
-
-    console.log("escrow", escrowPaymentAccount);
-
-    const [
-      previousBidderEscrowPaymentAccount,
-      previousBidderEscrowPaymentBump,
-    ] = findAuctionHouseBidderEscrowAccount(
-      this.auctionHouse,
-      lastBidInfo.bidder,
-      merkleTree,
-      assetId,
-      this.program.programId
-    );
-
-    console.log("prev bi", previousBidderEscrowPaymentAccount);
-    /*
-   let buyTx = await this.createBuyTx(
+   let cancelTx = await this.createCancelTx(
      price,
      buyer.publicKey,
      assetId,
      merkleTree,
-     lastBidInfo.bidder,
+     buyer.publicKey,
      lastBidPrice,
      buyerAta,
      leafIndex,
      saleType
    );
 
-   await this.sendTx(buyTx, [buyer]); */
-  }
+   await this.sendTx(cancelTx, [buyer]); 
+   let lastBidInfo1 = await this.program.account.lastBidPrice.fetch(
+     lastBidPrice
+   );
+   console.log('final',lastBidInfo1)
+   const [escrowPaymentAccount, escrowBump] =
+   findAuctionHouseBidderEscrowAccount(
+     this.auctionHouse,
+     buyer.publicKey,
+     merkleTree,
+     assetId,
+     this.program.programId
+   );
+   console.log('escrow ',escrowPaymentAccount)
+ }
+ public async createCancelTx(
+  price: number,
+  buyer: anchor.web3.PublicKey,
+  assetId: anchor.web3.PublicKey,
+  merkleTree: anchor.web3.PublicKey,
+  previousBidder: anchor.web3.PublicKey,//user publickey
+  lastBidPrice: anchor.web3.PublicKey,
+  buyerAta: anchor.web3.PublicKey,
+  leafIndex: number,
+  saleType: SaleType
+) {
+  const tx = new anchor.web3.Transaction();
+
+  let normalizedPrice = new anchor.BN(price * Math.pow(10, 6));
+
+  const [tradeState, tradeStateBump] = findAuctionHouseTradeState(
+    this.auctionHouse,
+    buyer,
+    assetId,
+    this.mintAccount,
+    merkleTree,
+    normalizedPrice,
+    this.program.programId
+  );
+
+  const [escrowPaymentAccount, escrowBump] =
+    findAuctionHouseBidderEscrowAccount(
+      this.auctionHouse,
+      buyer,
+      merkleTree,
+      assetId,
+      this.program.programId
+    );
+
+  const [
+    previousBidderEscrowPaymentAccount,
+    previousBidderEscrowPaymentBump,
+  ] = findAuctionHouseBidderEscrowAccount(
+    this.auctionHouse,
+    previousBidder,
+    merkleTree,assetId,
+    this.program.programId
+  );
+
+  let previousBidderRefundAccount = getAssociatedTokenAddressSync(
+    this.mintAccount,
+    previousBidder
+  );
+
+  tx.add(      
+    await this.program.methods
+      .cancelV2(
+        tradeStateBump,
+        escrowBump,
+        normalizedPrice,
+        new anchor.BN(leafIndex),
+        null,
+        previousBidderEscrowPaymentBump
+      )
+      .accounts({
+        wallet: buyer,
+        paymentAccount: buyerAta,
+        transferAuthority: buyer,
+        treasuryMint: this.mintAccount,
+        assetId: assetId,
+        escrowPaymentAccount,
+        authority: auctionHouseAuthority.publicKey,
+        auctionHouse: this.auctionHouse,
+        auctionHouseFeeAccount: this.feeAccount,
+        buyerTradeState: tradeState,
+        merkleTree,
+        lastBidPrice,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        previousBidderWallet: previousBidder,
+        previousBidderEscrowPaymentAccount,
+        previousBidderRefundAccount,
+        ataProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      })
+      .instruction()
+  );
+  console.log('buyer ata',buyerAta)
+
+  return tx;
+}
 }

@@ -1,23 +1,52 @@
-use anchor_lang::{prelude::*, solana_program::program::invoke_signed};
-use anchor_spl::token::{self, Mint, Token, TokenAccount};
+use anchor_lang::{
+    prelude::*,
+    solana_program::{program::invoke, system_instruction},
+};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{self, Mint, Token, TokenAccount},
+};
 
-use crate::{constants::*, utils::*, AuctionHouse, AuctionHouseError, TradeStateSaleType};
+use crate::{
+    constants::*, utils::*, AuctionHouse, AuctionHouseError, LastBidPrice, TradeStateSaleType,
+};
 
-// Accepts additional accounts compared to Cancel to support
-// mpl_token_metadata::instruction::thaw_delegated_account call
+// Supports on-chain refunds
 #[derive(Accounts)]
-#[instruction(buyer_price: u64, token_size: u64, program_as_signer_bump: u8)]
+#[instruction(trade_state_bump: u8, escrow_payment_bump: u8, buyer_price: u64, leaf_index: u64, auction_end_time: Option<i64>, previous_bidder_escrow_payment_bump: u8)]
 pub struct CancelV2<'info> {
+    #[account(mut)]
+    wallet: Signer<'info>,
     /// CHECK: No need to deserialize.
     #[account(mut)]
-    wallet: UncheckedAccount<'info>,
-    #[account(mut, owner = token::ID)]
-    token_account: Account<'info, TokenAccount>,
-    token_mint: Account<'info, Mint>,
+    payment_account: UncheckedAccount<'info>,
+    /// CHECK: No need to deserialize.
+    transfer_authority: UncheckedAccount<'info>,
+    treasury_mint: Box<Account<'info, Mint>>,
+
+    /// CHECK: No need to deserialize.
+    asset_id: UncheckedAccount<'info>,
+
+    /// CHECK: No need to deserialize.
+    merkle_tree: UncheckedAccount<'info>,
+
+    /// CHECK: No need to deserialize.
+    #[account(
+        mut,
+        seeds = [
+            PREFIX.as_bytes(),
+            auction_house.key().as_ref(),
+            wallet.key().as_ref(),
+            asset_id.key().as_ref()
+        ],
+        bump = escrow_payment_bump
+    )]
+    escrow_payment_account: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
     authority: UncheckedAccount<'info>,
     #[account(
         has_one = authority,
+        has_one = treasury_mint,
         has_one = auction_house_fee_account,
         seeds = [
             PREFIX.as_bytes(),
@@ -26,7 +55,7 @@ pub struct CancelV2<'info> {
         ],
         bump = auction_house.bump,
     )]
-    auction_house: Account<'info, AuctionHouse>,
+    auction_house: Box<Account<'info, AuctionHouse>>,
     /// CHECK: No need to deserialize.
     #[account(
         mut,
@@ -45,60 +74,114 @@ pub struct CancelV2<'info> {
             PREFIX.as_bytes(),
             wallet.key().as_ref(),
             auction_house.key().as_ref(),
-            token_account.key().as_ref(),
-            auction_house.treasury_mint.as_ref(),
-            token_mint.key().as_ref(),
-            &buyer_price.to_le_bytes(),
-            &token_size.to_le_bytes()
+            asset_id.key().as_ref(),
+            treasury_mint.key().as_ref(),
+            merkle_tree.key().as_ref(),
+            
         ],
-        bump = trade_state.to_account_info().data.borrow()[0]
+        bump = trade_state_bump
     )]
-    trade_state: UncheckedAccount<'info>,
+    buyer_trade_state: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    last_bid_price: Box<Account<'info, LastBidPrice>>,
+
     token_program: Program<'info, Token>,
+    system_program: Program<'info, System>,
+
+    rent: Sysvar<'info, Rent>,
+    clock: Sysvar<'info, Clock>,
+
+    /// CHECK: No need to deserialize.
+    previous_bidder_wallet: UncheckedAccount<'info>,
+
     /// CHECK: No need to deserialize.
     #[account(
         mut,
         seeds = [
             PREFIX.as_bytes(),
-            SIGNER.as_bytes()
+            auction_house.key().as_ref(),
+            previous_bidder_wallet.key().as_ref(),
+            
+            asset_id.key().as_ref()
         ],
-        bump = program_as_signer_bump
+        bump = previous_bidder_escrow_payment_bump
     )]
-    program_as_signer: UncheckedAccount<'info>,
+    previous_bidder_escrow_payment_account: UncheckedAccount<'info>,
+
     /// CHECK: No need to deserialize.
-    master_edition: UncheckedAccount<'info>,
-    /// CHECK: No need to deserialize.
-    #[account(address=mpl_token_metadata::id())]
-    metaplex_token_metadata_program: UncheckedAccount<'info>,
+    #[account(mut)]
+    previous_bidder_refund_account: UncheckedAccount<'info>,
+    ata_program: Program<'info, AssociatedToken>,
 }
 
-pub fn handle_cancel_v2(
-    ctx: Context<CancelV2>,
-    _buyer_price: u64,
-    _token_size: u64,
-    program_as_signer_bump: u8,
+pub fn handle_cancel_v2<'info>(
+    ctx: Context<'_, '_, '_, 'info, CancelV2<'info>>,
+    trade_state_bump: u8,
+    escrow_payment_bump: u8,
+    buyer_price: u64,
+    leaf_index: u64,
+    // Unix time (seconds since epoch)
+    auction_end_time: Option<i64>,
+    previous_bidder_escrow_payment_bump: u8,
 ) -> Result<()> {
-    let wallet = &ctx.accounts.wallet;
-    let token_account = &ctx.accounts.token_account;
-    let token_mint = &ctx.accounts.token_mint;
+     let wallet = &ctx.accounts.wallet;
+    let payment_account = &ctx.accounts.payment_account;
+    let transfer_authority = &ctx.accounts.transfer_authority;
+    let treasury_mint = &ctx.accounts.treasury_mint;
+
+    let asset_id = &ctx.accounts.asset_id;
+    let merkle_tree = &ctx.accounts.merkle_tree;
+
+    let escrow_payment_account = &ctx.accounts.escrow_payment_account;
     let authority = &ctx.accounts.authority;
     let auction_house = &ctx.accounts.auction_house;
     let auction_house_fee_account = &ctx.accounts.auction_house_fee_account;
-    let trade_state = &ctx.accounts.trade_state;
+    let buyer_trade_state = &mut ctx.accounts.buyer_trade_state;
+
+    let last_bid_price = &mut ctx.accounts.last_bid_price;
     let token_program = &ctx.accounts.token_program;
-    let program_as_signer = &ctx.accounts.program_as_signer;
-    let master_edition = &ctx.accounts.master_edition;
-    let metaplex_token_metadata_program = &ctx.accounts.metaplex_token_metadata_program;
+    let system_program = &ctx.accounts.system_program;
+    let rent = &ctx.accounts.rent;
+    let clock = &ctx.accounts.clock;
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
 
-    assert_keys_equal(token_mint.key(), token_account.mint)?;
-    let sale_type = get_trade_state_sale_type(&trade_state.to_account_info());
-    msg!("sale_type = {}", sale_type);
+    assert_valid_nft(&asset_id.key(), &merkle_tree.key(), leaf_index)?;
 
-    if !wallet.to_account_info().is_signer && !authority.to_account_info().is_signer {
-        return Err(AuctionHouseError::NoValidSignerPresent.into());
-    }
+    assert_valid_last_bid_price(
+        ctx.program_id,
+        &last_bid_price.to_account_info(),
+        &auction_house.key(),
+        &asset_id.key(),
+    )?;
+
+    let is_native = treasury_mint.key() == spl_token::native_mint::id();
+    let previous_bidder_wallet = &ctx.accounts.previous_bidder_wallet;
+    let previous_bidder_refund_account = &ctx.accounts.previous_bidder_refund_account;
+    let previous_bidder_escrow_payment_account =
+        &ctx.accounts.previous_bidder_escrow_payment_account;
+    let ata_program = &ctx.accounts.ata_program;
+
+    let ts_info = buyer_trade_state.to_account_info();
+    let buyer_trade_state_data = &mut ts_info.data.borrow_mut();
+    let buyer_sale_type = buyer_trade_state_data[1];
+
+    //let sale_type = get_trade_state_sale_type(&buyer_trade_state.to_account_info());
+    msg!("buyer_sale_type = {}", buyer_sale_type);
+     //add checks for updating the bid.
+     let initial_trade_state_price = u64::from_le_bytes(buyer_trade_state_data[2..10].try_into().unwrap());
+
+     msg!("initial buyer trade state data  = {}",initial_trade_state_price.to_string().as_str());
+     // keep current price
+     let new_buyer_price:u64=0;
+     buyer_trade_state_data[2..10].copy_from_slice(&new_buyer_price.to_le_bytes());
+
+     let current_trade_state_price = u64::from_le_bytes(buyer_trade_state_data[2..10].try_into().unwrap());
+
+     msg!("current buyer trade state data  = {}",current_trade_state_price.to_string().as_str());
+     msg!("current price  = {}",buyer_price.to_string().as_str());
+
 
     let auction_house_key = auction_house.key();
     let seeds = [
@@ -108,7 +191,7 @@ pub fn handle_cancel_v2(
         &[auction_house.fee_payer_bump],
     ];
 
-    let (fee_payer, _) = get_fee_payer(
+    let (fee_payer, fee_seeds) = get_fee_payer(
         authority,
         auction_house,
         wallet.to_account_info(),
@@ -116,56 +199,49 @@ pub fn handle_cancel_v2(
         &seeds,
     )?;
 
-    let curr_lamp = trade_state.lamports();
-    **trade_state.lamports.borrow_mut() = 0;
-
-    **fee_payer.lamports.borrow_mut() = fee_payer
-        .lamports()
-        .checked_add(curr_lamp)
-        .ok_or(AuctionHouseError::NumericalOverflow)?;
-
-    // First thaw account
-    let program_as_signer_seeds = [
+    let auction_house_key = auction_house.key();
+    let wallet_key = wallet.key();
+    let merkle_tree_key = merkle_tree.key();
+    let asset_id_key=asset_id.key();
+    let escrow_signer_seeds = [
         PREFIX.as_bytes(),
-        SIGNER.as_bytes(),
-        &[program_as_signer_bump],
+        auction_house_key.as_ref(),
+        wallet_key.as_ref(),
+        
+        asset_id_key.as_ref(),
+        &[escrow_payment_bump],
     ];
 
-    // NOTE: if the user manually assigns another delegate to the token account
-    // and then attempts to delist, this will fail (since the Auction House program
-    // would no longer be the delegate). Further, a token_account.is_frozen() check
-    // won't suffice since the user could manually freeze the account as well.
-    // We don't think this should ever happen but making a note just in case.
-    if token_account.is_frozen() && sale_type != TradeStateSaleType::Offer {
-        // Do not thaw if someone is cancelling an offer
-        invoke_signed(
-            &mpl_token_metadata::instruction::thaw_delegated_account(
-                mpl_token_metadata::id(),
-                program_as_signer.key(),
-                token_account.key(),
-                master_edition.key(),
-                token_mint.key(),
-            ),
-            &[
-                program_as_signer.to_account_info(),
-                token_account.to_account_info(),
-                master_edition.to_account_info(),
-                token_mint.to_account_info(),
-                metaplex_token_metadata_program.to_account_info(),
-            ],
-            &[&program_as_signer_seeds],
+
+
+
+
+  
+    // Execute various checks and other business logic based on the type of sale
+
+        // Manually "deserialize" data here instead of relying on anchor since we
+        // use `create_or_allocate_account_raw` to initialize these accounts using a
+        // dynamic fee_payer (vs. Anchor where we need to specify fee_payer)
+   
+        // https://stackoverflow.com/a/28029667
+        withdraw_helper(
+            previous_bidder_wallet,//bidder wallet
+            previous_bidder_refund_account,//bidder refund acc
+            escrow_payment_account,//escrow acc
+            authority,
+            auction_house,
+            auction_house_fee_account,
+            &treasury_mint.to_account_info(),
+            merkle_tree,
+            asset_id,
+            system_program,
+            token_program,
+            ata_program,
+            rent,
+            previous_bidder_escrow_payment_bump,//escrow acc bump
+            initial_trade_state_price,//price
+            false,
         )?;
-    }
-
-    if token_account.owner == wallet.key() && wallet.is_signer {
-        return revoke_helper(
-            &token_program.to_account_info(),
-            &token_account.to_account_info(),
-            &wallet.to_account_info(),
-            &trade_state.to_account_info(),
-            &fee_payer,
-        );
-    }
-
+   
     Ok(())
 }

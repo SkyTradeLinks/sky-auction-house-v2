@@ -77,9 +77,9 @@ const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
 console.log('li',assetId)
 
 // USD
-let cost = 3;
+let cost = 1;
 
-/*   await auctionHouseSdk.buy(
+/*      await auctionHouseSdk.buy(
    bidder,
   new anchor.web3.PublicKey(assetId.toString()),
   landMerkleTree,
@@ -87,8 +87,8 @@ let cost = 3;
   cost,
   leafIndex,
   SaleType.Offer 
-);   */
-await auctionHouseSdk.cancel(
+);  */    
+   await auctionHouseSdk.cancel(
   bidder,
  new anchor.web3.PublicKey(assetId.toString()),
  landMerkleTree,
@@ -96,7 +96,7 @@ await auctionHouseSdk.cancel(
  cost,
  leafIndex,
  SaleType.Offer 
-);
+);   
 }
 
 main().then(()=>{process.exit(0)}).catch((e)=>console.log('error art main',e))
