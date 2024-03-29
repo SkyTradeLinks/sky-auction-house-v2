@@ -9,7 +9,7 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import getTradeState from "../auction_house/getTradeState";
-import SaleType from "../types/SaleType";
+import SaleType from "../types/enum/SaleType";
 import AuctionHouseProgram from "../types/AuctionHouseProgram";
 
 type Accounts = {

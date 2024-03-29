@@ -188,9 +188,9 @@ pub fn handle_sell<'info>(
     //     return Err(AuctionHouseError::InvalidTokenAmount.into());
     // }
 
-    if token_size > 1 {
-        return Err(AuctionHouseError::InvalidTokenAmount.into());
-    }
+    // if token_size > 1 {
+    //     return Err(AuctionHouseError::InvalidTokenAmount.into());
+    // }
 
     if wallet.is_signer {
         invoke(
