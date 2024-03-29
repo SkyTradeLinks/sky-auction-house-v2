@@ -7,12 +7,10 @@ import { BN } from "@coral-xyz/anchor";
 
 export default async function getSellerFreeTradeState({
   wallet,
-  // assetIdOwner,
   merkleTree,
   auctionHouse,
   assetId,
   auctionHouseProgramId,
-  tokenSize = 1,
 }: {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
@@ -26,7 +24,6 @@ export default async function getSellerFreeTradeState({
     auctionHouseProgramId,
     priceInLamports: 0,
     merkleTree,
-    tokenSize,
     assetId,
     wallet,
   });
