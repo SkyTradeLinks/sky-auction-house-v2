@@ -6,16 +6,7 @@ import {
   TREASURY,
   auctionHouseAuthority,
 } from "./utils/constants";
-import {
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  sendAndConfirmTransaction,
-  SendOptions,
-  Transaction,
-  TransactionMessage,
-  VersionedTransaction,
-  Signer,
-} from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { getUSDC, setupAirDrop } from "./utils/helper";
 import { AuctionHouse } from "../target/types/auction_house";
 import SaleType from "./types/enum/SaleType";
@@ -24,20 +15,8 @@ import auctionHouseCreateTradeStateIx from "./instructions/auctionHouseCreateTra
 import auctionHouseCreateLastBidPriceIx from "./instructions/auctionHouseCreateLastBidPriceIx";
 import auctionHouseSellIx from "./instructions/auctionHouseSellIx";
 import { ixToTx, ixsToTx } from "./utils/instructions";
-import PdaResult from "./types/PdaResult";
-import { BN } from "@coral-xyz/anchor";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import {
-  mintV1,
-  mplBubblegum,
-  createTree,
-  findLeafAssetIdPda,
-  parseLeafFromMintV1Transaction,
-  LeafSchema,
-  getAssetWithProof,
-  transfer,
-  fetchMerkleTree,
-} from "@metaplex-foundation/mpl-bubblegum";
+import { mplBubblegum } from "@metaplex-foundation/mpl-bubblegum";
 
 const SIGNATURE_SIZE = 64;
 const MAX_SUPPORTED_TRANSACTION_VERSION = 0;

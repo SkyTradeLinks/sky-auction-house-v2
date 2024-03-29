@@ -7,36 +7,20 @@ import {
   none,
   generateSigner,
   signerIdentity,
-  AccountNotFoundError,
   createSignerFromKeypair,
   publicKey,
 } from "@metaplex-foundation/umi";
 import {
   mintV1,
-  mplBubblegum,
   createTree,
   findLeafAssetIdPda,
-  parseLeafFromMintV1Transaction,
-  LeafSchema,
   getAssetWithProof,
-  transfer,
-  fetchMerkleTree,
   TokenProgramVersion,
   TokenStandard,
   getMetadataArgsSerializer,
 } from "@metaplex-foundation/mpl-bubblegum";
 
-import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-  createAccount,
-  createMint,
-  createMultisig,
-  getAssociatedTokenAddress,
-  getAssociatedTokenAddressSync,
-  getOrCreateAssociatedTokenAccount,
-  createAssociatedTokenAccount,
-} from "@solana/spl-token";
+import { createAssociatedTokenAccount } from "@solana/spl-token";
 import { SYSVAR_RENT_PUBKEY, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 import {
