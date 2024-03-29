@@ -5,18 +5,6 @@ import fs from "fs";
 import "dotenv/config";
 
 // HdgFFgSrfav2mmbacqY6yZa4kyvjaA4LQDvSPvphjPSP
-export const getAuthorityKeypair = () => {
-  const walletFile = "/home/chuksud77/.config/solana/id.json";
-  const decodedKey = new Uint8Array(
-    JSON.parse(fs.readFileSync(walletFile).toString())
-  );
-  // const walletContents = fs.readFileSync(walletFile, 'utf-8');
-  // const walletData = JSON.parse(walletContents);
-  let keyPair = anchor.web3.Keypair.fromSecretKey(decodedKey);
-
-  // console.log("AUTHORITY", keyPair)
-  return keyPair;
-};
 export const auctionHouseAuthority = loadKeyPairV2(
   process.env.AUCTION_HOUSE_AUTHORITY
 );
