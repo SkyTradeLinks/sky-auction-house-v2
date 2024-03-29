@@ -7,7 +7,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-#[instruction(trade_state_bump: u8, buyer_price: u64, token_size: u64)]
+#[instruction(trade_state_bump: u8, buyer_price: u64)]
 pub struct CreateTradeState<'info> {
     /// CHECK: No need to deserialize.
     authority: UncheckedAccount<'info>,
@@ -56,9 +56,9 @@ pub struct CreateTradeState<'info> {
             wallet.key().as_ref(),
             auction_house.key().as_ref(),
             merkle_tree.key().as_ref(),
+            auction_house.treasury_mint.as_ref(),
             asset_id.key().as_ref(),
             &buyer_price.to_le_bytes(),
-            &token_size.to_le_bytes()
         ],
         bump = trade_state_bump
     )]  
@@ -71,7 +71,6 @@ pub fn handle_create_trade_state<'info>(
     ctx: Context<'_, '_, '_, 'info, CreateTradeState<'info>>,
     trade_state_bump: u8,
     price: u64,
-    token_size: u64,
     sale_type: u8,
     trade_state_size: Option<u16>,
 ) -> Result<()> {
@@ -103,9 +102,9 @@ pub fn handle_create_trade_state<'info>(
     // if token_account.amount < 1 {
     //     return Err(AuctionHouseError::InvalidTokenAccountAmount.into());
     // }
-    if token_size < 1 {
-        return Err(AuctionHouseError::InvalidTokenAccountAmount.into());
-    }
+    // if token_size < 1 {
+    //     return Err(AuctionHouseError::InvalidTokenAccountAmount.into());
+    // }
     let ts_info = trade_state.to_account_info();
     if !ts_info.data_is_empty() {
         return Err(AuctionHouseError::TradeStateAlreadyInitialized.into());
@@ -134,9 +133,8 @@ pub fn handle_create_trade_state<'info>(
         auction_house_key.as_ref(),
         payment_account_key.as_ref(),
         auction_house.treasury_mint.as_ref(),
-        // token_account.mint.as_ref(),
         &price.to_le_bytes(),
-        &token_size.to_le_bytes(),
+        // &token_size.to_le_bytes(),
         &[trade_state_bump],
     ];
     create_or_allocate_account_raw(

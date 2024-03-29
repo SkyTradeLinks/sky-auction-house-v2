@@ -10,7 +10,6 @@ export default function findAuctionHouseTradeState(
   wallet: PublicKey,
   assetId: PublicKey,
   merkleTree: PublicKey,
-  tokenSize: BN,
   buyPrice: BN,
   auctionHouseProgramId: PublicKey
 ): PdaResult {
@@ -22,7 +21,6 @@ export default function findAuctionHouseTradeState(
       merkleTree.toBuffer(),
       assetId.toBuffer(),
       buyPrice.toArrayLike(Buffer, "le", 8),
-      tokenSize.toArrayLike(Buffer, "le", 8),
     ],
     auctionHouseProgramId
   );

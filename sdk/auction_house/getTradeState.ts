@@ -9,7 +9,6 @@ export default async function getTradeState({
   auctionHouse,
   assetId,
   auctionHouseProgramId,
-  tokenSize = 1,
 }: {
   auctionHouse: PublicKey;
   auctionHouseProgramId: PublicKey;
@@ -26,7 +25,6 @@ export default async function getTradeState({
     wallet,
     assetId,
     merkleTree,
-    new BN(tokenSize),
     priceAdjusted,
     auctionHouseProgramId
   );

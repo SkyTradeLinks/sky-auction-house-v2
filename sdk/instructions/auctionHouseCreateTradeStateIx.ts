@@ -1,13 +1,16 @@
 import { BN } from "@coral-xyz/anchor";
 import { Maybe } from "../types/UtilityTypes";
 import {
-  LAMPORTS_PER_SOL, PublicKey, Signer, SystemProgram,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  Signer,
+  SystemProgram,
   SYSVAR_RENT_PUBKEY,
-  TransactionInstruction } from "@solana/web3.js";
+  TransactionInstruction,
+} from "@solana/web3.js";
 import getTradeState from "../auction_house/getTradeState";
-import SaleType from "../types/SaleType";
+import SaleType from "../types/enum/SaleType";
 import AuctionHouseProgram from "../types/AuctionHouseProgram";
-
 
 type Accounts = {
   auctionHouse: PublicKey;
@@ -40,9 +43,9 @@ export default async function auctionHouseCreateTradeStateIx(
     treasuryMint,
     paymentAccount,
     wallet,
-    assetId
+    assetId,
   }: Accounts,
-  { allocationSize, priceInLamports, saleType, tokenSize = 1 }: Args
+  { allocationSize, priceInLamports, saleType }: Args
 ): Promise<TransactionInstruction> {
   const [tradeState, tradeStateBump, buyPriceAdjusted] = await getTradeState({
     auctionHouse,
@@ -57,7 +60,6 @@ export default async function auctionHouseCreateTradeStateIx(
     .createTradeState(
       tradeStateBump,
       buyPriceAdjusted,
-      new BN(tokenSize),
       saleType,
       allocationSize ?? null
     )
@@ -68,11 +70,11 @@ export default async function auctionHouseCreateTradeStateIx(
       rent: SYSVAR_RENT_PUBKEY,
       systemProgram: SystemProgram.programId,
       paymentAccount,
-      treasuryMint, 
+      treasuryMint,
       merkleTree,
       tradeState,
       wallet: wallet,
-      assetId
+      assetId,
     })
     .instruction();
 }

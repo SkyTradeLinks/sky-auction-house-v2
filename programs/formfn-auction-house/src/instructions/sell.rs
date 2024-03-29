@@ -67,7 +67,6 @@ pub struct Sell<'info> {
             auction_house.treasury_mint.as_ref(),
             asset_id.key().as_ref(),
             &buyer_price.to_le_bytes(),
-            &token_size.to_le_bytes()
         ],
         bump = trade_state_bump
     )]
@@ -83,7 +82,6 @@ pub struct Sell<'info> {
             auction_house.treasury_mint.as_ref(),
             asset_id.key().as_ref(),
             &0u64.to_le_bytes(),
-            &token_size.to_le_bytes()
         ],
         bump = free_trade_state_bump
     )]
@@ -140,9 +138,6 @@ pub fn handle_sell<'info>(
     let metaplex_token_metadata_program = &ctx.accounts.metaplex_token_metadata_program;
     let leaf_data_owner = &ctx.accounts.leaf_data_owner;
 
-    // let accounts = &mut ctx.remaining_accounts.iter();
-
-    // let land_owner = next_account_info(accounts)?;
 
     
 
@@ -153,21 +148,6 @@ pub fn handle_sell<'info>(
     
     assert_keys_equal(treasury_mint.key(), auction_house.treasury_mint)?;
     assert_keys_equal(leaf_data_owner.key(), wallet.key())?;
-    // check that the payment_account belongs to the seller
-    // assert_token_account_owner(payment_account.owner, *wallet.key)?;
-    // assert_token_account_owner(*leaf_data_owner.key, wallet.key())?;
-    // assert_keys_equal(*land_owner.key, payment_account.owner)?;
-
-    // validate asset_id
-    // let token_asset_id = get_asset_id(
-    //     ctx.accounts.merkle_tree.key,
-    //     leaf_data.leaf_nonce.into(),
-    // );
-
-    // if leaf_data.owner != wallet.key() || asset_id.key() != token_asset_id.key() {
-    //     return Err(AuctionHouseError::IncorrectOwner.into());
-
-    // }
 
 
 
@@ -208,9 +188,9 @@ pub fn handle_sell<'info>(
     //     return Err(AuctionHouseError::InvalidTokenAmount.into());
     // }
 
-    if token_size > 1 {
-        return Err(AuctionHouseError::InvalidTokenAmount.into());
-    }
+    // if token_size > 1 {
+    //     return Err(AuctionHouseError::InvalidTokenAmount.into());
+    // }
 
     if wallet.is_signer {
         invoke(
@@ -242,9 +222,7 @@ pub fn handle_sell<'info>(
             auction_house_key.as_ref(),
             payment_account_key.as_ref(),
             auction_house.treasury_mint.as_ref(),
-            // treasury_mint.as_ref(),
             &buyer_price.to_le_bytes(),
-            &token_size.to_le_bytes(),
             &[trade_state_bump],
         ];
         create_or_allocate_account_raw(
