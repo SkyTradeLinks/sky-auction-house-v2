@@ -45,6 +45,7 @@
     "@metaplex-foundation/umi": "^0.9.1",
     "@metaplex-foundation/umi-bundle-defaults": "^0.9.1",
     "@msgpack/msgpack": "^2.8.0",
+    "@solana/spl-account-compression": "^0.2.0",
     "@solana/spl-token": "^0.4.1",
     "@solana/web3.js": "^1.91.0",
     "@types/chai": "^4.3.12",

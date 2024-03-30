@@ -1,0 +1,3 @@
+{
+  "rust-analyzer.linkedProjects": ["./programs/formfn-auction-house/Cargo.toml"]
+}
