@@ -1,6 +1,7 @@
 pub mod append_edition_allowlist_merkle_roots;
 pub mod buy_edition_v2;
 pub mod buy_v2;
+pub mod cancel_offer;
 pub mod cancel_v2;
 pub mod clear_edition_allowlist_merkle_roots;
 pub mod close_edition_allowlist_settings_account;
@@ -30,6 +31,7 @@ pub mod withdraw_from_treasury;
 pub use append_edition_allowlist_merkle_roots::*;
 pub use buy_edition_v2::*;
 pub use buy_v2::*;
+pub use cancel_offer::*;
 pub use cancel_v2::*;
 pub use clear_edition_allowlist_merkle_roots::*;
 pub use close_edition_allowlist_settings_account::*;

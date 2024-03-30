@@ -1,12 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AuctionHouse } from "../target/types/auction_house";
-import { AuctionHouseSdk } from "../sdk/auction-house-sdk";
-import {
-  findAuctionHouseBidderEscrowAccount,
-  loadKeyPair,
-  setupAirDrop,
-} from "../sdk/utils/helper";
+import AuctionHouseSdk from "./../sdk/auction-house-sdk";
+import { loadKeyPair, setupAirDrop } from "../sdk/utils/helper";
 import {
   getAssociatedTokenAddress,
   getOrCreateAssociatedTokenAccount,
@@ -86,22 +82,11 @@ describe("bid-auction-house", async () => {
 
       console.log(acc_balance);
 
-      const [escrowPaymentAccount, escrowBump] =
-        findAuctionHouseBidderEscrowAccount(
-          auctionHouseSdk.auctionHouse,
-          bidder.publicKey,
-          landMerkleTree,
-          new anchor.web3.PublicKey(assetId.toString()),
-          program.programId
-        );
-
-      console.log("es", escrowPaymentAccount);
-
       // USD
       let cost = 10;
 
-      await auctionHouseSdk.buy(
-        bidder,
+      const tx = await auctionHouseSdk.buy(
+        bidder.publicKey,
         new anchor.web3.PublicKey(assetId.toString()),
         landMerkleTree,
         bidderAta.address,
@@ -110,18 +95,9 @@ describe("bid-auction-house", async () => {
         SaleType.Offer
       );
 
-      console.log("es", escrowPaymentAccount);
+      tx.sign([bidder]);
 
-      // // console.log(
-      // //   await this.provider.connection.getBalance(escrowPaymentAccount)
-      // // );
-
-      /* const [lastBidPrice] = auctionHouseSdk.findLastBidPrice(assetId);
-      let lastBidInfo = await auctionHouseSdk.program.account.lastBidPrice.fetch(
-        lastBidPrice
-      );
-
-       console.log(lastBidInfo); */
+      await auctionHouseSdk.sendTx(tx);
     } catch (err: any) {
       console.log(err);
     }

@@ -4,7 +4,7 @@ use anchor_lang::{
 };
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{self, Mint, Token, TokenAccount},
+    token::{Mint, Token},
 };
 
 use crate::{
@@ -102,7 +102,6 @@ pub struct BuyV2<'info> {
             PREFIX.as_bytes(),
             auction_house.key().as_ref(),
             previous_bidder_wallet.key().as_ref(),
-            
             asset_id.key().as_ref()
         ],
         bump = previous_bidder_escrow_payment_bump
@@ -145,7 +144,6 @@ pub fn handle_buy_v2<'info>(
     let system_program = &ctx.accounts.system_program;
     let rent = &ctx.accounts.rent;
     let clock = &ctx.accounts.clock;
-
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
 
@@ -218,8 +216,6 @@ pub fn handle_buy_v2<'info>(
         is_native,
     )?;
 
-
-
     let ts_info = buyer_trade_state.to_account_info();
     if ts_info.data_is_empty() {
         let wallet_key = wallet.key();
@@ -250,13 +246,7 @@ pub fn handle_buy_v2<'info>(
     buyer_trade_state_data[0] = trade_state_bump;
     buyer_trade_state_data[1] = sale_type;
 
-
-
-
-
-    // if price in trade_state, compare against buyer_price, and then withdraw based off stuff
-
-    
+    // if price in trade_state, compare against buyer_price, and then alter deposit / withdraw
 
     // Execute various checks and other business logic based on the type of sale
     // Manually "deserialize" data here instead of relying on anchor since we
@@ -400,8 +390,6 @@ pub fn handle_buy_v2<'info>(
 
     // keep current price
     buyer_trade_state_data[2..10].copy_from_slice(&buyer_price.to_le_bytes());
-
-    
  
     Ok(())
 }

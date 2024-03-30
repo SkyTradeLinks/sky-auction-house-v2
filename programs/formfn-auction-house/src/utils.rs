@@ -159,16 +159,23 @@ pub fn get_fee_payer<'a, 'b>(
 pub fn assert_keys_equal(key1: Pubkey, key2: Pubkey) -> Result<()> {
     if key1 != key2 {
         msg!("PublicKeyMismatch, expected {} = {}", key1, key2);
+        // error!("Owner mismatch: {:?} != {:?}" key1 key2);
         Err(AuctionHouseError::PublicKeyMismatch.into())
     } else {
+        // msg!("Owner match: {:?} {:?}", key1, key2);
+        // info!("Owner match: {:?}" key1, key2);
         Ok(())
     }
 }
 
 pub fn assert_token_account_owner(key1: Pubkey, key2: Pubkey) -> Result<()> {
     if key1 != key2 {
+        // msg!("Owner mismatch, expected {} = {}", key1, key2);
+        // error!("Owner mismatch: {:?} != {:?}" key1, key2);
         Err(AuctionHouseError::IncorrectOwner.into())
     } else {
+        // info!("Owner match: {:?}" key1, key2);
+        // msg!("Owner match: {:?} {:?}", key1, key2);
         Ok(())
     }
 }

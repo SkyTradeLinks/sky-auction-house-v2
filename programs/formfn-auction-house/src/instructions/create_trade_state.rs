@@ -42,6 +42,7 @@ pub struct CreateTradeState<'info> {
         bump = auction_house.fee_payer_bump
     )]
     auction_house_fee_account: UncheckedAccount<'info>,
+    
     /// CHECK: No need to deserialize.
     #[account(
         mut,
@@ -54,7 +55,7 @@ pub struct CreateTradeState<'info> {
             merkle_tree.key().as_ref(),
         ],
         bump = trade_state_bump
-    )]
+    )]  
     trade_state: UncheckedAccount<'info>,
     system_program: Program<'info, System>,
     rent: Sysvar<'info, Rent>,
