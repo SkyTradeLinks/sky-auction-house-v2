@@ -2,7 +2,11 @@ import fs from "fs";
 import * as anchor from "@coral-xyz/anchor";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { TransactionWithMeta } from "@metaplex-foundation/umi";
-import { SPL_NOOP_PROGRAM_ID } from "@metaplex-foundation/mpl-bubblegum";
+import {
+  SPL_NOOP_PROGRAM_ID,
+  getAssetWithProof,
+  getMetadataArgsSerializer,
+} from "@metaplex-foundation/mpl-bubblegum";
 import { deserializeChangeLogEventV1 } from "@solana/spl-account-compression";
 
 export const loadKeyPair = (filename) => {
@@ -119,4 +123,29 @@ export const findLeafIndexFromAnchorTx = (txInfo: TransactionWithMeta) => {
 
   //
   return [leafIndex, treeAddress];
+};
+
+export const getLeafData = async (umi, assetId, owner: PublicKey) => {
+  let assetWithProof = await getAssetWithProof(umi, assetId);
+
+  let leafData = {
+    leafIndex: assetWithProof.index,
+    leafNonce: new anchor.BN(assetWithProof.nonce),
+    owner,
+    delegate:
+      assetWithProof.leafDelegate != null
+        ? new anchor.web3.PublicKey(assetWithProof.leafDelegate)
+        : owner,
+    root: new anchor.web3.PublicKey(assetWithProof.root),
+    leafHash: [
+      ...new anchor.web3.PublicKey(
+        assetWithProof.rpcAssetProof.leaf.toString()
+      ).toBytes(),
+    ],
+    leafMetadata: Buffer.from(
+      getMetadataArgsSerializer().serialize(assetWithProof.metadata)
+    ),
+  };
+
+  return leafData;
 };

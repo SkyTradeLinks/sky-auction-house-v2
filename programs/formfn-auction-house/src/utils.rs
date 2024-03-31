@@ -1,5 +1,7 @@
 use anchor_lang::solana_program;
 
+use crate::LeafData;
+
 use {
     crate::constants::{FEE_PAYER, PREFIX},
     crate::{
@@ -29,7 +31,11 @@ use {
     std::{convert::TryInto, io::Write, slice::Iter, str::FromStr},
 };
 
-use mpl_bubblegum::utils::get_asset_id;
+use mpl_bubblegum::{
+    hash::{hash_creators, hash_metadata},
+    types::{LeafSchema, MetadataArgs},
+    utils::get_asset_id,
+};
 
 // 0.01 SOL
 const BOT_FEE: u64 = 10u64.pow(7);
@@ -748,7 +754,6 @@ pub fn withdraw_helper<'info>(
         PREFIX.as_bytes(),
         auction_house_key.as_ref(),
         wallet_key.as_ref(),
-        
         asset_id_key.as_ref(),
         &[escrow_payment_bump],
     ];
@@ -1258,6 +1263,304 @@ pub fn assert_valid_nft(asset_id: &Pubkey, merkle_tree: &Pubkey, leaf_index: u64
 
     if generated_asset_id != asset_id.key() {
         return Err(AuctionHouseError::InvalidEdition.into());
+    }
+
+    Ok(())
+}
+
+pub fn assert_valid_nft_owner(
+    leaf_data: &LeafData,
+    leaf_owner: &UncheckedAccount,
+    merkle_tree: &UncheckedAccount,
+    passed_asset_id: &UncheckedAccount,
+) -> Result<()> {
+    if leaf_data.owner != leaf_owner.key() {
+        return err!(AuctionHouseError::NoValidSignerPresent);
+    }
+
+    let asset_id = get_asset_id(merkle_tree.key, leaf_data.leaf_nonce.into());
+
+    if passed_asset_id.key() != asset_id {
+        return err!(AuctionHouseError::NoValidSignerPresent);
+    }
+
+    let metadata = MetadataArgs::try_from_slice(leaf_data.leaf_metadata.as_slice())?;
+
+    let data_hash = hash_metadata(&metadata)?;
+    let creator_hash = hash_creators(&metadata.creators);
+
+    let schema = LeafSchema::V1 {
+        id: asset_id,
+        owner: leaf_data.owner,
+        delegate: leaf_data.delegate,
+        nonce: leaf_data.leaf_nonce,
+        data_hash: data_hash,
+        creator_hash: creator_hash,
+    };
+
+    if schema.hash() != leaf_data.leaf_hash.unwrap() {
+        return err!(AuctionHouseError::NoValidSignerPresent);
+    }
+
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn pay_creator_fees_cnft<'a>(
+    remaining_accounts: &mut Iter<AccountInfo<'a>>,
+    metadata: &MetadataArgs,
+    escrow_payment_account: &AccountInfo<'a>,
+    payment_account_owner: &AccountInfo<'a>,
+    fee_payer: &AccountInfo<'a>,
+    treasury_mint: &AccountInfo<'a>,
+    ata_program: &AccountInfo<'a>,
+    token_program: &AccountInfo<'a>,
+    system_program: &AccountInfo<'a>,
+    rent: &AccountInfo<'a>,
+    signer_seeds: &[&[u8]],
+    fee_payer_seeds: &[&[u8]],
+    size: u64,
+    is_native: bool,
+) -> Result<u64> {
+    let fees = metadata.seller_fee_basis_points;
+
+    let total_fee = (fees as u128)
+        .checked_mul(size as u128)
+        .ok_or(AuctionHouseError::NumericalOverflow)?
+        .checked_div(10000)
+        .ok_or(AuctionHouseError::NumericalOverflow)? as u64;
+
+    let mut remaining_fee = total_fee;
+    let remaining_size = size
+        .checked_sub(total_fee)
+        .ok_or(AuctionHouseError::NumericalOverflow)?;
+
+    let creators = &metadata.creators;
+
+    for creator in creators {
+        let pct = creator.share as u128;
+
+        let creator_fee = pct
+            .checked_mul(total_fee as u128)
+            .ok_or(AuctionHouseError::NumericalOverflow)?
+            .checked_div(100)
+            .ok_or(AuctionHouseError::NumericalOverflow)? as u64;
+
+        remaining_fee = remaining_fee
+            .checked_sub(creator_fee)
+            .ok_or(AuctionHouseError::NumericalOverflow)?;
+
+        let current_creator_info = next_account_info(remaining_accounts)?;
+
+        assert_keys_equal(creator.address, *current_creator_info.key)?;
+
+        if !is_native {
+            let current_creator_token_account_info = next_account_info(remaining_accounts)?;
+            if current_creator_token_account_info.data_is_empty() {
+                make_ata(
+                    current_creator_token_account_info.to_account_info(),
+                    current_creator_info.to_account_info(),
+                    treasury_mint.to_account_info(),
+                    fee_payer.to_account_info(),
+                    ata_program.to_account_info(),
+                    token_program.to_account_info(),
+                    system_program.to_account_info(),
+                    rent.to_account_info(),
+                    fee_payer_seeds,
+                )?;
+            }
+
+            assert_is_ata(
+                current_creator_token_account_info,
+                current_creator_info.key,
+                &treasury_mint.key(),
+            )?;
+
+            if creator_fee > 0 {
+                invoke_signed(
+                    &spl_token::instruction::transfer(
+                        token_program.key,
+                        &escrow_payment_account.key,
+                        current_creator_token_account_info.key,
+                        payment_account_owner.key,
+                        &[],
+                        creator_fee,
+                    )?,
+                    &[
+                        escrow_payment_account.clone(),
+                        current_creator_token_account_info.clone(),
+                        token_program.clone(),
+                        payment_account_owner.clone(),
+                    ],
+                    &[signer_seeds],
+                )?;
+            }
+        } else if creator_fee > 0 {
+            invoke_signed(
+                &system_instruction::transfer(
+                    &escrow_payment_account.key,
+                    current_creator_info.key,
+                    creator_fee,
+                ),
+                &[
+                    escrow_payment_account.clone(),
+                    current_creator_info.clone(),
+                    system_program.clone(),
+                ],
+                &[signer_seeds],
+            )?;
+        }
+    }
+
+    // Any dust is returned to the party posting the NFT
+    Ok(remaining_size
+        .checked_add(remaining_fee)
+        .ok_or(AuctionHouseError::NumericalOverflow)?)
+}
+
+pub fn get_has_been_sold_cnft(
+    metadata: &MetadataArgs,
+    last_bid_price: Option<&LastBidPrice>,
+) -> bool {
+    return match last_bid_price {
+        None => metadata.primary_sale_happened,
+        Some(last_bid_price) => metadata.primary_sale_happened || last_bid_price.has_been_sold == 1,
+    };
+}
+
+pub fn should_split_primary_sale_cnft(
+    metadata: &MetadataArgs,
+    seller: &Pubkey,
+    has_been_sold: bool,
+) -> bool {
+    let creators = &metadata.creators;
+
+    return creators.len() > 1
+        && !has_been_sold
+        && creators.iter().any(|creator| creator.address.eq(seller));
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn split_primary_sale_between_creators_non_native_cnft<'a>(
+    remaining_accounts: &mut Iter<AccountInfo<'a>>,
+    metadata: &MetadataArgs,
+    payer_account: &AccountInfo<'a>,
+    payment_account_owner: &AccountInfo<'a>,
+    fee_payer: &AccountInfo<'a>,
+    treasury_mint: &AccountInfo<'a>,
+    ata_program: &AccountInfo<'a>,
+    token_program: &AccountInfo<'a>,
+    system_program: &AccountInfo<'a>,
+    rent: &AccountInfo<'a>,
+    signer_seeds: &[&[u8]],
+    fee_payer_seeds: &[&[u8]],
+    total_amount: u64,
+) -> Result<()> {
+    let mut remaining_amount = total_amount;
+
+    let creators = &metadata.creators;
+
+    for (index, creator) in creators.iter().enumerate() {
+        let pct = creator.share as u128;
+        let creator_amount = if index != creators.len() - 1 {
+            pct.checked_mul(total_amount as u128)
+                .ok_or(AuctionHouseError::NumericalOverflow)?
+                .checked_div(100)
+                .ok_or(AuctionHouseError::NumericalOverflow)? as u64
+        } else {
+            // Leftover amount due to imprecision given to last creator
+            remaining_amount
+        };
+        remaining_amount = remaining_amount
+            .checked_sub(creator_amount)
+            .ok_or(AuctionHouseError::NumericalOverflow)?;
+        let current_creator_info = next_account_info(remaining_accounts)?;
+        assert_keys_equal(creator.address, *current_creator_info.key)?;
+        let current_creator_token_account_info = next_account_info(remaining_accounts)?;
+        if current_creator_token_account_info.data_is_empty() {
+            make_ata(
+                current_creator_token_account_info.to_account_info(),
+                current_creator_info.to_account_info(),
+                treasury_mint.to_account_info(),
+                fee_payer.to_account_info(),
+                ata_program.to_account_info(),
+                token_program.to_account_info(),
+                system_program.to_account_info(),
+                rent.to_account_info(),
+                fee_payer_seeds,
+            )?;
+        }
+        assert_is_ata(
+            current_creator_token_account_info,
+            current_creator_info.key,
+            &treasury_mint.key(),
+        )?;
+        if creator_amount > 0 {
+            invoke_signed(
+                &spl_token::instruction::transfer(
+                    token_program.key,
+                    &payer_account.key,
+                    current_creator_token_account_info.key,
+                    payment_account_owner.key,
+                    &[],
+                    creator_amount,
+                )?,
+                &[
+                    payer_account.clone(),
+                    current_creator_token_account_info.clone(),
+                    token_program.clone(),
+                    payment_account_owner.clone(),
+                ],
+                &[signer_seeds],
+            )?;
+        }
+    }
+
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn split_primary_sale_between_creators_native_cnft<'a>(
+    remaining_accounts: &mut Iter<AccountInfo<'a>>,
+    metadata: &MetadataArgs,
+    payer_account: &AccountInfo<'a>,
+    system_program: &AccountInfo<'a>,
+    signer_seeds: &[&[u8]],
+    total_amount: u64,
+) -> Result<()> {
+    let mut remaining_amount = total_amount;
+
+    let creators = &metadata.creators;
+
+    for (index, creator) in creators.iter().enumerate() {
+        let pct = creator.share as u128;
+        let creator_amount = if index != creators.len() - 1 {
+            pct.checked_mul(total_amount as u128)
+                .ok_or(AuctionHouseError::NumericalOverflow)?
+                .checked_div(100)
+                .ok_or(AuctionHouseError::NumericalOverflow)? as u64
+        } else {
+            // Leftover amount due to imprecision given to last creator
+            remaining_amount
+        };
+        remaining_amount = remaining_amount
+            .checked_sub(creator_amount)
+            .ok_or(AuctionHouseError::NumericalOverflow)?;
+        let current_creator_info = next_account_info(remaining_accounts)?;
+        assert_keys_equal(creator.address, *current_creator_info.key)?;
+        invoke_signed(
+            &system_instruction::transfer(
+                &payer_account.key,
+                current_creator_info.key,
+                creator_amount,
+            ),
+            &[
+                payer_account.clone(),
+                current_creator_info.clone(),
+                system_program.clone(),
+            ],
+            &[signer_seeds],
+        )?;
     }
 
     Ok(())

@@ -6,14 +6,14 @@ import {
   createSignerFromKeypair,
   publicKey,
   signerIdentity,
-  createNoopSigner,
-  publicKeyBytes,
 } from "@metaplex-foundation/umi";
-import { VersionedTransaction } from "@solana/web3.js";
+import { PublicKey, VersionedTransaction } from "@solana/web3.js";
 
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { mplBubblegum, delegate } from "@metaplex-foundation/mpl-bubblegum";
-import { toWeb3JsInstruction } from "@metaplex-foundation/umi-web3js-adapters";
+import {
+  mplBubblegum,
+  fetchTreeConfigFromSeeds,
+} from "@metaplex-foundation/mpl-bubblegum";
 
 // constants
 import {
@@ -29,13 +29,16 @@ import SaleType from "./types/enum/SaleType";
 
 // pdas
 import findLastBidPrice from "./pdas/findLastBidPrice";
-import findAuctionHouseProgramAsSigner from "./pdas/findAuctionHouseProgramAsSigner";
 
 // instructions
 import createLastBidPriceIx from "./instructions/createLastBidPriceIx";
 import createBuyIx from "./instructions/createBuyIx";
 import createSellIx from "./instructions/createSellIx";
 import createCancelOfferIx from "./instructions/createCancelOfferIx";
+import createCancelListingIx from "./instructions/createCancelListingIx";
+import transferNftDelegateIx from "./instructions/transferNftDelegateIx";
+import createExecuteSaleIx from "./instructions/createExecuteSaleIx";
+import transferNftIx from "./instructions/transferNftIx";
 
 export default class AuctionHouseSdk {
   private static instance: AuctionHouseSdk;
@@ -156,7 +159,6 @@ export default class AuctionHouseSdk {
     buyer: anchor.web3.PublicKey,
     assetId: anchor.web3.PublicKey,
     merkleTree: anchor.web3.PublicKey,
-    buyerAta: anchor.web3.PublicKey,
     price: number,
     leafIndex: number,
     saleType: SaleType
@@ -199,7 +201,6 @@ export default class AuctionHouseSdk {
       this.mintAccount,
       lastBidInfo.bidder,
       lastBidPrice,
-      buyerAta,
       this.feeAccount,
       leafIndex,
       saleType,
@@ -238,7 +239,7 @@ export default class AuctionHouseSdk {
     return tx;
   }
 
-  async sell(
+  public async sell(
     seller: anchor.web3.PublicKey,
     assetId: anchor.web3.PublicKey,
     merkleTree: anchor.web3.PublicKey,
@@ -260,32 +261,11 @@ export default class AuctionHouseSdk {
       this.program.programId
     );
 
-    const rpcAsset = await this.umi.rpc.getAsset(publicKey(assetId));
-    const rpcAssetProof = await this.umi.rpc.getAssetProof(publicKey(assetId));
-
-    const leafOwner = createNoopSigner(rpcAsset.ownership.owner);
-
-    const [programSigner] = findAuctionHouseProgramAsSigner(
-      this.program.programId
+    let delegateIxs = await transferNftDelegateIx(
+      this.umi,
+      assetId,
+      auctionHouseAuthority.publicKey
     );
-
-    let umiTx = await delegate(this.umi, {
-      leafOwner,
-      previousLeafDelegate:
-        rpcAsset.ownership.delegate ?? rpcAsset.ownership.owner,
-      newLeafDelegate: publicKey(programSigner),
-      merkleTree: rpcAssetProof.tree_id,
-      root: publicKeyBytes(rpcAssetProof.root),
-      dataHash: publicKeyBytes(rpcAsset.compression.data_hash),
-      creatorHash: publicKeyBytes(rpcAsset.compression.creator_hash),
-      nonce: rpcAsset.compression.leaf_id,
-      index: rpcAssetProof.node_index - 2 ** rpcAssetProof.proof.length,
-      proof: rpcAssetProof.proof,
-    }).setLatestBlockhash(this.umi);
-
-    let ix = umiTx.getInstructions();
-
-    let delegateIxs = ix.map((el) => toWeb3JsInstruction(el));
 
     const tx = await convertToTx(this.provider.connection, seller, [
       saleIx,
@@ -293,5 +273,91 @@ export default class AuctionHouseSdk {
     ]);
 
     return tx;
+  }
+
+  async cancelListing(
+    seller: anchor.web3.PublicKey,
+    assetId: anchor.web3.PublicKey,
+    merkleTree: anchor.web3.PublicKey
+  ) {
+    let cancelIx = await createCancelListingIx(
+      this.program,
+      this.umi,
+      seller,
+      assetId,
+      merkleTree,
+      this.auctionHouse,
+      this.mintAccount,
+      this.feeAccount,
+      this.program.programId
+    );
+
+    const treeConfig = await fetchTreeConfigFromSeeds(this.umi, {
+      merkleTree: publicKey(merkleTree),
+    });
+
+    // set delegate back to tree delegate
+    let delegateIxs = await transferNftDelegateIx(
+      this.umi,
+      assetId,
+      new PublicKey(treeConfig.treeDelegate)
+    );
+
+    const tx = await convertToTx(this.provider.connection, seller, [
+      cancelIx,
+      ...delegateIxs,
+    ]);
+
+    return tx;
+  }
+
+  public async createExecuteSaleIx(
+    buyer: anchor.web3.PublicKey,
+    assetId: anchor.web3.PublicKey,
+    merkleTree: anchor.web3.PublicKey,
+    seller: anchor.web3.PublicKey
+  ) {
+    let executeSaleIx = await createExecuteSaleIx(
+      this.program,
+      this.umi,
+      buyer,
+      assetId,
+      merkleTree,
+      seller,
+      this.auctionHouse,
+      this.mintAccount,
+      this.feeAccount,
+      this.treasuryAccount,
+      this.program.programId
+    );
+
+    // change to include either auction house / seller
+    const tx = await convertToTx(this.provider.connection, seller, [
+      executeSaleIx,
+    ]);
+
+    return tx;
+  }
+
+  public async sendExecuteSaleTx(
+    transaction: VersionedTransaction,
+    assetId: PublicKey,
+    buyer: PublicKey
+  ) {
+    // transaction must be signed
+    await this.sendTx(transaction);
+
+    // get transfer nft
+    let transferIx = await transferNftIx(this.umi, assetId, buyer);
+
+    const transferTx = await convertToTx(
+      this.provider.connection,
+      this.feeAccount,
+      [...transferIx]
+    );
+
+    transferTx.sign([auctionHouseAuthority]);
+
+    await this.sendTx(transferTx);
   }
 }

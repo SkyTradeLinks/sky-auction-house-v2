@@ -89,7 +89,6 @@ describe("bid-auction-house", async () => {
         bidder.publicKey,
         new anchor.web3.PublicKey(assetId.toString()),
         landMerkleTree,
-        bidderAta.address,
         cost,
         leafIndex,
         SaleType.Offer

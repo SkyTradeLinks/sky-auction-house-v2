@@ -22,6 +22,7 @@ import {
   TokenStandard,
   getMetadataArgsSerializer,
   delegate,
+  fetchTreeConfigFromSeeds,
 } from "@metaplex-foundation/mpl-bubblegum";
 
 import { createAssociatedTokenAccount } from "@solana/spl-token";
@@ -129,139 +130,93 @@ describe("Sell test Auction", async () => {
   });
 
   it("should successfully mint rental token and sell", async () => {
-    const sig = await mintV1(umi, {
-      leafOwner: publicKey(seller1.publicKey),
+    // const sig = await mintV1(umi, {
+    //   leafOwner: publicKey(seller1.publicKey),
+    //   merkleTree: publicKey(customMerkleTree.publicKey),
+    //   metadata: {
+    //     name: "Land NFT",
+    //     symbol: "",
+    //     uri: "",
+    //     creators: [],
+    //     sellerFeeBasisPoints: 0,
+    //     primarySaleHappened: false,
+    //     isMutable: false,
+    //     editionNonce: null,
+    //     uses: null,
+    //     collection: null,
+    //     tokenProgramVersion: TokenProgramVersion.Original,
+    //     tokenStandard: TokenStandard.NonFungible,
+    //   },
+    // }).sendAndConfirm(umi);
+
+    // let mintTxInfo;
+
+    // let i = 0;
+
+    // while (i < 6) {
+    //   const tx0 = await umi.rpc.getTransaction(sig.signature, {
+    //     commitment: "confirmed",
+    //   });
+
+    //   if (tx0 !== null) {
+    //     mintTxInfo = tx0;
+    //     break;
+    //   }
+
+    //   await sleep(1000 * i);
+
+    //   i++;
+    // }
+
+    // let [leafIndex] = findLeafIndexFromAnchorTx(mintTxInfo);
+
+    // let [assetId] = findLeafAssetIdPda(umi, {
+    //   merkleTree: publicKey(customMerkleTree.publicKey),
+    //   leafIndex: leafIndex,
+    // });
+
+    // const rpcAsset = await umi.rpc.getAsset(assetId);
+    // const rpcAssetProof = await umi.rpc.getAssetProof(assetId);
+
+    // console.log(rpcAsset);
+
+    const treeConfig = await fetchTreeConfigFromSeeds(umi, {
       merkleTree: publicKey(customMerkleTree.publicKey),
-      metadata: {
-        name: "Land NFT",
-        symbol: "",
-        uri: "",
-        creators: [],
-        sellerFeeBasisPoints: 0,
-        primarySaleHappened: false,
-        isMutable: false,
-        editionNonce: null,
-        uses: null,
-        collection: null,
-        tokenProgramVersion: TokenProgramVersion.Original,
-        tokenStandard: TokenStandard.NonFungible,
-      },
-    }).sendAndConfirm(umi);
-
-    let mintTxInfo;
-
-    let i = 0;
-
-    while (i < 6) {
-      const tx0 = await umi.rpc.getTransaction(sig.signature, {
-        commitment: "confirmed",
-      });
-
-      if (tx0 !== null) {
-        mintTxInfo = tx0;
-        break;
-      }
-
-      await sleep(1000 * i);
-
-      i++;
-    }
-
-    let [leafIndex] = findLeafIndexFromAnchorTx(mintTxInfo);
-
-    let [assetId] = findLeafAssetIdPda(umi, {
-      merkleTree: publicKey(customMerkleTree.publicKey),
-      leafIndex: leafIndex,
     });
 
-    const rpcAsset = await umi.rpc.getAsset(assetId);
-    const rpcAssetProof = await umi.rpc.getAssetProof(assetId);
+    console.log(treeConfig.treeCreator);
 
-    const leafOwner = createNoopSigner(rpcAsset.ownership.owner);
+    console.log("Hey");
 
-    let umiTx = await delegate(umi, {
-      leafOwner,
-      previousLeafDelegate:
-        rpcAsset.ownership.delegate ?? rpcAsset.ownership.owner,
-      newLeafDelegate: publicKey(imposter.publicKey),
-      merkleTree: rpcAssetProof.tree_id,
-      root: publicKeyBytes(rpcAssetProof.root),
-      dataHash: publicKeyBytes(rpcAsset.compression.data_hash),
-      creatorHash: publicKeyBytes(rpcAsset.compression.creator_hash),
-      nonce: rpcAsset.compression.leaf_id,
-      index: rpcAssetProof.node_index - 2 ** rpcAssetProof.proof.length,
-      proof: rpcAssetProof.proof,
-    }).setLatestBlockhash(umi);
+    // const leafOwner = createNoopSigner(rpcAsset.ownership.owner);
 
-    let ix = umiTx.getInstructions();
+    // let umiTx = await delegate(umi, {
+    //   leafOwner,
+    //   previousLeafDelegate:
+    //     rpcAsset.ownership.delegate ?? rpcAsset.ownership.owner,
+    //   newLeafDelegate: publicKey(imposter.publicKey),
+    //   merkleTree: rpcAssetProof.tree_id,
+    //   root: publicKeyBytes(rpcAssetProof.root),
+    //   dataHash: publicKeyBytes(rpcAsset.compression.data_hash),
+    //   creatorHash: publicKeyBytes(rpcAsset.compression.creator_hash),
+    //   nonce: rpcAsset.compression.leaf_id,
+    //   index: rpcAssetProof.node_index - 2 ** rpcAssetProof.proof.length,
+    //   proof: rpcAssetProof.proof,
+    // }).setLatestBlockhash(umi);
 
-    let properIx = ix.map((el) => toWeb3JsInstruction(el));
+    // let ix = umiTx.getInstructions();
 
-    const tx = await convertToTx(
-      provider.connection,
-      seller1.publicKey,
-      properIx
-    );
+    // let properIx = ix.map((el) => toWeb3JsInstruction(el));
 
-    tx.sign([seller1]);
+    // const tx = await convertToTx(
+    //   provider.connection,
+    //   seller1.publicKey,
+    //   properIx
+    // );
 
-    await auctionHouseSdk.sendTx(tx);
+    // tx.sign([seller1]);
 
-    // createSignerFromWalletAdapte/r;
-
-    // console.log(umiTx.message.instructions);
-
-    // umiTx.message.
-
-    //     console.log("AssetId", asset_id);
-    //     // console.log("Rpc-Asset", rpcAsset)
-    //     assetWithProof = await getAssetWithProof(umi, assetId);
-    //     owner = new anchor.web3.PublicKey(assetWithProof.leafOwner);
-    //     console.log("Owner", owner);
-    //     let leafData = {
-    //       leafIndex: new anchor.BN(assetWithProof.index),
-    //       leafNonce: new anchor.BN(assetWithProof.nonce),
-    //       owner,
-    //       delegate:
-    //         assetWithProof.leafDelegate != null
-    //           ? new anchor.web3.PublicKey(assetWithProof.leafDelegate)
-    //           : owner,
-    //       root: new anchor.web3.PublicKey(assetWithProof.root),
-    //       leafHash: [
-    //         ...new anchor.web3.PublicKey(
-    //           assetWithProof.rpcAssetProof.leaf.toString()
-    //         ).toBytes(),
-    //       ],
-    //       leafMetadata: Buffer.from(
-    //         getMetadataArgsSerializer().serialize(assetWithProof.metadata)
-    //       ),
-    //     };
-    //     leavesData.push(leafData);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    //   tokenAccount = await createAssociatedTokenAccount(
-    //     connection,
-    //     seller1,
-    //     auctionHouseSdk.mintAccount,
-    //     owner
-    //   );
-    //   console.log("TokenAccount", tokenAccount);
-    //   console.log("TokenAccount Owner", owner);
-    //   const tx = await auctionHouseSdk.sell(
-    //     SaleType.Auction,
-    //     true,
-    //     new anchor.web3.PublicKey(asset_id),
-    //     {
-    //       priceInLamports: BUY_PRICE * LAMPORTS_PER_SOL,
-    //       merkleTree: landMerkleTree,
-    //       paymentAccount: tokenAccount,
-    //       wallet: owner,
-    //       leafDataOwner: leavesData[0].owner,
-    //     },
-    //     { tokenSize: 1 }
-    //   );
-    //   // console.log(tx);
+    // await auctionHouseSdk.sendTx(tx);
   });
 
   // it("should fail if an imposter tries to sell", async () => {

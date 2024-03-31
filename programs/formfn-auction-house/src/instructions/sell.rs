@@ -1,12 +1,6 @@
+use crate::{constants::*, state::*, utils::*, AuctionHouse};
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
-use mpl_bubblegum::{
-    hash::{hash_creators, hash_metadata},
-    types::{LeafSchema, MetadataArgs},
-    utils::get_asset_id,
-};
-
-use crate::{constants::*, state::*, utils::*, AuctionHouse, AuctionHouseError};
 
 #[derive(Accounts)]
 #[instruction(trade_state_bump: u8, buyer_price: u64, sale_type: u8, leaf_data: LeafData)]
@@ -19,6 +13,9 @@ pub struct Sell<'info> {
 
     /// CHECK: No need to deserialize.
     authority: UncheckedAccount<'info>,
+
+    /// CHECK: No need to deserialize.
+    merkle_tree: UncheckedAccount<'info>,
 
     #[account(
         has_one = authority,
@@ -58,14 +55,11 @@ pub struct Sell<'info> {
     )]
     seller_trade_state: UncheckedAccount<'info>,
 
-    treasury_mint: Account<'info, Mint>,
+    treasury_mint: Box<Account<'info, Mint>>,
 
     system_program: Program<'info, System>,
 
     rent: Sysvar<'info, Rent>,
-
-    /// CHECK: No need to deserialize.
-    merkle_tree: UncheckedAccount<'info>,
 
     /// CHECK: No need to deserialize.
     leaf_data_owner: UncheckedAccount<'info>,
@@ -94,39 +88,17 @@ pub fn handle_sell<'info>(
 
     let merkle_tree = &ctx.accounts.merkle_tree;
 
-    let leaf_data_owner = &ctx.accounts.leaf_data_owner;
+    let leaf_owner = &ctx.accounts.leaf_data_owner;
+
+    let asset_id = &ctx.accounts.asset_id;
 
     assert_valid_auction_house(ctx.program_id, &auction_house.key())?;
 
     assert_keys_equal(treasury_mint.key(), auction_house.treasury_mint)?;
-    assert_keys_equal(leaf_data_owner.key(), wallet.key())?;
 
-    // make assertion / utils
-    let leaf_owner = &ctx.accounts.leaf_data_owner;
+    assert_keys_equal(leaf_owner.key(), wallet.key())?;
 
-    if leaf_data.owner != leaf_owner.key() {
-        return err!(AuctionHouseError::NoValidSignerPresent);
-    }
-
-    let asset_id = get_asset_id(ctx.accounts.merkle_tree.key, leaf_data.leaf_nonce.into());
-
-    let metadata = MetadataArgs::try_from_slice(leaf_data.leaf_metadata.as_slice())?;
-
-    let data_hash = hash_metadata(&metadata)?;
-    let creator_hash = hash_creators(&metadata.creators);
-
-    let schema = LeafSchema::V1 {
-        id: asset_id,
-        owner: leaf_data.owner,
-        delegate: leaf_data.delegate,
-        nonce: leaf_data.leaf_nonce,
-        data_hash: data_hash,
-        creator_hash: creator_hash,
-    };
-
-    if schema.hash() != leaf_data.leaf_hash.unwrap() {
-        return err!(AuctionHouseError::NoValidSignerPresent);
-    }
+    assert_valid_nft_owner(&leaf_data, leaf_owner, merkle_tree, asset_id)?;
 
     let auction_house_key = auction_house.key();
 

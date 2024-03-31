@@ -23,6 +23,7 @@ pub struct BuyV2<'info> {
     payment_account: UncheckedAccount<'info>,
     /// CHECK: No need to deserialize.
     transfer_authority: UncheckedAccount<'info>,
+    
     treasury_mint: Box<Account<'info, Mint>>,
 
     /// CHECK: No need to deserialize.

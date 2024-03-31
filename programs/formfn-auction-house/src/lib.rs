@@ -112,30 +112,21 @@ pub mod auction_house {
     // // in a backwards compatible way and thus we are introducing a new IX.
     pub fn cancel_v2<'info>(
         ctx: Context<'_, '_, '_, 'info, CancelV2<'info>>,
-        buyer_price: u64,
-        token_size: u64,
-        program_as_signer_bump: u8,
+        trade_state_bump: u8,
+        leaf_data: LeafData,
     ) -> Result<()> {
-        handle_cancel_v2(ctx, buyer_price, token_size, program_as_signer_bump)
+        handle_cancel_v2(ctx, trade_state_bump, leaf_data)
     }
 
     pub fn execute_sale_v2<'info>(
         ctx: Context<'_, '_, '_, 'info, ExecuteSaleV2<'info>>,
         escrow_payment_bump: u8,
-        free_trade_state_bump: u8,
-        program_as_signer_bump: u8,
-        buyer_price: u64,
-        seller_price: u64,
-        token_size: u64,
+        leaf_data: LeafData,
     ) -> Result<()> {
         handle_execute_sale_v2(
             ctx,
             escrow_payment_bump,
-            free_trade_state_bump,
-            program_as_signer_bump,
-            buyer_price,
-            seller_price,
-            token_size,
+            leaf_data,
         )
     }
 

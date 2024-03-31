@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{token::{Mint, Token}, associated_token::AssociatedToken};
 use crate::{
-   AuctionHouse, LastBidPrice, constants::*,  utils::*,
+   AuctionHouse, constants::*,  utils::*,
 };
 
 #[derive(Accounts)]

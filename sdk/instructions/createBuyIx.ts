@@ -22,7 +22,6 @@ const createBuyIx = async (
   mintAccount: PublicKey,
   previousBidder: PublicKey,
   lastBidPrice: PublicKey,
-  buyerAta: PublicKey,
   feeAccount: PublicKey,
   leafIndex: number,
   saleType: SaleType,
@@ -58,6 +57,8 @@ const createBuyIx = async (
     mintAccount,
     previousBidder
   );
+
+  let buyerAta = getAssociatedTokenAddressSync(mintAccount, buyer);
 
   // trade-state is created on the fly
   const ix = await program.methods
