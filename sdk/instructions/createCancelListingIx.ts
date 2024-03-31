@@ -1,7 +1,7 @@
 import { AuctionHouse } from "../../target/types/auction_house";
 import { Program } from "@coral-xyz/anchor";
 import { getLeafData } from "../utils/helper";
-import { auctionHouseAuthority } from "../utils/constants";
+
 import findTradeState from "../pdas/findTradeState";
 import { Umi } from "@metaplex-foundation/umi";
 import { PublicKey } from "@solana/web3.js";
@@ -15,6 +15,7 @@ const createCancelListingIx = async (
   auctionHouse: PublicKey,
   mintAccount: PublicKey,
   feeAccount: PublicKey,
+  auctionHouseAuthority: PublicKey,
   auctionHouseProgramId: PublicKey
 ) => {
   const [tradeState, tradeStateBump] = findTradeState(
@@ -34,7 +35,7 @@ const createCancelListingIx = async (
       wallet: seller,
       treasuryMint: mintAccount,
       assetId,
-      authority: auctionHouseAuthority.publicKey,
+      authority: auctionHouseAuthority,
 
       merkleTree,
       auctionHouse,

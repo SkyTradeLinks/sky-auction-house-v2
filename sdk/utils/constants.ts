@@ -1,11 +1,10 @@
 import { loadKeyPair } from "./helper";
-import fs from 'fs';
 import "dotenv/config";
 
 // HdgFFgSrfav2mmbacqY6yZa4kyvjaA4LQDvSPvphjPSP
-export const auctionHouseAuthority = loadKeyPair(
-  process.env.AUCTION_HOUSE_AUTHORITY
-);
+// export const auctionHouseAuthority = loadKeyPair(
+//   process.env.AUCTION_HOUSE_AUTHORITY
+// );
 
 // export const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
 //   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"

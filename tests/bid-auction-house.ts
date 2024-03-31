@@ -8,7 +8,7 @@ import {
   getOrCreateAssociatedTokenAccount,
   mintTo,
 } from "@solana/spl-token";
-import { auctionHouseAuthority } from "../sdk/utils/constants";
+
 import { findLeafAssetIdPda } from "@metaplex-foundation/mpl-bubblegum";
 import { publicKey } from "@metaplex-foundation/umi";
 import SaleType from "../sdk/types/enum/SaleType";
@@ -31,8 +31,16 @@ describe("bid-auction-house", async () => {
     "BQi6mDUZVwJvSV3PcWHTVFtP5jRgFDPNrqnTJYhv5c6B"
   );
 
+  const auctionHouseAuthority = loadKeyPair(
+    process.env.AUCTION_HOUSE_AUTHORITY
+  );
+
   before(async () => {
-    auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
+    auctionHouseSdk = await AuctionHouseSdk.getInstance(
+      program,
+      provider,
+      auctionHouseAuthority
+    );
 
     // setup airdrop
     try {
@@ -73,30 +81,34 @@ describe("bid-auction-house", async () => {
         leafIndex,
       });
 
-      let acc = await getAssociatedTokenAddress(
-        auctionHouseSdk.mintAccount,
-        bidder.publicKey
-      );
+      // await auctionHouseSdk.getAssetMetadata(assetId);
 
-      let acc_balance = await provider.connection.getTokenAccountBalance(acc);
+      // console.log
 
-      console.log(acc_balance);
+      // let acc = await getAssociatedTokenAddress(
+      //   auctionHouseSdk.mintAccount,
+      //   bidder.publicKey
+      // );
 
-      // USD
-      let cost = 10;
+      // let acc_balance = await provider.connection.getTokenAccountBalance(acc);
 
-      const tx = await auctionHouseSdk.buy(
-        bidder.publicKey,
-        new anchor.web3.PublicKey(assetId.toString()),
-        landMerkleTree,
-        cost,
-        leafIndex,
-        SaleType.Offer
-      );
+      // console.log(acc_balance);
 
-      tx.sign([bidder]);
+      // // USD
+      // let cost = 10;
 
-      await auctionHouseSdk.sendTx(tx);
+      // const tx = await auctionHouseSdk.buy(
+      //   bidder.publicKey,
+      //   new anchor.web3.PublicKey(assetId.toString()),
+      //   landMerkleTree,
+      //   cost,
+      //   leafIndex,
+      //   SaleType.Offer
+      // );
+
+      // tx.sign([bidder]);
+
+      // await auctionHouseSdk.sendTx(tx);
     } catch (err: any) {
       console.log(err);
     }

@@ -10,7 +10,7 @@ import {
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import { AuctionHouse } from "../../target/types/auction_house";
-import { auctionHouseAuthority } from "../utils/constants";
+
 
 const createBuyIx = async (
   program: Program<AuctionHouse>,
@@ -23,6 +23,7 @@ const createBuyIx = async (
   previousBidder: PublicKey,
   lastBidPrice: PublicKey,
   feeAccount: PublicKey,
+  auctionHouseAuthority: PublicKey,
   leafIndex: number,
   saleType: SaleType,
   auctionHouseProgramId: PublicKey
@@ -78,7 +79,7 @@ const createBuyIx = async (
       treasuryMint: mintAccount,
       assetId: assetId,
       escrowPaymentAccount,
-      authority: auctionHouseAuthority.publicKey,
+      authority: auctionHouseAuthority,
       auctionHouse: auctionHouse,
       auctionHouseFeeAccount: feeAccount,
       buyerTradeState: tradeState,

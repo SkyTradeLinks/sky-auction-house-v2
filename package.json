@@ -1,17 +1,11 @@
 {
-  "name": "@formfunction-hq/formfunction-auction-house",
-  "version": "0.0.5-alpha.146",
+  "name": "sky-trade-auction-house",
+  "version": "0.0.2",
   "description": "TypeScript SDK for interacting with Formfunction's auction house program.",
-  "repository": "git://github.com/formfunction-hq/formfn-auction-house.git",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "license": "UNLICENSED",
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "@formfunction-hq:registry": "https://npm.pkg.github.com"
-  },
   "scripts": {
     "prepare": "husky install",
     "setup": "./scripts/setup.sh",

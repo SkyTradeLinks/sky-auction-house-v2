@@ -33,7 +33,6 @@ import {
   TransactionMessage,
 } from "@solana/web3.js";
 
-import { auctionHouseAuthority, BUY_PRICE } from "../sdk/utils/constants";
 import {
   loadKeyPair,
   sleep,
@@ -81,6 +80,10 @@ describe("Sell test Auction", async () => {
 
   const customMerkleTree = loadKeyPair(process.env.MERKLE_TREE_KEYPAIR);
 
+  const auctionHouseAuthority = loadKeyPair(
+    process.env.AUCTION_HOUSE_AUTHORITY
+  );
+
   before(async () => {
     // Setup airdrop
     const airdropSignature = await connection.requestAirdrop(
@@ -105,7 +108,12 @@ describe("Sell test Auction", async () => {
     });
 
     // Initialize Sdk
-    auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
+    auctionHouseSdk = await AuctionHouseSdk.getInstance(
+      program,
+      provider,
+      auctionHouseAuthority
+    );
+    
     umi = auctionHouseSdk.getCustomUmi();
 
     try {

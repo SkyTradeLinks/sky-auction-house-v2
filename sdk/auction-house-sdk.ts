@@ -7,7 +7,7 @@ import {
   publicKey,
   signerIdentity,
 } from "@metaplex-foundation/umi";
-import { PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { Keypair, PublicKey, VersionedTransaction } from "@solana/web3.js";
 
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import {
@@ -20,7 +20,7 @@ import {
   AUCTION_HOUSE,
   FEE_PAYER,
   TREASURY,
-  auctionHouseAuthority,
+  // auctionHouseAuthority,
 } from "./utils/constants";
 
 // utils
@@ -42,6 +42,8 @@ import transferNftIx from "./instructions/transferNftIx";
 
 export default class AuctionHouseSdk {
   private static instance: AuctionHouseSdk;
+
+  private auctionHouseAuthority: Keypair;
 
   // fields
   public umi: Umi;
@@ -67,17 +69,18 @@ export default class AuctionHouseSdk {
 
   static async getInstance(
     program: anchor.Program<AuctionHouse>,
-    provider: anchor.AnchorProvider
+    provider: anchor.AnchorProvider,
+    auctionHouseAuthority: Keypair
   ) {
     if (!AuctionHouseSdk.instance) {
       AuctionHouseSdk.instance = new AuctionHouseSdk(program, provider);
-      await AuctionHouseSdk.instance.setup();
+      await AuctionHouseSdk.instance.setup(auctionHouseAuthority);
     }
 
     return AuctionHouseSdk.instance;
   }
 
-  private async setup() {
+  private async setup(auctionHouseAuthority: Keypair) {
     const umi = createUmi(this.provider.connection.rpcEndpoint).use(
       mplBubblegum()
     );
@@ -143,6 +146,8 @@ export default class AuctionHouseSdk {
 
     this.treasuryAccount = treasuryAccount;
     this.treasuryBump = treasuryBump;
+
+    this.auctionHouseAuthority = auctionHouseAuthority;
   }
 
   public async sendTx(transaction: VersionedTransaction) {
@@ -174,16 +179,17 @@ export default class AuctionHouseSdk {
         this.program,
         this.auctionHouse,
         assetId,
+        this.auctionHouseAuthority.publicKey,
         lastBidPrice
       );
 
       const tx = await convertToTx(
         this.provider.connection,
-        auctionHouseAuthority.publicKey,
+        this.auctionHouseAuthority.publicKey,
         [createBidIx]
       );
 
-      tx.sign([auctionHouseAuthority]);
+      tx.sign([this.auctionHouseAuthority]);
 
       await this.sendTx(tx);
     }
@@ -202,6 +208,7 @@ export default class AuctionHouseSdk {
       lastBidInfo.bidder,
       lastBidPrice,
       this.feeAccount,
+      this.auctionHouseAuthority.publicKey,
       leafIndex,
       saleType,
       this.program.programId
@@ -228,6 +235,7 @@ export default class AuctionHouseSdk {
       this.auctionHouse,
       this.mintAccount,
       buyerAta,
+      this.auctionHouseAuthority.publicKey,
       leafIndex,
       this.program.programId
     );
@@ -257,6 +265,7 @@ export default class AuctionHouseSdk {
       this.auctionHouse,
       this.mintAccount,
       this.feeAccount,
+      this.auctionHouseAuthority.publicKey,
       saleType,
       this.program.programId
     );
@@ -264,7 +273,7 @@ export default class AuctionHouseSdk {
     let delegateIxs = await transferNftDelegateIx(
       this.umi,
       assetId,
-      auctionHouseAuthority.publicKey
+      this.auctionHouseAuthority.publicKey
     );
 
     const tx = await convertToTx(this.provider.connection, seller, [
@@ -289,6 +298,7 @@ export default class AuctionHouseSdk {
       this.auctionHouse,
       this.mintAccount,
       this.feeAccount,
+      this.auctionHouseAuthority.publicKey,
       this.program.programId
     );
 
@@ -328,6 +338,7 @@ export default class AuctionHouseSdk {
       this.mintAccount,
       this.feeAccount,
       this.treasuryAccount,
+      this.auctionHouseAuthority.publicKey,
       this.program.programId
     );
 
@@ -356,7 +367,7 @@ export default class AuctionHouseSdk {
       [...transferIx]
     );
 
-    transferTx.sign([auctionHouseAuthority]);
+    transferTx.sign([this.auctionHouseAuthority]);
 
     await this.sendTx(transferTx);
   }

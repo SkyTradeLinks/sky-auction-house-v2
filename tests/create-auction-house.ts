@@ -9,8 +9,8 @@ import {
 } from "@solana/spl-token";
 import { SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 
-import { auctionHouseAuthority, BUY_PRICE } from "../sdk/utils/constants";
 import AuctionHouseSdk from "../sdk/auction-house-sdk";
+import { loadKeyPair } from "../sdk/utils/helper";
 
 describe("create-auction-house", async () => {
   const provider = anchor.AnchorProvider.env();
@@ -20,8 +20,16 @@ describe("create-auction-house", async () => {
 
   let auctionHouseSdk: AuctionHouseSdk;
 
+  const auctionHouseAuthority = loadKeyPair(
+    process.env.AUCTION_HOUSE_AUTHORITY
+  );
+
   before(async () => {
-    auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
+    auctionHouseSdk = await AuctionHouseSdk.getInstance(
+      program,
+      provider,
+      auctionHouseAuthority
+    );
   });
 
   // 1% goes to authority

@@ -10,7 +10,7 @@ import {
   getMetadataArgsSerializer,
 } from "@metaplex-foundation/mpl-bubblegum";
 
-import { auctionHouseAuthority } from "../utils/constants";
+
 import findTradeState from "../pdas/findTradeState";
 
 const createSellIx = async (
@@ -23,6 +23,7 @@ const createSellIx = async (
   auctionHouse: PublicKey,
   mintAccount: PublicKey,
   feeAccount: PublicKey,
+  auctionHouseAuthority: PublicKey,
   saleType: SaleType,
   auctionHouseProgramId: PublicKey
 ) => {
@@ -64,7 +65,7 @@ const createSellIx = async (
     .accounts({
       wallet: seller,
       assetId,
-      authority: auctionHouseAuthority.publicKey,
+      authority: auctionHouseAuthority,
       auctionHouse,
       auctionHouseFeeAccount: feeAccount,
       sellerTradeState: tradeState,

@@ -5,7 +5,7 @@ import * as anchor from "@coral-xyz/anchor";
 
 import findTradeState from "../pdas/findTradeState";
 import findEscrowAccount from "../pdas/findEscrowAccount";
-import { auctionHouseAuthority } from "../utils/constants";
+
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -19,6 +19,7 @@ const createCancelOfferIx = async (
   auctionHouse: PublicKey,
   mintAccount: PublicKey,
   buyerAta: PublicKey,
+  auctionHouseAuthority: PublicKey,
   leafIndex: number,
   auctionHouseProgramId: PublicKey
 ) => {
@@ -47,7 +48,7 @@ const createCancelOfferIx = async (
       treasuryMint: mintAccount,
       assetId: assetId,
       escrowPaymentAccount,
-      authority: auctionHouseAuthority.publicKey,
+      authority: auctionHouseAuthority,
       auctionHouse: auctionHouse,
       buyerTradeState: tradeState,
       tokenProgram: TOKEN_PROGRAM_ID,

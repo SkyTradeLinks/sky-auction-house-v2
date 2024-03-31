@@ -5,9 +5,9 @@ import findTradeState from "../pdas/findTradeState";
 import { getLeafData } from "../utils/helper";
 import { Umi } from "@metaplex-foundation/umi";
 import findEscrowAccount from "../pdas/findEscrowAccount";
-import findAuctionHouseProgramAsSigner from "../pdas/findAuctionHouseProgramAsSigner";
+
 import * as anchor from "@coral-xyz/anchor";
-import { auctionHouseAuthority } from "../utils/constants";
+
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -25,6 +25,7 @@ const createExecuteSaleIx = async (
   mintAccount: PublicKey,
   feeAccount: PublicKey,
   treasuryAccount: PublicKey,
+  auctionHouseAuthority: PublicKey,
   auctionHouseProgramId: PublicKey
 ) => {
   const [buyerTradeState] = findTradeState(
@@ -66,7 +67,7 @@ const createExecuteSaleIx = async (
       escrowPaymentAccount,
       sellerPaymentReceiptAccount: sellerAta,
       merkleTree,
-      authority: auctionHouseAuthority.publicKey,
+      authority: auctionHouseAuthority,
       auctionHouse,
       auctionHouseFeeAccount: feeAccount,
       auctionHouseTreasury: treasuryAccount,

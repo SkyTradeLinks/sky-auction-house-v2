@@ -31,6 +31,7 @@ export const setupAirDrop = async (
   connection: anchor.web3.Connection,
   account: anchor.web3.PublicKey
 ) => {
+  // needs better logic
   if (connection.rpcEndpoint.includes("mainnet")) return;
 
   const latestBlockHash = await connection.getLatestBlockhash();
