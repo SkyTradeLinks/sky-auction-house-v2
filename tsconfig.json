@@ -8,7 +8,7 @@
     "esModuleInterop": true,
   },
     "include": [
-    "src/**/*.ts",    // Include TypeScript files in the src directory and its subdirectories
+    "sdk/**/*.ts",    // Include TypeScript files in the src directory and its subdirectories
     "tests/**/*.ts"   // Include TypeScript files in the tests directory and its subdirectories
   ]
 }
