@@ -1,12 +1,13 @@
 import fs from "fs";
 import * as anchor from "@coral-xyz/anchor";
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { TransactionWithMeta } from "@metaplex-foundation/umi";
 import {
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  sendAndConfirmTransaction,
-} from "@solana/web3.js";
-import { createMint } from "@solana/spl-token";
-import { AUCTION_HOUSE, auctionHouseAuthority } from "./constants";
+  SPL_NOOP_PROGRAM_ID,
+  getAssetWithProof,
+  getMetadataArgsSerializer,
+} from "@metaplex-foundation/mpl-bubblegum";
+import { deserializeChangeLogEventV1 } from "@solana/spl-account-compression";
 
 export const loadKeyPair = (filename) => {
   const decodedKey = new Uint8Array(
@@ -30,6 +31,7 @@ export const setupAirDrop = async (
   connection: anchor.web3.Connection,
   account: anchor.web3.PublicKey
 ) => {
+  // needs better logic
   if (connection.rpcEndpoint.includes("mainnet")) return;
 
   const latestBlockHash = await connection.getLatestBlockhash();
@@ -72,44 +74,79 @@ export const getUSDC = async (
   }
 };
 
-export const findAuctionHouseBidderEscrowAccount = (
-  auctionHouse: PublicKey,
-  wallet: PublicKey,
-  merkleTree: PublicKey,
-  assetId:PublicKey,
-  auctionHouseProgramId: PublicKey
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export const convertToTx = async (
+  connection: Connection,
+  payer: PublicKey,
+  instructions
 ) => {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from(AUCTION_HOUSE),
-      auctionHouse.toBuffer(),
-      wallet.toBuffer(),
-      
-      assetId.toBuffer()
-    ],
-    auctionHouseProgramId
-  );
+  const blockhash = await connection.getLatestBlockhash();
+
+  // add nonce maybe?
+  const messageV0 = new anchor.web3.TransactionMessage({
+    payerKey: payer,
+    recentBlockhash: blockhash.blockhash,
+    instructions: instructions,
+  }).compileToV0Message();
+
+  const transaction = new anchor.web3.VersionedTransaction(messageV0);
+
+  return transaction;
 };
 
-export const findAuctionHouseTradeState = (
-  auctionHouse: PublicKey,
-  wallet: PublicKey,
-  assetId: PublicKey,
-  treasuryMint: PublicKey,
-  merkleTree: PublicKey,
-  buyPrice: anchor.BN,
-  auctionHouseProgramId: PublicKey
-) => {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from(AUCTION_HOUSE),
-      wallet.toBuffer(),
-      auctionHouse.toBuffer(),
-      assetId.toBuffer(),
-      treasuryMint.toBuffer(),
-      merkleTree.toBuffer(),
-      buyPrice.toArrayLike(Buffer, "le", 8),
+export const findLeafIndexFromAnchorTx = (txInfo: TransactionWithMeta) => {
+  let leafIndex: number | undefined = undefined;
+  let treeAddress;
+
+  let innerInstructions = txInfo.meta.innerInstructions;
+
+  for (let i = innerInstructions.length - 1; i >= 0; i--) {
+    for (let j = innerInstructions[i].instructions.length - 1; j >= 0; j--) {
+      const instruction = innerInstructions[i].instructions[j];
+
+      const programId = txInfo.message.accounts[instruction.programIndex];
+
+      if (programId.toString() == SPL_NOOP_PROGRAM_ID.toString()) {
+        try {
+          const changeLogEvent = deserializeChangeLogEventV1(
+            Buffer.from(instruction.data)
+          );
+
+          leafIndex = changeLogEvent?.index;
+          treeAddress = changeLogEvent?.treeId;
+        } catch (__) {
+          // do nothing, invalid data is handled just after the for loop
+        }
+      }
+    }
+  }
+
+  //
+  return [leafIndex, treeAddress];
+};
+
+export const getLeafData = async (umi, assetId, owner: PublicKey) => {
+  let assetWithProof = await getAssetWithProof(umi, assetId);
+
+  let leafData = {
+    leafIndex: assetWithProof.index,
+    leafNonce: new anchor.BN(assetWithProof.nonce),
+    owner,
+    delegate:
+      assetWithProof.leafDelegate != null
+        ? new anchor.web3.PublicKey(assetWithProof.leafDelegate)
+        : owner,
+    root: new anchor.web3.PublicKey(assetWithProof.root),
+    leafHash: [
+      ...new anchor.web3.PublicKey(
+        assetWithProof.rpcAssetProof.leaf.toString()
+      ).toBytes(),
     ],
-    auctionHouseProgramId
-  );
+    leafMetadata: Buffer.from(
+      getMetadataArgsSerializer().serialize(assetWithProof.metadata)
+    ),
+  };
+
+  return leafData;
 };

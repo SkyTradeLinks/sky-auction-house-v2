@@ -1,1 +1,0 @@
-In this folder are JSON output files from the program tests for debugging.

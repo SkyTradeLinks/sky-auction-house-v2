@@ -4,3 +4,6 @@ test-ledger/
 .anchor/
 
 .env
+
+
+**/dist

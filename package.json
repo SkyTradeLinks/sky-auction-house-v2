@@ -1,17 +1,11 @@
 {
-  "name": "@formfunction-hq/formfunction-auction-house",
-  "version": "0.0.5-alpha.146",
+  "name": "sky-trade-auction-house",
+  "version": "0.0.7",
   "description": "TypeScript SDK for interacting with Formfunction's auction house program.",
-  "repository": "git://github.com/formfunction-hq/formfn-auction-house.git",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "license": "UNLICENSED",
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "@formfunction-hq:registry": "https://npm.pkg.github.com"
-  },
   "scripts": {
     "prepare": "husky install",
     "setup": "./scripts/setup.sh",
@@ -45,24 +39,22 @@
     "@metaplex-foundation/umi": "^0.9.1",
     "@metaplex-foundation/umi-bundle-defaults": "^0.9.1",
     "@msgpack/msgpack": "^2.8.0",
+    "@solana/spl-account-compression": "^0.2.0",
     "@solana/spl-token": "^0.4.1",
-    "@solana/web3.js": "^1.91.0",
-    "@types/chai": "^4.3.12",
+    "@solana/web3.js": "^1.91.2",
     "bn.js": "^5.2.0",
     "buffer-layout": "^1.2.2",
     "dayjs": "^1.10.7",
-    "dotenv": "^16.4.5"
-  },
-  "peerDependencies": {
-    "@metaplex-foundation/mpl-token-metadata": "^2.7.0"
+    "dotenv": "^16.4.5",
+    "@metaplex-foundation/mpl-token-metadata": "^3.2.1"
   },
   "devDependencies": {
-    "@metaplex-foundation/mpl-token-metadata": "^2.7.0",
     "@types/bluebird": "^3.5.36",
     "@types/bn.js": "^5.1.0",
     "@types/jest": "^27.4.1",
     "@types/mocha": "^10.0.6",
     "@types/yargs": "^17.0.19",
+    "@types/chai": "^4.3.12",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "bluebird": "^3.7.2",

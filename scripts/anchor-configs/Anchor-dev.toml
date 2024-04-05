@@ -1,20 +1,13 @@
-[programs.localnet]
-formfn_auction_house = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
-
-[programs.devnet]
-formfn_auction_house = "devmBQyHHBPiLcuCqbWWRYxCG33ntAfPD5nXZeLd4eX"
+[features]
+seeds = false
+skip-lint = false
 
 [registry]
-url = "https://anchor.projectserum.com"
+url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "https://devnet.helius-rpc.com/?api-key=887524e6-92b0-4f96-973c-b37a53a9cfe4"
 wallet = "keys/devnet/deployer-keypair.json"
 
-# Token Metadata
-[[test.genesis]]
-address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-program = "artifacts/mpl_token_metadata.so"
-
 [scripts]
-test = "./scripts/run-tests.sh"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

@@ -1,18 +1,14 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AuctionHouse } from "../target/types/auction_house";
-import { AuctionHouseSdk } from "../sdk/auction-house-sdk";
-import {
-  findAuctionHouseBidderEscrowAccount,
-  loadKeyPair,
-  setupAirDrop,
-} from "../sdk/utils/helper";
+import AuctionHouseSdk from "./../sdk/auction-house-sdk";
+import { loadKeyPair, setupAirDrop } from "../sdk/utils/helper";
 import {
   getAssociatedTokenAddress,
   getOrCreateAssociatedTokenAccount,
   mintTo,
 } from "@solana/spl-token";
-import { auctionHouseAuthority } from "../sdk/utils/constants";
+
 import { findLeafAssetIdPda } from "@metaplex-foundation/mpl-bubblegum";
 import { publicKey } from "@metaplex-foundation/umi";
 import SaleType from "../sdk/types/enum/SaleType";
@@ -35,8 +31,16 @@ describe("bid-auction-house", async () => {
     "BQi6mDUZVwJvSV3PcWHTVFtP5jRgFDPNrqnTJYhv5c6B"
   );
 
+  const auctionHouseAuthority = loadKeyPair(
+    process.env.AUCTION_HOUSE_AUTHORITY
+  );
+
   before(async () => {
-    auctionHouseSdk = await AuctionHouseSdk.getInstance(program, provider);
+    auctionHouseSdk = await AuctionHouseSdk.getInstance(
+      program,
+      provider,
+      auctionHouseAuthority
+    );
 
     // setup airdrop
     try {
@@ -70,55 +74,41 @@ describe("bid-auction-house", async () => {
 
   it("should make an offer on un-listed asset", async () => {
     try {
-      let leafIndex = 5;
+      let leafIndex = 0;
       // dummy nft created
       const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
         merkleTree: publicKey(landMerkleTree),
         leafIndex,
       });
 
-      // USD
-      let cost = 7;
+      // await auctionHouseSdk.getAssetMetadata(assetId);
 
-      await auctionHouseSdk.buy(
-        bidder,
-        new anchor.web3.PublicKey(assetId.toString()),
-        landMerkleTree,
-        bidderAta.address,
-        cost,
-        leafIndex,
-        SaleType.Offer
-      );
+      // console.log
 
-      const [escrowPaymentAccount, escrowBump] =
-        findAuctionHouseBidderEscrowAccount(
-          auctionHouseSdk.auctionHouse,
-          bidder.publicKey,
-          landMerkleTree,
-          new anchor.web3.PublicKey(assetId.toString()),
-          program.programId
-        );
+      // let acc = await getAssociatedTokenAddress(
+      //   auctionHouseSdk.mintAccount,
+      //   bidder.publicKey
+      // );
 
-      let acc = await getAssociatedTokenAddress(
-        auctionHouseSdk.mintAccount,
-        bidder.publicKey
-      );
+      // let acc_balance = await provider.connection.getTokenAccountBalance(acc);
 
-      let acc_balance = await provider.connection.getTokenAccountBalance(acc);
+      // console.log(acc_balance);
 
-      console.log(acc_balance);
-      console.log('es',escrowPaymentAccount)
+      // // USD
+      // let cost = 10;
 
-      // // console.log(
-      // //   await this.provider.connection.getBalance(escrowPaymentAccount)
-      // // );
-      
-      /* const [lastBidPrice] = auctionHouseSdk.findLastBidPrice(assetId);
-      let lastBidInfo = await auctionHouseSdk.program.account.lastBidPrice.fetch(
-        lastBidPrice
-      );
+      // const tx = await auctionHouseSdk.buy(
+      //   bidder.publicKey,
+      //   new anchor.web3.PublicKey(assetId.toString()),
+      //   landMerkleTree,
+      //   cost,
+      //   leafIndex,
+      //   SaleType.Offer
+      // );
 
-       console.log(lastBidInfo); */
+      // tx.sign([bidder]);
+
+      // await auctionHouseSdk.sendTx(tx);
     } catch (err: any) {
       console.log(err);
     }

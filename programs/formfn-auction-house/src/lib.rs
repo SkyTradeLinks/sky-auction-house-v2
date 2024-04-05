@@ -1,5 +1,12 @@
 use anchor_lang::prelude::*;
 
+// use mpl_bubblegum::{
+//     hash::{hash_creators, hash_metadata},
+//     instructions::MintV1CpiBuilder,
+//     types::{LeafSchema, MetadataArgs},
+//     utils::get_asset_id,
+// };
+
 pub mod constants;
 pub mod errors;
 pub mod instructions;
@@ -12,7 +19,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-anchor_lang::declare_id!("6tptr1Kvt96JcVcpYQHL1ZjufYnMkaW8EhoeeinnjZKa");
+anchor_lang::declare_id!("GjF7g6QAqfhNz8Eb7AN8T5m6d8Lzqq7zTSWPfx6r6fYd");
 
 #[program]
 pub mod auction_house {
@@ -105,49 +112,32 @@ pub mod auction_house {
     // // in a backwards compatible way and thus we are introducing a new IX.
     pub fn cancel_v2<'info>(
         ctx: Context<'_, '_, '_, 'info, CancelV2<'info>>,
-        buyer_price: u64,
-        token_size: u64,
-        program_as_signer_bump: u8,
+        trade_state_bump: u8,
+        leaf_data: LeafData,
     ) -> Result<()> {
-        handle_cancel_v2(ctx, buyer_price, token_size, program_as_signer_bump)
+        handle_cancel_v2(ctx, trade_state_bump, leaf_data)
     }
 
     pub fn execute_sale_v2<'info>(
         ctx: Context<'_, '_, '_, 'info, ExecuteSaleV2<'info>>,
         escrow_payment_bump: u8,
-        free_trade_state_bump: u8,
-        program_as_signer_bump: u8,
-        buyer_price: u64,
-        seller_price: u64,
-        token_size: u64,
+        leaf_data: LeafData,
     ) -> Result<()> {
         handle_execute_sale_v2(
             ctx,
             escrow_payment_bump,
-            free_trade_state_bump,
-            program_as_signer_bump,
-            buyer_price,
-            seller_price,
-            token_size,
+            leaf_data,
         )
     }
 
     pub fn sell<'info>(
         ctx: Context<'_, '_, '_, 'info, Sell<'info>>,
         trade_state_bump: u8,
-        free_trade_state_bump: u8,
-        program_as_signer_bump: u8,
         buyer_price: u64,
-        token_size: u64,
+        sale_type: u8,
+        leaf_data: LeafData,
     ) -> Result<()> {
-        handle_sell(
-            ctx,
-            trade_state_bump,
-            free_trade_state_bump,
-            program_as_signer_bump,
-            buyer_price,
-            token_size,
-        )
+        handle_sell(ctx, trade_state_bump, buyer_price, sale_type, leaf_data)
     }
 
     // // Need a separate ix because this takes in an additional arg
@@ -157,6 +147,7 @@ pub mod auction_house {
         escrow_payment_bump: u8,
         buyer_price: u64,
         leaf_index: u64,
+        sale_type: u8,
         // Unix time (seconds since epoch)
         auction_end_time: Option<i64>,
         previous_bidder_escrow_payment_bump: u8,
@@ -167,9 +158,19 @@ pub mod auction_house {
             escrow_payment_bump,
             buyer_price,
             leaf_index,
+            sale_type,
             auction_end_time,
             previous_bidder_escrow_payment_bump,
         )
+    }
+
+    pub fn cancel_offer<'info>(
+        ctx: Context<'_, '_, '_, 'info, CancelOffer<'info>>,
+        trade_state_bump: u8,
+        escrow_payment_bump: u8,
+        leaf_index: u64,
+    ) -> Result<()> {
+        handle_cancel_offer(ctx, trade_state_bump, escrow_payment_bump, leaf_index)
     }
 
     pub fn thaw_delegated_account<'info>(
@@ -230,13 +231,7 @@ pub mod auction_house {
         sale_type: u8,
         trade_state_size: Option<u16>,
     ) -> Result<()> {
-        handle_create_trade_state(
-            ctx,
-            trade_state_bump,
-            price,
-            sale_type,
-            trade_state_size,
-        )
+        handle_create_trade_state(ctx, trade_state_bump, price, sale_type, trade_state_size)
     }
 
     pub fn create_edition_distributor<'info>(

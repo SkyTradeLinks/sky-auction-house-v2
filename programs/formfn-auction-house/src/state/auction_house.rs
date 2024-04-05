@@ -38,3 +38,4 @@ pub const AUCTION_HOUSE_SIZE: usize = 8 + //key
 1 + // can change sale price
 2 + // seller fee basis points secondary
 220; // padding
+// pub const AUCTION_HOUSE_SIZE: usize = 10_000;
