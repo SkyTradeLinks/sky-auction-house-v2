@@ -1,6 +1,6 @@
 {
   "name": "sky-trade-auction-house",
-  "version": "0.0.2",
+  "version": "0.0.7",
   "description": "TypeScript SDK for interacting with Formfunction's auction house program.",
   "license": "UNLICENSED",
   "files": [

@@ -5,6 +5,7 @@ import findTradeState from "../pdas/findTradeState";
 import { getLeafData } from "../utils/helper";
 import { Umi } from "@metaplex-foundation/umi";
 import findEscrowAccount from "../pdas/findEscrowAccount";
+import findLastBidPrice from "../pdas/findLastBidPrice";
 
 import * as anchor from "@coral-xyz/anchor";
 
@@ -57,6 +58,12 @@ const createExecuteSaleIx = async (
 
   let sellerAta = await getAssociatedTokenAddressSync(mintAccount, seller);
 
+  const [lastBidPrice] = findLastBidPrice(
+    auctionHouse,
+    assetId,
+    auctionHouseProgramId
+  );
+
   const ix = await program.methods
     .executeSaleV2(escrowBump, leafData)
     .accounts({
@@ -78,6 +85,7 @@ const createExecuteSaleIx = async (
       ataProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       nftDelegate: leafData.delegate,
+      lastBidPrice,
     })
     .instruction();
 

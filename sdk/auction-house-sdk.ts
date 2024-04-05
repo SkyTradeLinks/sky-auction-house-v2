@@ -7,7 +7,12 @@ import {
   publicKey,
   signerIdentity,
 } from "@metaplex-foundation/umi";
-import { Keypair, PublicKey, VersionedTransaction } from "@solana/web3.js";
+import {
+  Keypair,
+  PublicKey,
+  Transaction,
+  VersionedTransaction,
+} from "@solana/web3.js";
 
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import {
@@ -70,17 +75,21 @@ export default class AuctionHouseSdk {
   static async getInstance(
     program: anchor.Program<AuctionHouse>,
     provider: anchor.AnchorProvider,
-    auctionHouseAuthority: Keypair
+    auctionHouseAuthority: Keypair,
+    testMode: boolean = false
   ) {
     if (!AuctionHouseSdk.instance) {
       AuctionHouseSdk.instance = new AuctionHouseSdk(program, provider);
-      await AuctionHouseSdk.instance.setup(auctionHouseAuthority);
+      await AuctionHouseSdk.instance.setup(auctionHouseAuthority, testMode);
     }
 
     return AuctionHouseSdk.instance;
   }
 
-  private async setup(auctionHouseAuthority: Keypair) {
+  private async setup(
+    auctionHouseAuthority: Keypair,
+    testMode: boolean = false
+  ) {
     const umi = createUmi(this.provider.connection.rpcEndpoint).use(
       mplBubblegum()
     );
@@ -107,7 +116,7 @@ export default class AuctionHouseSdk {
       );
     } catch (err) {}
 
-    this.mintAccount = await getUSDC(this.provider.connection, true);
+    this.mintAccount = await getUSDC(this.provider.connection, testMode);
 
     const [auctionHouse, auctionHouseBump] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -276,12 +285,17 @@ export default class AuctionHouseSdk {
       this.auctionHouseAuthority.publicKey
     );
 
-    const tx = await convertToTx(this.provider.connection, seller, [
+    const saleTx = await convertToTx(this.provider.connection, seller, [
       saleIx,
-      ...delegateIxs,
     ]);
 
-    return tx;
+    const delegateTx = await convertToTx(
+      this.provider.connection,
+      seller,
+      delegateIxs
+    );
+
+    return [saleTx, delegateTx];
   }
 
   async cancelListing(
@@ -313,19 +327,25 @@ export default class AuctionHouseSdk {
       new PublicKey(treeConfig.treeDelegate)
     );
 
-    const tx = await convertToTx(this.provider.connection, seller, [
+    const cancelTx = await convertToTx(this.provider.connection, seller, [
       cancelIx,
-      ...delegateIxs,
     ]);
 
-    return tx;
+    const delegateTx = await convertToTx(
+      this.provider.connection,
+      seller,
+      delegateIxs
+    );
+
+    return [cancelTx, delegateTx];
   }
 
   public async createExecuteSaleIx(
     buyer: anchor.web3.PublicKey,
     assetId: anchor.web3.PublicKey,
     merkleTree: anchor.web3.PublicKey,
-    seller: anchor.web3.PublicKey
+    seller: anchor.web3.PublicKey,
+    signer: anchor.web3.PublicKey
   ) {
     let executeSaleIx = await createExecuteSaleIx(
       this.program,
@@ -343,7 +363,7 @@ export default class AuctionHouseSdk {
     );
 
     // change to include either auction house / seller
-    const tx = await convertToTx(this.provider.connection, seller, [
+    const tx = await convertToTx(this.provider.connection, signer, [
       executeSaleIx,
     ]);
 
