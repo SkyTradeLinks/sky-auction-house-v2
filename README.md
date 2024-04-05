@@ -1,8 +1,8 @@
-# Sky Trade
+
 
 ## Overview
 
-The Solana program and TypeScript SDK which facilitates the trading of air-rights on [SkyTrade](https://sky.trade/). This is a smart contract designed to support trade between compressed nfts, as per the Metaplex Bubblegum standard.
+The Solana program and TypeScript SDK which facilitates the trading of air-rights on SkyTrade Marketplace. This is a smart contract designed to support trade between compressed nfts, as per the Metaplex Bubblegum standard.
 
 ## Sequence Overview
 
