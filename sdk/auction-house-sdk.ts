@@ -389,6 +389,6 @@ export default class AuctionHouseSdk {
 
     transferTx.sign([this.auctionHouseAuthority]);
 
-    await this.sendTx(transferTx);
+    return await this.sendTx(transferTx);
   }
 }
