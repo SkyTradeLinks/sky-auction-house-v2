@@ -7,12 +7,7 @@ import {
   publicKey,
   signerIdentity,
 } from "@metaplex-foundation/umi";
-import {
-  Keypair,
-  PublicKey,
-  Transaction,
-  VersionedTransaction,
-} from "@solana/web3.js";
+import { Keypair, PublicKey, VersionedTransaction } from "@solana/web3.js";
 
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import {
@@ -29,7 +24,7 @@ import {
 } from "./utils/constants";
 
 // utils
-import { convertToTx, getUSDC, setupAirDrop } from "./utils/helper";
+import { convertToTx, validateTx } from "./utils/helper";
 import SaleType from "./types/enum/SaleType";
 
 // pdas
@@ -44,17 +39,16 @@ import createCancelListingIx from "./instructions/createCancelListingIx";
 import transferNftDelegateIx from "./instructions/transferNftDelegateIx";
 import createExecuteSaleIx from "./instructions/createExecuteSaleIx";
 import transferNftIx from "./instructions/transferNftIx";
+import { createMint } from "@solana/spl-token";
+import { decode } from "@coral-xyz/anchor/dist/cjs/utils/bytes/bs58";
 
 export default class AuctionHouseSdk {
   private static instance: AuctionHouseSdk;
 
-  private auctionHouseAuthority: Keypair;
-
   // fields
-  public umi: Umi;
+  private umi: Umi;
   public mintAccount: anchor.web3.PublicKey;
   public auctionHouse: anchor.web3.PublicKey;
-  public addressLookupTable: anchor.web3.PublicKey;
   public auctionHouseBump: number;
 
   public feeAccount: anchor.web3.PublicKey;
@@ -63,103 +57,126 @@ export default class AuctionHouseSdk {
   public treasuryAccount: anchor.web3.PublicKey;
   public treasuryBump: number;
 
+  private isInitialized: boolean = false;
+
   constructor(
     public readonly program: anchor.Program<AuctionHouse>,
-    private readonly provider: anchor.AnchorProvider
+    private readonly provider: anchor.AnchorProvider,
+    private readonly auctionHouseAuthority: Keypair,
+    private readonly testMode: boolean = false
   ) {}
 
   getCustomUmi() {
     return this.umi;
   }
 
-  static async getInstance(
+  private async getUSDC(test_flag = false) {
+    if (test_flag) {
+      const mint = await createMint(
+        this.provider.connection,
+        this.auctionHouseAuthority,
+        this.auctionHouseAuthority.publicKey,
+        this.auctionHouseAuthority.publicKey,
+        6
+      );
+
+      return mint;
+    } else {
+      if (this.provider.connection.rpcEndpoint.includes("mainnet")) {
+        return new anchor.web3.PublicKey(
+          "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        );
+      } else {
+        // devnet | testnet
+        return new anchor.web3.PublicKey(
+          "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+        );
+      }
+    }
+  }
+
+  static getInstance(
     program: anchor.Program<AuctionHouse>,
     provider: anchor.AnchorProvider,
     auctionHouseAuthority: Keypair,
     testMode: boolean = false
   ) {
     if (!AuctionHouseSdk.instance) {
-      AuctionHouseSdk.instance = new AuctionHouseSdk(program, provider);
-      await AuctionHouseSdk.instance.setup(auctionHouseAuthority, testMode);
+      AuctionHouseSdk.instance = new AuctionHouseSdk(
+        program,
+        provider,
+        auctionHouseAuthority,
+        testMode
+      );
     }
 
     return AuctionHouseSdk.instance;
   }
 
-  private async setup(
-    auctionHouseAuthority: Keypair,
-    testMode: boolean = false
-  ) {
-    const umi = createUmi(this.provider.connection.rpcEndpoint).use(
-      mplBubblegum()
-    );
-
-    umi.use(
-      signerIdentity(
-        createSignerFromKeypair(umi, {
-          secretKey: auctionHouseAuthority.secretKey,
-          publicKey: publicKey(auctionHouseAuthority.publicKey),
-        })
-      )
-    );
-
-    this.umi = umi;
-
-    await setupAirDrop(
-      this.provider.connection,
-      auctionHouseAuthority.publicKey
-    );
-
-    try {
-      this.addressLookupTable = new anchor.web3.PublicKey(
-        process.env.LOOKUP_TABLE_ADDRESS
-      );
-    } catch (err) {}
-
-    this.mintAccount = await getUSDC(this.provider.connection, testMode);
-
-    const [auctionHouse, auctionHouseBump] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(AUCTION_HOUSE),
-          auctionHouseAuthority.publicKey.toBuffer(),
-          this.mintAccount.toBuffer(),
-        ],
-        this.program.programId
+  public async setup() {
+    if (!this.isInitialized) {
+      const umi = createUmi(this.provider.connection.rpcEndpoint).use(
+        mplBubblegum()
       );
 
-    this.auctionHouse = auctionHouse;
-    this.auctionHouseBump = auctionHouseBump;
-
-    const [feeAccount, feeBump] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from(AUCTION_HOUSE),
-        this.auctionHouse.toBuffer(),
-        Buffer.from(FEE_PAYER),
-      ],
-      this.program.programId
-    );
-
-    this.feeAccount = feeAccount;
-    this.feeBump = feeBump;
-
-    const [treasuryAccount, treasuryBump] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(AUCTION_HOUSE),
-          auctionHouse.toBuffer(),
-          Buffer.from(TREASURY),
-        ],
-        this.program.programId
+      umi.use(
+        signerIdentity(
+          createSignerFromKeypair(umi, {
+            secretKey: this.auctionHouseAuthority.secretKey,
+            publicKey: publicKey(this.auctionHouseAuthority.publicKey),
+          })
+        )
       );
 
-    this.treasuryAccount = treasuryAccount;
-    this.treasuryBump = treasuryBump;
+      this.umi = umi;
 
-    this.auctionHouseAuthority = auctionHouseAuthority;
+      this.mintAccount = await this.getUSDC(this.testMode);
+
+      const [auctionHouse, auctionHouseBump] =
+        anchor.web3.PublicKey.findProgramAddressSync(
+          [
+            Buffer.from(AUCTION_HOUSE),
+            this.auctionHouseAuthority.publicKey.toBuffer(),
+            this.mintAccount.toBuffer(),
+          ],
+          this.program.programId
+        );
+
+      this.auctionHouse = auctionHouse;
+      this.auctionHouseBump = auctionHouseBump;
+
+      const [feeAccount, feeBump] =
+        anchor.web3.PublicKey.findProgramAddressSync(
+          [
+            Buffer.from(AUCTION_HOUSE),
+            this.auctionHouse.toBuffer(),
+            Buffer.from(FEE_PAYER),
+          ],
+          this.program.programId
+        );
+
+      this.feeAccount = feeAccount;
+      this.feeBump = feeBump;
+
+      const [treasuryAccount, treasuryBump] =
+        anchor.web3.PublicKey.findProgramAddressSync(
+          [
+            Buffer.from(AUCTION_HOUSE),
+            auctionHouse.toBuffer(),
+            Buffer.from(TREASURY),
+          ],
+          this.program.programId
+        );
+
+      this.treasuryAccount = treasuryAccount;
+      this.treasuryBump = treasuryBump;
+
+      this.isInitialized = true;
+    }
   }
 
   public async sendTx(transaction: VersionedTransaction) {
+    await this.setup();
     // implement address lookup table
     try {
       const txId = await this.provider.connection.sendTransaction(transaction);
@@ -177,13 +194,29 @@ export default class AuctionHouseSdk {
     leafIndex: number,
     saleType: SaleType
   ) {
+    await this.setup();
+
     const [lastBidPrice] = findLastBidPrice(
       this.auctionHouse,
       assetId,
       this.program.programId
     );
 
-    if ((await this.provider.connection.getAccountInfo(lastBidPrice)) == null) {
+    let lastBidAccInfo;
+
+    try {
+      lastBidAccInfo = await this.provider.connection.getAccountInfo(
+        lastBidPrice
+      );
+    } catch (err) {
+      if (err.message.includes("does not exist")) {
+        lastBidAccInfo = null;
+      } else {
+        throw err;
+      }
+    }
+
+    if (lastBidAccInfo == null) {
       const createBidIx = await createLastBidPriceIx(
         this.program,
         this.auctionHouse,
@@ -200,8 +233,11 @@ export default class AuctionHouseSdk {
 
       tx.sign([this.auctionHouseAuthority]);
 
-      await this.sendTx(tx);
+      let txId = await this.sendTx(tx);
+
+      await validateTx(this.umi, decode(txId));
     }
+
     let lastBidInfo = await this.program.account.lastBidPrice.fetch(
       lastBidPrice
     );
@@ -236,6 +272,8 @@ export default class AuctionHouseSdk {
     buyerAta: anchor.web3.PublicKey,
     leafIndex: number
   ) {
+    await this.setup();
+
     let cancelOfferIx = await createCancelOfferIx(
       this.program,
       buyer,
@@ -263,6 +301,8 @@ export default class AuctionHouseSdk {
     price: number,
     saleType: SaleType
   ) {
+    await this.setup();
+
     // check asset-id ownership?
     let saleIx = await createSellIx(
       this.program,
@@ -303,6 +343,8 @@ export default class AuctionHouseSdk {
     assetId: anchor.web3.PublicKey,
     merkleTree: anchor.web3.PublicKey
   ) {
+    await this.setup();
+
     let cancelIx = await createCancelListingIx(
       this.program,
       this.umi,
@@ -347,6 +389,8 @@ export default class AuctionHouseSdk {
     seller: anchor.web3.PublicKey,
     signer: anchor.web3.PublicKey
   ) {
+    await this.setup();
+
     let executeSaleIx = await createExecuteSaleIx(
       this.program,
       this.umi,
@@ -375,6 +419,8 @@ export default class AuctionHouseSdk {
     assetId: PublicKey,
     buyer: PublicKey
   ) {
+    await this.setup();
+
     // transaction must be signed
     await this.sendTx(transaction);
 

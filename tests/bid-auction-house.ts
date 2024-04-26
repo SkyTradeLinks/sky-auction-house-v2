@@ -2,17 +2,31 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { AuctionHouse } from "../target/types/auction_house";
 import AuctionHouseSdk from "./../sdk/auction-house-sdk";
-import { loadKeyPair, setupAirDrop } from "../sdk/utils/helper";
 import {
-  getAssociatedTokenAddress,
+  findLeafIndexFromAnchorTx,
+  loadKeyPair,
+  setupAirDrop,
+  validateTx,
+} from "../sdk/utils/helper";
+import {
+  Account,
   getOrCreateAssociatedTokenAccount,
   mintTo,
 } from "@solana/spl-token";
 
-import { findLeafAssetIdPda } from "@metaplex-foundation/mpl-bubblegum";
-import { publicKey } from "@metaplex-foundation/umi";
+import { findLeafAssetIdPda, mintV1 } from "@metaplex-foundation/mpl-bubblegum";
+import { Umi, generateSigner, publicKey } from "@metaplex-foundation/umi";
 import SaleType from "../sdk/types/enum/SaleType";
-import "dotenv/config";
+
+import assert from "assert";
+import { join } from "path";
+import {
+  fromWeb3JsPublicKey,
+  toWeb3JsPublicKey,
+} from "@metaplex-foundation/umi-web3js-adapters";
+import { createTree } from "@metaplex-foundation/mpl-bubblegum";
+import { none, sol } from "@metaplex-foundation/umi";
+import { decode } from "@coral-xyz/anchor/dist/cjs/utils/bytes/bs58";
 
 describe("bid-auction-house", async () => {
   const provider = anchor.AnchorProvider.env();
@@ -22,34 +36,39 @@ describe("bid-auction-house", async () => {
 
   let auctionHouseSdk: AuctionHouseSdk;
 
-  const bidder = loadKeyPair(process.env.BIDDER_KEYPAIR);
+  let bidderAta: Account;
 
-  let bidderAta;
+  let umi: Umi;
 
-  // land merkle tree
-  const landMerkleTree = new anchor.web3.PublicKey(
-    "BQi6mDUZVwJvSV3PcWHTVFtP5jRgFDPNrqnTJYhv5c6B"
-  );
+  let merkleTree;
+
+  let leafIndex;
 
   const auctionHouseAuthority = loadKeyPair(
-    process.env.AUCTION_HOUSE_AUTHORITY
+    join(__dirname, "keys", "auctionHouseAuthority.json")
   );
 
+  const bidder = anchor.web3.Keypair.generate();
+
+  const owner = anchor.web3.Keypair.generate();
+
   before(async () => {
-    auctionHouseSdk = await AuctionHouseSdk.getInstance(
+    auctionHouseSdk = AuctionHouseSdk.getInstance(
       program,
       provider,
-      auctionHouseAuthority
+      auctionHouseAuthority,
+      true
     );
 
-    // setup airdrop
-    try {
-      await setupAirDrop(provider.connection, bidder.publicKey);
-    } catch (err) {}
+    umi = auctionHouseSdk.getCustomUmi();
 
-    try {
-      await setupAirDrop(provider.connection, auctionHouseSdk.feeAccount);
-    } catch (err) {}
+    await umi.rpc.airdrop(
+      fromWeb3JsPublicKey(auctionHouseAuthority.publicKey),
+      sol(1)
+    );
+
+    await setupAirDrop(provider.connection, bidder.publicKey);
+    await setupAirDrop(provider.connection, auctionHouseSdk.feeAccount);
 
     bidderAta = await getOrCreateAssociatedTokenAccount(
       provider.connection,
@@ -67,50 +86,72 @@ describe("bid-auction-house", async () => {
       auctionHouseAuthority,
       10 * Math.pow(10, 6)
     );
-  });
 
-  // airdrop
-  // fund mint account with dev-usdc
+    merkleTree = generateSigner(umi);
+
+    const builder = await createTree(umi, {
+      merkleTree,
+      maxDepth: 14,
+      maxBufferSize: 64,
+    });
+
+    await builder.sendAndConfirm(umi);
+
+    let sx = await mintV1(umi, {
+      leafOwner: fromWeb3JsPublicKey(owner.publicKey),
+      merkleTree,
+      metadata: {
+        name: "My Compressed NFT",
+        uri: "https://example.com/my-cnft.json",
+        sellerFeeBasisPoints: 500, // 5%
+        collection: none(),
+        creators: [
+          { address: umi.identity.publicKey, verified: false, share: 100 },
+        ],
+      },
+    }).sendAndConfirm(umi);
+
+    let mintTxInfo = await validateTx(umi, sx.signature);
+
+    [leafIndex] = findLeafIndexFromAnchorTx(mintTxInfo);
+  });
 
   it("should make an offer on un-listed asset", async () => {
-    try {
-      let leafIndex = 0;
-      // dummy nft created
-      const [assetId] = findLeafAssetIdPda(auctionHouseSdk.umi, {
-        merkleTree: publicKey(landMerkleTree),
-        leafIndex,
-      });
+    const [assetId] = findLeafAssetIdPda(umi, {
+      merkleTree: publicKey(merkleTree),
+      leafIndex,
+    });
 
-      // await auctionHouseSdk.getAssetMetadata(assetId);
+    let acc_balance = await provider.connection.getTokenAccountBalance(
+      bidderAta.address
+    );
 
-      // console.log
+    let initialAmt = acc_balance.value.uiAmount;
 
-      // let acc = await getAssociatedTokenAddress(
-      //   auctionHouseSdk.mintAccount,
-      //   bidder.publicKey
-      // );
+    // USD
+    let cost = 5;
+    const tx = await auctionHouseSdk.buy(
+      bidder.publicKey,
+      toWeb3JsPublicKey(assetId),
+      toWeb3JsPublicKey(merkleTree.publicKey),
+      cost,
+      leafIndex,
+      SaleType.Offer
+    );
+    tx.sign([bidder]);
 
-      // let acc_balance = await provider.connection.getTokenAccountBalance(acc);
+    let signature = await auctionHouseSdk.sendTx(tx);
 
-      // console.log(acc_balance);
+    await validateTx(umi, decode(signature));
 
-      // // USD
-      // let cost = 10;
-
-      // const tx = await auctionHouseSdk.buy(
-      //   bidder.publicKey,
-      //   new anchor.web3.PublicKey(assetId.toString()),
-      //   landMerkleTree,
-      //   cost,
-      //   leafIndex,
-      //   SaleType.Offer
-      // );
-
-      // tx.sign([bidder]);
-
-      // await auctionHouseSdk.sendTx(tx);
-    } catch (err: any) {
-      console.log(err);
-    }
+    assert.equal(
+      initialAmt - 5,
+      (await provider.connection.getTokenAccountBalance(bidderAta.address))
+        .value.uiAmount
+    );
   });
+
+  it("should accept and transfer the nft", () => {
+    
+  })
 });

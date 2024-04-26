@@ -8,6 +8,7 @@ import {
   getMetadataArgsSerializer,
 } from "@metaplex-foundation/mpl-bubblegum";
 import { deserializeChangeLogEventV1 } from "@solana/spl-account-compression";
+import { createMint } from "@solana/spl-token";
 
 export const loadKeyPair = (filename) => {
   const decodedKey = new Uint8Array(
@@ -52,26 +53,6 @@ export const setupAirDrop = async (
       LAMPORTS_PER_SOL * amount
     ),
   });
-};
-
-export const getUSDC = async (
-  connection: anchor.web3.Connection,
-  test_flag = false
-) => {
-  if (test_flag) {
-    return new PublicKey("BnXBBCnX8nZFxxeK9teZGJSHeCbnQ5PfzdS2RanrVnv7");
-  } else {
-    if (connection.rpcEndpoint.includes("mainnet")) {
-      return new anchor.web3.PublicKey(
-        "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-      );
-    } else {
-      // devnet | testnet
-      return new anchor.web3.PublicKey(
-        "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
-      );
-    }
-  }
 };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -149,4 +130,17 @@ export const getLeafData = async (umi, assetId, owner: PublicKey) => {
   };
 
   return leafData;
+};
+
+export const validateTx = async (umi, signature) => {
+  let mintTxInfo;
+  for (let i = 0; i < 6; i++) {
+    mintTxInfo = await umi.rpc.getTransaction(signature);
+
+    if (mintTxInfo != null) {
+      return mintTxInfo;
+    }
+
+    await sleep(1000 * i);
+  }
 };
