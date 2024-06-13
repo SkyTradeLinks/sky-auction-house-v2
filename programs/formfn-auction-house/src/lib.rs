@@ -19,7 +19,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-anchor_lang::declare_id!("GjF7g6QAqfhNz8Eb7AN8T5m6d8Lzqq7zTSWPfx6r6fYd");
+anchor_lang::declare_id!("37Qa7Jo4YbgGSvxa9T1sseDKUAk1GBMkomb89wruGX8G");
 
 #[program]
 pub mod auction_house {

@@ -1,6 +1,11 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { AuctionHouse } from "../target/types/auction_house";
+import { AuctionHouse } from "../../target/types/auction_house";
+import {
+  createMint,
+  mintTo,
+  getOrCreateAssociatedTokenAccount,
+} from "@solana/spl-token";
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -28,7 +33,7 @@ describe("create-auction-house", async () => {
   );
 
   before(async () => {
-    await setupAirDrop(provider.connection, auctionHouseAuthority.publicKey);
+    // await setupAirDrop(provider.connection, auctionHouseAuthority.publicKey);
 
     auctionHouseSdk = AuctionHouseSdk.getInstance(
       program,
@@ -96,7 +101,7 @@ describe("create-auction-house", async () => {
 
             auctionHouseTreasury: auctionHouseSdk.treasuryAccount,
             tokenProgram: TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
+            systemProgram: anchor.web3.SystemProgram.programId,
             ataProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             rent: SYSVAR_RENT_PUBKEY,
           })

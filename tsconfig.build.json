@@ -12,6 +12,6 @@
     "removeComments": false,
     "sourceMap": true
   },
-  "include": ["sdk/"],
+  "include": ["src/sdk/"]
   // "exclude": ["src/scripts"]
 }

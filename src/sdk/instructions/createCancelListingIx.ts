@@ -1,4 +1,4 @@
-import { AuctionHouse } from "../../target/types/auction_house";
+import { AuctionHouse } from "../../../target/types/auction_house";
 import { Program } from "@coral-xyz/anchor";
 import { getLeafData } from "../utils/helper";
 

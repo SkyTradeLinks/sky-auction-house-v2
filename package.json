@@ -1,6 +1,6 @@
 {
-  "name": "sky-trade-auction-house",
-  "version": "0.0.8",
+  "name": "sky-trade-auction-house-v-0.0.1",
+  "version": "0.1.0",
   "description": "TypeScript SDK for interacting with Formfunction's auction house program.",
   "license": "UNLICENSED",
   "files": [
@@ -30,7 +30,8 @@
     "extend-address-lookup-table": "ts-node -r tsconfig-paths/register src/address-lookup-table/scripts/extendTable.ts",
     "modify-program-idl": "ts-node -r tsconfig-paths/register -T src/scripts/modifyProgramIdl.ts",
     "lint-program-idl": "ts-node -r tsconfig-paths/register src/scripts/lintProgramIdl.ts",
-    "dump": "./scripts/solana-program-dump.sh"
+    "dump": "./scripts/solana-program-dump.sh",
+    "deploy-package": "anchor build && npm publish"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",

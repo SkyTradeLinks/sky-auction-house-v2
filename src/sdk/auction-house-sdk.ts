@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { AuctionHouse } from "../target/types/auction_house";
+import { AuctionHouse } from "../../target/types/auction_house";
 
 import {
   Umi,
@@ -41,7 +41,12 @@ import createExecuteSaleIx from "./instructions/createExecuteSaleIx";
 import transferNftIx from "./instructions/transferNftIx";
 import { createMint } from "@solana/spl-token";
 import { decode } from "@coral-xyz/anchor/dist/cjs/utils/bytes/bs58";
-
+import {
+  LAMPORTS_PER_SOL,
+  SystemProgram,
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
 export default class AuctionHouseSdk {
   private static instance: AuctionHouseSdk;
 
@@ -89,7 +94,8 @@ export default class AuctionHouseSdk {
       } else {
         // devnet | testnet
         return new anchor.web3.PublicKey(
-          "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+          // "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+          "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
         );
       }
     }
@@ -130,7 +136,10 @@ export default class AuctionHouseSdk {
 
       this.umi = umi;
 
-      this.mintAccount = await this.getUSDC(this.testMode);
+      // this.mintAccount = await this.getUSDC(this.testMode);
+      this.mintAccount = new anchor.web3.PublicKey(
+        "6Gx9MoFfEGSYWnjXFKtMcL8MiDgkCLAFW5KARVRJwaQh"
+      );
 
       const [auctionHouse, auctionHouseBump] =
         anchor.web3.PublicKey.findProgramAddressSync(
@@ -178,8 +187,12 @@ export default class AuctionHouseSdk {
   public async sendTx(transaction: VersionedTransaction) {
     await this.setup();
     // implement address lookup table
+    // console.log("Sending Transaction....");
     try {
       const txId = await this.provider.connection.sendTransaction(transaction);
+      // const txId = await sendAndConfirmTransaction(transaction);
+
+      // console.log("txId:", txId);
       return txId;
     } catch (err) {
       throw err;
@@ -201,6 +214,7 @@ export default class AuctionHouseSdk {
       assetId,
       this.program.programId
     );
+    // console.log("Last bid acct info", lastBidPrice);
 
     let lastBidAccInfo;
 
@@ -208,7 +222,9 @@ export default class AuctionHouseSdk {
       lastBidAccInfo = await this.provider.connection.getAccountInfo(
         lastBidPrice
       );
+      // console.log("Last bid acct info 1", lastBidAccInfo);
     } catch (err) {
+      console.log("eRROR HERE..........", err);
       if (err.message.includes("does not exist")) {
         lastBidAccInfo = null;
       } else {
@@ -234,6 +250,7 @@ export default class AuctionHouseSdk {
       tx.sign([this.auctionHouseAuthority]);
 
       let txId = await this.sendTx(tx);
+      // console.log("last bid tx", txId);
 
       await validateTx(this.umi, decode(txId));
     }
@@ -241,6 +258,7 @@ export default class AuctionHouseSdk {
     let lastBidInfo = await this.program.account.lastBidPrice.fetch(
       lastBidPrice
     );
+    // console.log("Last bid acct info 2", lastBidInfo);
 
     let buyIx = await createBuyIx(
       this.program,
@@ -260,7 +278,7 @@ export default class AuctionHouseSdk {
     );
 
     const tx = await convertToTx(this.provider.connection, buyer, [buyIx]);
-
+    // const tx = buyIx;
     return tx;
   }
 
@@ -405,11 +423,13 @@ export default class AuctionHouseSdk {
       this.auctionHouseAuthority.publicKey,
       this.program.programId
     );
+    // console.log("Executesale instruction", executeSaleIx);
 
     // change to include either auction house / seller
     const tx = await convertToTx(this.provider.connection, signer, [
       executeSaleIx,
     ]);
+    // const tx = new Transaction().add(executeSaleIx);
 
     return tx;
   }
@@ -423,13 +443,20 @@ export default class AuctionHouseSdk {
 
     // transaction must be signed
     await this.sendTx(transaction);
+    console.log("Trransaction sent...");
 
     // get transfer nft
     let transferIx = await transferNftIx(this.umi, assetId, buyer);
 
+    // const transferTx = await convertToTx(
+    //   this.provider.connection,
+    //   this.feeAccount,
+    //   [...transferIx]
+    // );
+
     const transferTx = await convertToTx(
       this.provider.connection,
-      this.feeAccount,
+      this.auctionHouseAuthority.publicKey,
       [...transferIx]
     );
 

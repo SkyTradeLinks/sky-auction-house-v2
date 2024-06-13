@@ -1,6 +1,6 @@
 import { Program } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
-import { AuctionHouse } from "../../target/types/auction_house";
+import { AuctionHouse } from "../../../target/types/auction_house";
 
 import { PublicKey } from "@solana/web3.js";
 import SaleType from "../types/enum/SaleType";
@@ -9,7 +9,6 @@ import {
   getAssetWithProof,
   getMetadataArgsSerializer,
 } from "@metaplex-foundation/mpl-bubblegum";
-
 
 import findTradeState from "../pdas/findTradeState";
 
@@ -58,6 +57,8 @@ const createSellIx = async (
       getMetadataArgsSerializer().serialize(assetWithProof.metadata)
     ),
   };
+  /* confirm leafDelegate */
+  // console.log("leafData", leafData);
 
   // trade-state is created on the fly
   const ix = await program.methods

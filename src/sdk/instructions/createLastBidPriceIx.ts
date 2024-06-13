@@ -1,7 +1,7 @@
 import { PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
 
 import { Program } from "@coral-xyz/anchor";
-import { AuctionHouse } from "../../target/types/auction_house";
+import { AuctionHouse } from "../../../target/types/auction_house";
 
 const createLastBidPriceIx = async (
   program: Program<AuctionHouse>,
