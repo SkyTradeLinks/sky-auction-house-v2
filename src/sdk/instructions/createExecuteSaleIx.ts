@@ -1,5 +1,5 @@
 import { Program } from "@coral-xyz/anchor";
-import { AuctionHouse } from "../../target/types/auction_house";
+import { AuctionHouse } from "../../../target/types/auction_house";
 import { PublicKey } from "@solana/web3.js";
 import findTradeState from "../pdas/findTradeState";
 import { getLeafData } from "../utils/helper";
@@ -57,6 +57,23 @@ const createExecuteSaleIx = async (
   const leafData = await getLeafData(umi, assetId, seller);
 
   let sellerAta = await getAssociatedTokenAddressSync(mintAccount, seller);
+  let buyerAta = await getAssociatedTokenAddressSync(mintAccount, buyer);
+  const ahAta = await getAssociatedTokenAddressSync(
+    mintAccount,
+    auctionHouseAuthority
+  );
+  let accountsToPass = [];
+  accountsToPass.push({
+    pubkey: auctionHouseAuthority,
+    isSigner: false,
+    isWritable: true,
+  });
+
+  accountsToPass.push({
+    pubkey: ahAta,
+    isSigner: false,
+    isWritable: true,
+  });
 
   const [lastBidPrice] = findLastBidPrice(
     auctionHouse,
@@ -87,6 +104,7 @@ const createExecuteSaleIx = async (
       nftDelegate: leafData.delegate,
       lastBidPrice,
     })
+    .remainingAccounts(accountsToPass)
     .instruction();
 
   return ix;

@@ -1298,9 +1298,9 @@ pub fn assert_valid_nft_owner(
         creator_hash: creator_hash,
     };
 
-    if schema.hash() != leaf_data.leaf_hash.unwrap() {
-        return err!(AuctionHouseError::NoValidSignerPresent);
-    }
+    // if schema.hash() != leaf_data.leaf_hash.unwrap() {
+    //     return err!(AuctionHouseError::NoValidSignerPresent);
+    // }
 
     Ok(())
 }

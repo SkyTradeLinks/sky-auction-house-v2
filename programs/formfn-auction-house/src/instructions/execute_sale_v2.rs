@@ -434,7 +434,7 @@ pub fn handle_execute_sale_v2<'info>(
 
     let curr_seller_lamp = seller_trade_state.lamports();
     **seller_trade_state.lamports.borrow_mut() = 0;
-    seller_trade_state_clone.data.borrow_mut()[0] = 0;
+    // seller_trade_state_clone.data.borrow_mut()[0] = 0;
 
     **fee_payer.lamports.borrow_mut() = fee_payer
         .lamports()
@@ -443,7 +443,7 @@ pub fn handle_execute_sale_v2<'info>(
 
     let curr_buyer_lamp = buyer_trade_state.lamports();
     **buyer_trade_state.lamports.borrow_mut() = 0;
-    buyer_trade_state_clone.data.borrow_mut()[0] = 0;
+    // buyer_trade_state_clone.data.borrow_mut()[0] = 0;
 
     **fee_payer.lamports.borrow_mut() = fee_payer
         .lamports()

@@ -6,13 +6,26 @@ skip-lint = false
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "https://devnet.helius-rpc.com/?api-key=887524e6-92b0-4f96-973c-b37a53a9cfe4"
-wallet = "/home/erenaspire7/.config/solana/id.json"
+# cluster = "localnet"
+cluster = "https://devnet.helius-rpc.com/?api-key=950a4580-589c-4df3-a058-6324bcd6181e"
+wallet = "/home/chukky_/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 src/tests/index.ts"
 
 [test]
 startup_wait = 60000
 shutdown_wait = 2000
 upgradeable = false
+
+[[test.genesis]]
+address = "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"
+program = "clones/bubblegum.so"
+
+[[test.genesis]]
+address = "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK"
+program = "clones/spl-account-compression.so"
+
+[[test.genesis]]
+address = "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV"
+program = "clones/spl-noop.so"

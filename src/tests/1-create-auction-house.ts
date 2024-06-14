@@ -1,6 +1,11 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { AuctionHouse } from "../target/types/auction_house";
+import { AuctionHouse } from "../../target/types/auction_house";
+import {
+  createMint,
+  mintTo,
+  getOrCreateAssociatedTokenAccount,
+} from "@solana/spl-token";
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -10,7 +15,10 @@ import {
 import { SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 
 import AuctionHouseSdk from "../sdk/auction-house-sdk";
-import { loadKeyPair } from "../sdk/utils/helper";
+import { loadKeyPair, setupAirDrop } from "../sdk/utils/helper";
+
+import assert from "assert";
+import { join } from "path";
 
 describe("create-auction-house", async () => {
   const provider = anchor.AnchorProvider.env();
@@ -21,15 +29,20 @@ describe("create-auction-house", async () => {
   let auctionHouseSdk: AuctionHouseSdk;
 
   const auctionHouseAuthority = loadKeyPair(
-    process.env.AUCTION_HOUSE_AUTHORITY
+    join(__dirname, "keys", "auctionHouseAuthority.json")
   );
 
   before(async () => {
-    auctionHouseSdk = await AuctionHouseSdk.getInstance(
+    // await setupAirDrop(provider.connection, auctionHouseAuthority.publicKey);
+
+    auctionHouseSdk = AuctionHouseSdk.getInstance(
       program,
       provider,
-      auctionHouseAuthority
+      auctionHouseAuthority,
+      true
     );
+
+    await auctionHouseSdk.setup();
   });
 
   // 1% goes to authority
@@ -94,6 +107,17 @@ describe("create-auction-house", async () => {
           })
           .signers([auctionHouseAuthority])
           .rpc();
+
+        let auctionHouseData = await program.account.auctionHouse.fetch(
+          auctionHouseSdk.auctionHouse
+        );
+
+        assert.equal(auctionHouseData.payAllFees, payAllFees);
+        assert.equal(
+          auctionHouseData.sellerFeeBasisPointsSecondary,
+          subsequentListingFeePercent
+        );
+
         return;
       }
 
